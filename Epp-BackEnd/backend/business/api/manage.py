@@ -468,9 +468,13 @@ def server_status(request):
 def record_visit(request):
     """ 记录用户访问 """
     # 需要用户鉴权
+    print("******recordvisit******")
     username = request.session.get('username')
-    user = User.objects.filter(username=username).first()
+    print("username:    " + str(username))
+    # user = User.objects.filter(username=username).first()
+    user = User.objects.filter(username="22371427").first()
     if not user:
+        print("no user")
         return reply.fail(msg="请先正确登录")
 
     ip_address = request.META.get('REMOTE_ADDR')
@@ -484,6 +488,8 @@ def record_visit(request):
     if not UserVisit.objects.filter(ip_address=ip_address, timestamp__gte=start_of_hour,
                                     timestamp__lt=start_of_hour + datetime.timedelta(minutes=30)).first():
         UserVisit(ip_address=ip_address, timestamp=now).save()
+
+    print("*****success*****")
 
     return reply.success(msg="登记成功")
 

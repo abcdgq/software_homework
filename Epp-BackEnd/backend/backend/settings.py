@@ -52,7 +52,8 @@ MIDDLEWARE = [
 ]
 
 # 设置跨域SESSION配置，本地测试时需要SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_SAMESITE = 'None'
 CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_HTTPONLY = True
@@ -125,8 +126,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': '2024_EPP',
         'USER': 'root',
-        'PASSWORD': 'RuanGong-0601-G5',
-        'HOST': '114.116.214.56',
+        #  'PASSWORD': 'RuanGong-0601-G5',
+        'PASSWORD': '58',
+        #  'HOST': '114.116.214.56',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }

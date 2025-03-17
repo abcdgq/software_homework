@@ -26,7 +26,8 @@ if not os.path.exists(USER_REPORTS_PATH):
 def user_info(request):
     """ 用户基础信息 """
     username = request.session.get('username')
-    user = User.objects.filter(username=username).first()
+    # user = User.objects.filter(username=username).first()
+    user = User.objects.filter(username='22371427').first()
     if user:
         return reply.success(data={'user_id': user.user_id,
                                    'username': user.username,

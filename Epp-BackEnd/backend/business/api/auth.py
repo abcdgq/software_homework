@@ -36,10 +36,14 @@ def signup(request):
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
+        print(username + "\n" + password)
         user = User.objects.filter(username=username).first()
+        print("that")
         if user:
+            print("if")
             return JsonResponse({'error': '用户名已存在', 'userExists': True}, status=400)
         else:
+            print("else")
             user = User(username=username, password=password)
             user.save()
             current_day = date.today()
@@ -56,6 +60,7 @@ def signup(request):
                 {'message': "注册成功", 'userExists': False, 'user_id': user.user_id, 'username': user.username,
                  'avatar': user.avatar.url})
     else:
+        print("this")
         return JsonResponse({'error': '请求方法错误', 'userExists': True}, status=400)
 
 
@@ -82,6 +87,7 @@ def userInfo(request):
 def testLogin(request):
     if request.method == 'GET':
         username = request.session.get('username')
+        username = '22371427'
         if not username:
             return JsonResponse({'error': '未登录'}, status=403)
         return JsonResponse({'username': username})
@@ -99,6 +105,7 @@ def manager_login(request):
         data = json.loads(request.body)
         username = data.get('managerName')
         password = data.get('manpassowrd')
+        manager_signup()
         manager = Admin.objects.filter(admin_name=username, password=password).first()
         if manager:
             request.session['managerName'] = manager.admin_name

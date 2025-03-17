@@ -7,7 +7,8 @@ import message from 'element-ui'
 axios.defaults.withCredentials = true
 
 Vue.prototype.$axios = axios
-const baseURL = 'https://epp.buaase.cn/api/'
+// const baseURL = 'https://epp.buaase.cn/api/'
+const baseURL = 'http://127.0.0.1:8000/api/'
 
 const api = axios.create({
   baseURL,
@@ -153,7 +154,8 @@ export const fetchUserInfo = async () => {
     const response = await api.get('userInfo/userInfo')
     console.log(response)
     localStorage.setItem('username', response.data.username)
-    localStorage.setItem('avatar', 'https://epp.buaase.cn' + response.data.avatar)
+    // localStorage.setItem('avatar', 'https://epp.buaase.cn' + response.data.avatar)
+    localStorage.setItem('avatar', 'https://127.0.0.1:8000' + response.data.avatar)
     localStorage.setItem('loginTime', response.data.registration_date)
     localStorage.setItem('favorites', response.data.collected_papers_cnt)
     localStorage.setItem('likes', response.data.liked_papers_cnt)
