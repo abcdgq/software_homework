@@ -121,13 +121,13 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     'default': {
-        #  'ENGINE': 'django.db.backends.sqlite3',
-        #  'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.mysql',
         'NAME': '2024_EPP',
         'USER': 'root',
-        #  'PASSWORD': 'RuanGong-0601-G5',
-        'PASSWORD': '58',
+        'PASSWORD': '2883536Dgq',
+        # 'PASSWORD': '58',
         #  'HOST': '114.116.214.56',
         'HOST': '127.0.0.1',
         'PORT': '3306',
