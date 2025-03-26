@@ -190,17 +190,20 @@ def restore_paper_study(request):
     file_reading_id = request_data.get('file_reading_id')
     fr = FileReading.objects.get(id=file_reading_id)
     if not fr.document_id:
+        print("type1")
         paper = Paper.objects.get(paper_id=fr.paper_id.get_paper_id())
         local_path = paper.local_path
         title = paper.title
         content_type = ".pdf"
     else:
+        print("type2")
         document = UserDocument.objects.get(document_id=fr.document_id.get_document_id())
         local_path = document.local_path
         title = document.title
         content_type = document.format
 
     if local_path is None or title is None:
+        print("type3")
         return reply.fail(msg="服务器内无本地文件, 请检查")
 
     # 上传到远端服务器, 创建新的临时知识库
@@ -232,10 +235,13 @@ def restore_paper_study(request):
         with open(fr.conversation_path, 'r') as f:
             conversation_history = json.load(f)  # 使用 json.load() 方法将 JSON 数据转换为字典
 
+        print("error1")
+
         return reply.success(
             {'file_reading_id': file_reading_id, 'conversation_history': conversation_history},
             msg="恢复文献研读对话成功")
     else:
+        print("type4")
         return reply.fail(msg="连接模型服务器失败")
 
 

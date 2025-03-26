@@ -471,8 +471,8 @@ def record_visit(request):
     print("******recordvisit******")
     username = request.session.get('username')
     print("username:    " + str(username))
-    # user = User.objects.filter(username=username).first()
-    user = User.objects.filter(username="22371427").first()
+    user = User.objects.filter(username=username).first()
+    # user = User.objects.filter(username="22371427").first()
     if not user:
         print("no user")
         return reply.fail(msg="请先正确登录")

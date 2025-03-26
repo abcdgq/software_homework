@@ -82,6 +82,7 @@ def document_list(request):
     """ 用户上传文件列表 """
     username = request.session.get('username')
     user = User.objects.filter(username=username).first()
+    # user = User.objects.filter(username='22371427').first()
     if not user:
         return reply.fail(msg="请先正确登录")
 
