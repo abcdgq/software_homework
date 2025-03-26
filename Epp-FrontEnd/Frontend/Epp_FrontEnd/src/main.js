@@ -19,8 +19,10 @@ Vue.use(ElementUI)
 
 Vue.config.productionTip = false
 
-Vue.prototype.$BASE_URL = 'https://epp.buaase.cn'
-Vue.prototype.$BASE_API_URL = 'https://epp.buaase.cn/api'
+// Vue.prototype.$BASE_URL = 'https://epp.buaase.cn'
+// Vue.prototype.$BASE_API_URL = 'https://epp.buaase.cn/api'
+Vue.prototype.$BASE_URL = 'http://127.0.0.1:8000'
+Vue.prototype.$BASE_API_URL = 'http://127.0.0.1:8000/api'
 
 /* eslint-disable no-new */
 new Vue({

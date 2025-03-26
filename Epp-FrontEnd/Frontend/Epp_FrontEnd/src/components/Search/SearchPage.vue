@@ -93,7 +93,7 @@ export default {
       loading: true,
       currentPage: 1,
       itemsPerPage: 5,
-      isDialogSearch: true
+      isDialogSearch: false
     }
   },
   computed: {

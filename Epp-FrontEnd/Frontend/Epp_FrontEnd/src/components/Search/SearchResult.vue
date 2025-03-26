@@ -140,7 +140,7 @@ export default {
       restoreHistory: false,
       selectedPapers: [],
       checkedPapers: {},
-      isDialogSearch: true,
+      isDialogSearch: false,
       defaultSearchContent: ''
     }
   },
