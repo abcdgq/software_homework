@@ -169,8 +169,8 @@
             <!-- 分页组件 -->
             <el-pagination
                 class="user-manage-pagination"
-                v-model:current-page="currentPage"
-                v-model:page-size="pageSize"
+                v-model="currentPage"
+                :page-size="pageSize"
                 :page-sizes="[10, 25, 50, 100]"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="userData.total"
