@@ -3,6 +3,8 @@
     api/manage/...
     鉴权先不加了吧...
 """
+from math import frexp
+
 from django.views.decorators.http import require_http_methods
 from django.db.models import Count
 from django.db.models.functions import TruncHour
@@ -15,7 +17,7 @@ import datetime
 from collections import defaultdict
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
     Subclass, UserVisit
-from business.utils import reply
+from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
 
 
@@ -527,3 +529,28 @@ def visit_statistic(request):
         data['data'].append(visits_dict.get(hour, 0))
 
     return reply.success(data=data, msg="访问量统计信息获取成功")
+
+@require_http_methods('GET')
+def hot_promptword_statistic(request):
+    """ 高频提示词统计数据 """
+    mode = int(request.GET.get('mode', default=0))
+    if mode == 1:
+        #
+        texts = [""]
+        top_n = 10
+
+        results = analyze_dialog(texts, top_n)
+
+        data = {
+            "words": [],
+            "freqs": []
+        }
+
+        for word, freq in results:
+            data['words'].append(word)
+            data['freqs'].append(freq)
+
+        return reply.success(data=data, msg="高频统计词获取成功")
+
+    else:
+        return reply.fail(msg="mode参数错误")
