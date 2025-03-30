@@ -7,6 +7,9 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Count
 from django.db.models.functions import TruncHour
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.utils import timezone  # 时间处理
+from django.db.models import Count  # 聚合计数
+from django.db.models.functions import ExtractHour  # 提取小时函数
 
 import math
 import json
@@ -527,3 +530,86 @@ def visit_statistic(request):
         data['data'].append(visits_dict.get(hour, 0))
 
     return reply.success(data=data, msg="访问量统计信息获取成功")
+
+@require_http_methods('GET')
+def user_active_option(request):
+    """用户活跃时段统计（按3小时分段）"""
+    mode = request.GET.get('mode', '1')  # 默认模式1
+    if mode not in ('1', '2', '3'):
+        return reply.fail(msg="非法mode参数")
+
+    now = timezone.now()
+    periods = [
+        (0, 3, '00:00-03:00'),
+        (3, 6, '03:00-06:00'),
+        (6, 9, '06:00-09:00'),
+        (9, 12, '09:00-12:00'),
+        (12, 15, '12:00-15:00'),
+        (15, 18, '15:00-18:00'),
+        (18, 21, '18:00-21:00'),
+        (21, 24, '21:00-24:00')
+    ]
+
+    # 当天统计
+    start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+    hourly_day = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_of_day, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    day_counts = {h['hour']: h['count'] for h in hourly_day}
+
+    # 近一周统计
+    start_week = (now - datetime.timedelta(days=6)).replace(hour=0, minute=0, second=0, microsecond=0)
+    weekly_hours = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_week, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    week_counts = defaultdict(int)
+    for h in weekly_hours:
+        week_counts[h['hour']] += h['count']
+    days_in_week = 7  # 直接固定为7天更准确
+
+    # 近一月统计
+    start_month = (now - datetime.timedelta(days=29)).replace(hour=0, minute=0, second=0, microsecond=0)
+    monthly_hours = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_month, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    month_counts = defaultdict(int)
+    for h in monthly_hours:
+        month_counts[h['hour']] += h['count']
+    days_in_month = 30  # 固定为30天避免日期差计算误差
+
+    # 构建结果
+    result = []
+    for start_h, end_h, label in periods:
+        # 计算各时段总和
+        day_total = sum(day_counts.get(h, 0) for h in range(start_h, end_h))
+        week_total = sum(week_counts.get(h, 0) for h in range(start_h, end_h))
+        month_total = sum(month_counts.get(h, 0) for h in range(start_h, end_h))
+
+        # 计算平均值
+        week_avg = round(week_total / days_in_week, 2) if days_in_week else 0
+        month_avg = round(month_total / days_in_month, 2) if days_in_month else 0
+
+        # 根据mode选择value
+        if mode == '1':
+            value = day_total
+        elif mode == '2':
+            value = week_avg
+        elif mode == '3':
+            value = month_avg
+
+        result.append({'value': value, 'name': label})
+
+    return reply.success(data=result, msg="用户活跃统计获取成功")

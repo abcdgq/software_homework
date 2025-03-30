@@ -95,6 +95,7 @@ urlpatterns = [
                   path("api/manage/serverStatus", manage.server_status),
                   path("api/manage/recordVisit", manage.record_visit),
                   path("api/manage/visitStatistic", manage.visit_statistic),
+                  path("api/manage/userActiveOption", manage.user_active_option),
 
                   # 信息检索模块
                   path("api/search/easyVectorQuery", easy_vector_query),
