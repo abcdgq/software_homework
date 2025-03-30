@@ -748,6 +748,7 @@ def vector_query(request):
 
     request_data = json.loads(request.body)
     search_content = request_data.get('search_content')
+    search_word_counter.update([search_content])
     search_type = request_data.get('search_type')
     search_record_id = request_data.get('search_record_id')
     if search_record_id is None:
@@ -858,8 +859,12 @@ def vector_query(request):
     print("success")
     # 'keywords': keywords
     return JsonResponse({"paper_infos": filtered_papers_list, 'ai_reply': ai_reply, 'search_record_id' : search_record.search_record_id}, status=200)
-
-
+from collections import Counter
+search_word_counter = Counter()
+@require_http_methods(["GET"])
+def get_top10_frequency_search_words(request):
+    high_frequency_words = search_word_counter.most_common(10)
+    return JsonResponse({"high_frequency_words": high_frequency_words}, status=200)
 @require_http_methods(["GET"])
 def restore_search_record(request):
     # 鉴权
