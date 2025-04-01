@@ -52,3 +52,33 @@ export const getUserMonthlyStatistic = () => {
         }
     })
 }
+
+export const getSearchWordsStatistic = () => {
+    return request({
+        method: 'get',
+        url: '/api/manage/searchWordsStatistic',
+        params: {
+            mode: 1
+        }
+    })
+}
+
+export const getAIQuestionsStatistic = () => {
+    return request({
+        method: 'get',
+        url: '/api/manage/aiQuestionsStatistic',
+        params: {
+            mode: 1
+        }
+    })
+}
+
+export const getUserActiveOption = () => {
+    return request({
+        method: 'get',
+        url: '/api/manage/userActiveOption',
+        params: {
+            mode: 1
+        }
+    })
+}
