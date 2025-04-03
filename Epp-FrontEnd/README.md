@@ -17,6 +17,8 @@
 本来试了半天的pdfjs-dist来显示pdf，但是各种版本都会受到本地已有的babel的版本过低以及各种奇奇怪怪的版本问题，所以采用直接'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'的方式引入pdfjs，，，即不在本地下载这玩意了，直接网上导入。。应该不需要安装任何东西就可以。
 
 
+现在可以对框选内容悬置鼠标时候，自动显示与该框所有有相交点的框的全部注释。（本来想仅展示该鼠标点相交的注释，被各种距离修正什么的，太麻烦了，没弄好），在save和load，Annotation里添加与数据库交互的代码了
+目前的注释逻辑是，仅显示鼠标所在悬停点最上方（即最新的）注释框所相交的所有框的注释。
 
 <!-- npm install --save pdfjs-dist/legacy/build/pdf -->
 
