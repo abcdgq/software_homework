@@ -32,7 +32,7 @@ export default {
       startX: 0, // 框选起始点的X坐标
       startY: 0, // 框选起始点的Y坐标
       selectionBox: null, // 保存框选区域的DOM元素
-      annotations: [], // 保存注释
+      annotations: [], // 保存注释，每次渲染时从服务器获取即可，格式下面有样例
       pdfInstance: null, // PDF.js 实例
       containerOffsetTop: 0 // PDF 容器的顶部偏移
     }
@@ -84,7 +84,7 @@ export default {
         .then(pdf => {
           this.pdfInstance = pdf
           this.renderAllPages(pdf, container)
-          this.loadAnnotations() // 加载已有注释
+          this.loadAnnotations() // 加载已有注释,同时顺便渲染一下
         })
         .catch(error => {
           console.error('PDF加载失败:', error)
@@ -187,7 +187,7 @@ export default {
 
       if (comment) {
         this.saveAnnotation(x, y, width, height, pageNum, comment)
-        this.renderAnnotations() // 重新渲染所有注释
+        this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
       }
     },
     // 把一条注释渲染到页面上，这里的x,y,width,height,pageNum都是相对于canvas的坐标。
@@ -196,63 +196,6 @@ export default {
       const container = document.getElementById('pdf-viewer-container')
       const canvas = container.querySelector(`canvas[data-page-num="${pageNum}"]`)
       if (!canvas) return
-
-      // const annotation = document.createElement('div')
-      // annotation.classList.add('annotation')
-      // annotation.style.position = 'absolute'
-      // annotation.style.left = `${canvas.offsetLeft + x}px`
-      // annotation.style.top = `${canvas.offsetTop + y}px`
-      // annotation.style.width = `${width}px`
-      // annotation.style.height = `${height}px`
-      // annotation.style.backgroundColor = 'rgba(0,0,0,0.7)'
-      // annotation.style.color = 'white'
-      // annotation.style.padding = '5px'
-      // annotation.style.borderRadius = '5px'
-      // annotation.style.fontSize = '12px'
-      // annotation.textContent = comment
-      // annotation.setAttribute('data-page-num', pageNum)
-
-      // container.appendChild(annotation)
-      // // 创建注释点
-      // const annotation = document.createElement('div')
-      // annotation.classList.add('annotation')
-      // annotation.style.position = 'absolute'
-      // annotation.style.left = `${canvas.offsetLeft + x + width / 2}px` // 居中
-      // annotation.style.top = `${canvas.offsetTop + y + height / 2}px`
-      // annotation.style.width = `12px`
-      // annotation.style.height = `12px`
-      // annotation.style.backgroundColor = 'rgba(0, 0, 255, 0.7)' // 蓝色小点
-      // annotation.style.borderRadius = '50%'
-      // annotation.style.cursor = 'pointer'
-      // annotation.style.zIndex = '1000'
-      // annotation.setAttribute('data-page-num', pageNum)
-
-      // // 创建弹出注释框
-      // const tooltip = document.createElement('div')
-      // tooltip.classList.add('annotation-tooltip')
-      // tooltip.style.position = 'absolute'
-      // tooltip.style.left = `${canvas.offsetLeft + x}px`
-      // tooltip.style.top = `${canvas.offsetTop + y - 30}px`
-      // tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
-      // tooltip.style.color = 'white'
-      // tooltip.style.padding = '6px 10px'
-      // tooltip.style.borderRadius = '5px'
-      // tooltip.style.fontSize = '12px'
-      // tooltip.style.whiteSpace = 'nowrap'
-      // tooltip.style.display = 'none'
-      // tooltip.textContent = comment
-
-      // // 悬浮显示注释
-      // annotation.addEventListener('mouseenter', () => {
-      //   tooltip.style.display = 'block'
-      // })
-      // annotation.addEventListener('mouseleave', () => {
-      //   tooltip.style.display = 'none'
-      // })
-
-      // container.appendChild(annotation)
-      // container.appendChild(tooltip)
-
       // 创建虚线框
       const annotationBox = document.createElement('div')
       annotationBox.classList.add('annotation-box')
@@ -283,8 +226,9 @@ export default {
       // tooltip.innerHTML = comments.map(c => `• ${c}`).join('<br>') // 显示所有注释
 
       // **鼠标悬停时，找到所有重叠的注释**
-      annotationBox.addEventListener('mouseenter', () => {
-        const overlappingComments = this.findOverlappingComments(x, y, width, height, pageNum)
+      annotationBox.addEventListener('mousemove', (event) => {
+        // const overlappingComments = this.findOverlappingComments(x, y, width, height, pageNum)
+        const overlappingComments = this.findOverlappingComments(event.clientX, event.clientY, pageNum)
         tooltip.innerHTML = overlappingComments.map(c => `• ${c}`).join('<br>')
 
         // **调整 tooltip 位置**
@@ -300,29 +244,38 @@ export default {
       container.appendChild(annotationBox)
       container.appendChild(tooltip)
     },
-    findOverlappingComments (x, y, width, height, pageNum) {
+    // findOverlappingComments (x, y, width, height, pageNum) {
+    //   return this.annotations
+    //     .filter(annotation => {
+    //       return annotation.pageNum === pageNum && this.isOverlapping(annotation, { x, y, width, height })
+    //     })
+    //     .map(annotation => annotation.comment)
+    // },
+    findOverlappingComments (clientX, clientY, pageNum) {
       return this.annotations
         .filter(annotation => {
-          return annotation.pageNum === pageNum && this.isOverlapping(annotation, { x, y, width, height })
+          const canvas = document.querySelector(`canvas[data-page-num="${pageNum}"]`)
+          const canvasRect = canvas.getBoundingClientRect()
+          const adjustX = clientX - canvasRect.left
+          const adjustY = clientY - canvasRect.top // + canvas.scrollTop // 修正 scrollTop
+          return annotation.pageNum === pageNum && this.isInBox(adjustX, adjustY, annotation.x, annotation.y, annotation.width, annotation.height)
         })
         .map(annotation => annotation.comment)
     },
 
-    // 判断两个矩形区域是否重叠
-    isOverlapping (rect1, rect2) {
-      return !(rect2.x > rect1.x + rect1.width ||
-              rect2.x + rect2.width < rect1.x ||
-              rect2.y > rect1.y + rect1.height ||
-              rect2.y + rect2.height < rect1.y)
+    isInBox (adjustX, adjustY, x, y, width, height) {
+      return (adjustX >= x && adjustX <= x + width) && (adjustY >= y && adjustY <= y + height)
     },
-
-    // 保存一条评论到数据库，具体逻辑还没写，等前端显示好看了再说。
+    // 保存一条评论到数据库，具体逻辑还没写，等前端显示好看了再说。，注意的是，这里除了xy等参数，传到后端时候还需要能标注是哪个pdf，比如，pdf的id，url之类的。在fetchPaperPDF函数里获取过了，也保存到data里了
+    // 这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一个canvas）其中x，y是左上角坐标，width,height是宽高。并且这四个是相对于这一页的坐标。
+    // 具体格式方面，x，y,width,height,都是小数，pageNum是整数（正整数，但不会很大，直接当整数就行）。comment是字符串。当然，小数那点误差不是很重要。
+    // 强转整数也没太大事，但就小数表示吧。虽然是代表像素之类的 ，说是现在为了更精准显示，都是小数.
     saveAnnotation (x, y, width, height, pageNum, comment) {
       const annotation = { x, y, width, height, pageNum, comment }
-      this.annotations.push(annotation)
+      this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
       // 就按照这个数据格式传就行，这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一canvas）
     },
-    // 重新渲染所有注释，也就是删除旧的注释框，重新渲染新的注释框。
+    // 重新渲染所有注释，也就是删除旧的注释框，重新渲染新的注释框。也就是对每个公开或自己的评论分别renderAnnotation。
     renderAnnotations () {
       const container = document.getElementById('pdf-viewer-container')
       container.querySelectorAll('.annotation-box, .annotation-tooltip').forEach(el => el.remove()) // 清除旧的注释框
@@ -331,7 +284,8 @@ export default {
         this.renderAnnotation(x, y, width, height, pageNum, comment)
       })
     },
-    // 从数据库加载所有已有评论，并渲染到页面上，也就是对每个公开或自己的评论分别renderAnnotation。
+    // 从数据库加载所有已有评论，并渲染到页面上，可以分别renderAnnotation,也可以直接renderAnnotations
+    // 这个只在开始调用一次，避免和数据库交互太多，影响性能。
     loadAnnotations () {
       // axios.get(this.$BASE_API_URL + '/getAnnotations', {
       //   params: { fileReadingID: this.fileReadingID }
