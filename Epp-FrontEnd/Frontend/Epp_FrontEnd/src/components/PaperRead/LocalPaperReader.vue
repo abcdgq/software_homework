@@ -104,7 +104,7 @@ export default {
           const context = canvas.getContext('2d')
           canvas.height = viewport.height
           canvas.width = viewport.width
-          canvas.style.marginBottom = '10px' // 给每页之间加点间距
+          // canvas.style.marginBottom = '10px' // 给每页之间加点间距
           container.appendChild(canvas)
           page.render({ canvasContext: context, viewport: viewport })
           canvas.setAttribute('data-page-num', pageNum)
@@ -187,7 +187,7 @@ export default {
 
       if (comment) {
         this.saveAnnotation(x, y, width, height, pageNum, comment)
-        this.renderAnnotation(x, y, width, height, pageNum, comment)
+        this.renderAnnotations() // 重新渲染所有注释
       }
     },
     // 把一条注释渲染到页面上，这里的x,y,width,height,pageNum都是相对于canvas的坐标。
@@ -197,27 +197,139 @@ export default {
       const canvas = container.querySelector(`canvas[data-page-num="${pageNum}"]`)
       if (!canvas) return
 
-      const annotation = document.createElement('div')
-      annotation.classList.add('annotation')
-      annotation.style.position = 'absolute'
-      annotation.style.left = `${canvas.offsetLeft + x}px`
-      annotation.style.top = `${canvas.offsetTop + y}px`
-      annotation.style.width = `${width}px`
-      annotation.style.height = `${height}px`
-      annotation.style.backgroundColor = 'rgba(0,0,0,0.7)'
-      annotation.style.color = 'white'
-      annotation.style.padding = '5px'
-      annotation.style.borderRadius = '5px'
-      annotation.style.fontSize = '12px'
-      annotation.textContent = comment
-      annotation.setAttribute('data-page-num', pageNum)
+      // const annotation = document.createElement('div')
+      // annotation.classList.add('annotation')
+      // annotation.style.position = 'absolute'
+      // annotation.style.left = `${canvas.offsetLeft + x}px`
+      // annotation.style.top = `${canvas.offsetTop + y}px`
+      // annotation.style.width = `${width}px`
+      // annotation.style.height = `${height}px`
+      // annotation.style.backgroundColor = 'rgba(0,0,0,0.7)'
+      // annotation.style.color = 'white'
+      // annotation.style.padding = '5px'
+      // annotation.style.borderRadius = '5px'
+      // annotation.style.fontSize = '12px'
+      // annotation.textContent = comment
+      // annotation.setAttribute('data-page-num', pageNum)
 
-      container.appendChild(annotation)
+      // container.appendChild(annotation)
+      // // 创建注释点
+      // const annotation = document.createElement('div')
+      // annotation.classList.add('annotation')
+      // annotation.style.position = 'absolute'
+      // annotation.style.left = `${canvas.offsetLeft + x + width / 2}px` // 居中
+      // annotation.style.top = `${canvas.offsetTop + y + height / 2}px`
+      // annotation.style.width = `12px`
+      // annotation.style.height = `12px`
+      // annotation.style.backgroundColor = 'rgba(0, 0, 255, 0.7)' // 蓝色小点
+      // annotation.style.borderRadius = '50%'
+      // annotation.style.cursor = 'pointer'
+      // annotation.style.zIndex = '1000'
+      // annotation.setAttribute('data-page-num', pageNum)
+
+      // // 创建弹出注释框
+      // const tooltip = document.createElement('div')
+      // tooltip.classList.add('annotation-tooltip')
+      // tooltip.style.position = 'absolute'
+      // tooltip.style.left = `${canvas.offsetLeft + x}px`
+      // tooltip.style.top = `${canvas.offsetTop + y - 30}px`
+      // tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+      // tooltip.style.color = 'white'
+      // tooltip.style.padding = '6px 10px'
+      // tooltip.style.borderRadius = '5px'
+      // tooltip.style.fontSize = '12px'
+      // tooltip.style.whiteSpace = 'nowrap'
+      // tooltip.style.display = 'none'
+      // tooltip.textContent = comment
+
+      // // 悬浮显示注释
+      // annotation.addEventListener('mouseenter', () => {
+      //   tooltip.style.display = 'block'
+      // })
+      // annotation.addEventListener('mouseleave', () => {
+      //   tooltip.style.display = 'none'
+      // })
+
+      // container.appendChild(annotation)
+      // container.appendChild(tooltip)
+
+      // 创建虚线框
+      const annotationBox = document.createElement('div')
+      annotationBox.classList.add('annotation-box')
+      annotationBox.style.position = 'absolute'
+      annotationBox.style.left = `${canvas.offsetLeft + x}px`
+      annotationBox.style.top = `${canvas.offsetTop + y}px`
+      annotationBox.style.width = `${width}px`
+      annotationBox.style.height = `${height}px`
+      annotationBox.style.border = '2px dashed rgba(0, 0, 255, 0.8)' // 蓝色虚线框
+      annotationBox.style.pointerEvents = 'auto' // 让鼠标事件生效
+      annotationBox.style.zIndex = '1000'
+      annotationBox.setAttribute('data-page-num', pageNum)
+
+      // 创建弹出注释框
+      const tooltip = document.createElement('div')
+      tooltip.classList.add('annotation-tooltip')
+      tooltip.style.position = 'absolute'
+      tooltip.style.left = `${canvas.offsetLeft + x}px`
+      tooltip.style.top = `${canvas.offsetTop + y + height + 5}px` // 显示在框下方
+      tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
+      tooltip.style.color = 'white'
+      tooltip.style.padding = '6px 10px'
+      tooltip.style.borderRadius = '5px'
+      tooltip.style.fontSize = '12px'
+      tooltip.style.whiteSpace = 'nowrap'
+      tooltip.style.display = 'none'
+      tooltip.setAttribute('data-page-num', pageNum)
+      // tooltip.innerHTML = comments.map(c => `• ${c}`).join('<br>') // 显示所有注释
+
+      // **鼠标悬停时，找到所有重叠的注释**
+      annotationBox.addEventListener('mouseenter', () => {
+        const overlappingComments = this.findOverlappingComments(x, y, width, height, pageNum)
+        tooltip.innerHTML = overlappingComments.map(c => `• ${c}`).join('<br>')
+
+        // **调整 tooltip 位置**
+        tooltip.style.left = `${canvas.offsetLeft + x}px`
+        tooltip.style.top = `${canvas.offsetTop + y + height + 5}px`
+        tooltip.style.display = 'block'
+      })
+
+      annotationBox.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none'
+      })
+
+      container.appendChild(annotationBox)
+      container.appendChild(tooltip)
+    },
+    findOverlappingComments (x, y, width, height, pageNum) {
+      return this.annotations
+        .filter(annotation => {
+          return annotation.pageNum === pageNum && this.isOverlapping(annotation, { x, y, width, height })
+        })
+        .map(annotation => annotation.comment)
+    },
+
+    // 判断两个矩形区域是否重叠
+    isOverlapping (rect1, rect2) {
+      return !(rect2.x > rect1.x + rect1.width ||
+              rect2.x + rect2.width < rect1.x ||
+              rect2.y > rect1.y + rect1.height ||
+              rect2.y + rect2.height < rect1.y)
     },
 
     // 保存一条评论到数据库，具体逻辑还没写，等前端显示好看了再说。
     saveAnnotation (x, y, width, height, pageNum, comment) {
-
+      const annotation = { x, y, width, height, pageNum, comment }
+      this.annotations.push(annotation)
+      // 就按照这个数据格式传就行，这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一canvas）
+    },
+    // 重新渲染所有注释，也就是删除旧的注释框，重新渲染新的注释框。
+    renderAnnotations () {
+      const container = document.getElementById('pdf-viewer-container')
+      container.querySelectorAll('.annotation-box, .annotation-tooltip').forEach(el => el.remove()) // 清除旧的注释框
+      this.annotations.forEach(annotation => {
+        const { x, y, width, height, pageNum, comment } = annotation
+        this.renderAnnotation(x, y, width, height, pageNum, comment)
+      })
     },
     // 从数据库加载所有已有评论，并渲染到页面上，也就是对每个公开或自己的评论分别renderAnnotation。
     loadAnnotations () {
