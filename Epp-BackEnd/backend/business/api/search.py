@@ -7,7 +7,7 @@ api/serach/...
 import re
 
 import Levenshtein
-
+from collections import Counter
 
 def insert_search_record_2_kb(search_record_id, tmp_kb_id):
     search_record_id = str(search_record_id)
@@ -859,12 +859,7 @@ def vector_query(request):
     print("success")
     # 'keywords': keywords
     return JsonResponse({"paper_infos": filtered_papers_list, 'ai_reply': ai_reply, 'search_record_id' : search_record.search_record_id}, status=200)
-from collections import Counter
-search_word_counter = Counter()
-@require_http_methods(["GET"])
-def get_top10_frequency_search_words(request):
-    high_frequency_words = search_word_counter.most_common(10)
-    return JsonResponse({"high_frequency_words": high_frequency_words}, status=200)
+
 @require_http_methods(["GET"])
 def restore_search_record(request):
     # 鉴权
@@ -1129,4 +1124,11 @@ def flush(request):
             os.remove(conversation_path)
         sr.delete()
         HttpRequest('清空成功', status=200)
-        
+
+
+@require_http_methods(["GET"])
+def get_top10_frequency_search_words(request):
+    search_word_counter = Counter()
+    high_frequency_words = search_word_counter.most_common(10)
+    return JsonResponse({"high_frequency_words": high_frequency_words}, status=200)
+

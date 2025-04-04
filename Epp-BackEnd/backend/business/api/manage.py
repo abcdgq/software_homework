@@ -17,6 +17,7 @@ import math
 import json
 import requests
 import datetime
+from pathlib import Path
 from collections import defaultdict
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
     Subclass, UserVisit
@@ -533,6 +534,7 @@ def visit_statistic(request):
 
     return reply.success(data=data, msg="访问量统计信息获取成功")
 
+
 @require_http_methods('GET')
 def user_active_option(request):
     """用户活跃时段统计（按3小时分段）"""
@@ -615,14 +617,30 @@ def user_active_option(request):
         result.append({'value': value, 'name': label})
 
     return reply.success(data=result, msg="用户活跃统计获取成功")
+
+
 @require_http_methods('GET')
 def hot_promptword_statistic(request):
     """ 高频提示词统计数据 """
     mode = int(request.GET.get('mode', default=0))
     if mode == 1:
         #
-        texts = [""]
+        texts = []
         top_n = 10
+
+        '''
+            从对话历史记录中提取用户提问
+        '''
+        # 遍历'resource/database/users/conversation/search'
+        path = Path(settings.USER_SEARCH_CONSERVATION_PATH)
+        for json_file in path.rglob('*.json'):
+            print(f"Found JSON file: {json_file}")
+            # 你可以在这里加载和处理 JSON 文件
+            with open(json_file, 'r', encoding='utf-8') as f:
+                conversation_data = json.load(json_file)
+                for conversation in conversation_data.get('conversation', []):
+                    if conversation.get('role') == 'user':
+                        texts.append(conversation.get('content', ''))
 
         results = analyze_dialog(texts, top_n)
 
@@ -634,6 +652,8 @@ def hot_promptword_statistic(request):
         for word, freq in results:
             data['words'].append(word)
             data['freqs'].append(freq)
+
+        print(data)
 
         return reply.success(data=data, msg="高频统计词获取成功")
 
