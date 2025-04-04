@@ -1125,10 +1125,9 @@ def flush(request):
         sr.delete()
         HttpRequest('清空成功', status=200)
 
-
+search_word_counter = Counter()
 @require_http_methods(["GET"])
 def get_top10_frequency_search_words(request):
-    search_word_counter = Counter()
     high_frequency_words = search_word_counter.most_common(10)
     return JsonResponse({"high_frequency_words": high_frequency_words}, status=200)
 
