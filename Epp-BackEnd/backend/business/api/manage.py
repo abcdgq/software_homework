@@ -18,9 +18,9 @@ import json
 import requests
 import datetime
 from pathlib import Path
-from collections import defaultdict
+from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
-    Subclass, UserVisit
+    Subclass, UserVisit, SearchRecord
 from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
 
@@ -34,6 +34,8 @@ def get_last_10_months():
         current_date = current_date.replace(day=1)
         months.append(current_date)
         current_date -= datetime.timedelta(days=current_date.day)
+
+    print(months[::-1])
 
     return months[::-1]
 
@@ -356,7 +358,9 @@ def user_statistic(request):
         # 月统计数据对象
         month_data = {month.strftime('%Y-%m'): {'user_addition': 0, 'user_total': 0} for month in months}
         for addition in user_addition:
-            month_data[addition.date.strftime('%Y-%m')]['user_addition'] += addition.addition
+            date = addition.date.strftime('%Y-%m')
+            if date in month_data:
+                month_data[date]['user_addition'] += addition.addition
 
         # 返回统计数据
         total = User.objects.count()  # 用户总数
@@ -595,7 +599,11 @@ def user_active_option(request):
     days_in_month = 30  # 固定为30天避免日期差计算误差
 
     # 构建结果
-    result = []
+    data = {
+        "value": [],
+        "name": []
+    }
+
     for start_h, end_h, label in periods:
         # 计算各时段总和
         day_total = sum(day_counts.get(h, 0) for h in range(start_h, end_h))
@@ -614,9 +622,12 @@ def user_active_option(request):
         elif mode == '3':
             value = month_avg
 
-        result.append({'value': value, 'name': label})
+        data['value'].append(value)
+        data['name'].append(label)
 
-    return reply.success(data=result, msg="用户活跃统计获取成功")
+    print(data)
+
+    return reply.success(data=data, msg="用户活跃统计获取成功")
 
 
 @require_http_methods('GET')
@@ -659,3 +670,28 @@ def hot_promptword_statistic(request):
 
     else:
         return reply.fail(msg="mode参数错误")
+
+
+@require_http_methods(["GET"])
+def hot_searchword_statistic(request):
+
+    search_word_counter = Counter(list(SearchRecord.objects.values_list('keyword', flat=True)))
+
+    high_frequency_words = search_word_counter.most_common(10)
+
+    data = {
+        "words": [],
+        "frequencies": [],
+        "max_frequency": 0
+    }
+
+    for word, frequency in high_frequency_words:
+        data['words'].append(word)
+        data['frequencies'].append(frequency)
+
+    data['max_frequency'] = max(data['frequencies'])
+
+    print(data)
+
+    return reply.success(data=data, msg="获取高频检索词成功")
+
