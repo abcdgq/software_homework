@@ -56,7 +56,7 @@ export const getUserMonthlyStatistic = () => {
 export const getSearchWordsStatistic = () => {
     return request({
         method: 'get',
-        url: '/api/manage/searchWordsStatistic',
+        url: '/api/manage/searchWordStatistic',
         params: {
             mode: 1
         }
@@ -66,7 +66,7 @@ export const getSearchWordsStatistic = () => {
 export const getAIQuestionsStatistic = () => {
     return request({
         method: 'get',
-        url: '/api/manage/aiQuestionsStatistic',
+        url: '/api/manage/aiQuestionStatistic',
         params: {
             mode: 1
         }

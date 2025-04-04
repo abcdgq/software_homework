@@ -27,9 +27,7 @@ from business.api.paper_details import like_paper, score_paper, collect_paper, r
     batch_download_papers, get_paper_info, get_first_comment, get_second_comment, like_comment, \
     get_user_paper_info
 from business.api.upload_document import upload_paper, remove_uploaded_paper, document_list, get_document_url
-from business.api import user_info, manage
-from business.api.search import get_user_search_history, vector_query, dialog_query, flush, restore_search_record, \
-    build_kb, change_record_papers , get_top10_frequency_search_words
+from business.api import user_info, manage, search
 from business.utils.paper_vdb_init import local_vdb_init, easy_vector_query
 from business.api.summary import generate_summary, create_abstract_report, get_summary_status
 
@@ -97,18 +95,18 @@ urlpatterns = [
                   path("api/manage/visitStatistic", manage.visit_statistic),
                   path("api/manage/userActiveOption", manage.user_active_option),
                   path("api/manage/promptwordStatistic", manage.hot_promptword_statistic),
+                  path("api/manage/searchWordStatistic", manage.hot_searchword_statistic),
 
                   # 信息检索模块
                   path("api/search/easyVectorQuery", easy_vector_query),
-                  path("api/search/vectorQuery", vector_query),
-                  path("api/search/dialogQuery", dialog_query),
-                  path("api/search/flush", flush),
-                  path("api/search/restoreSearchRecord", restore_search_record),
-                  path("api/study/getUserSearchHistory", get_user_search_history),
-                  path('api/search/rebuildKB', build_kb),
+                  path("api/search/vectorQuery", search.vector_query),
+                  path("api/search/dialogQuery", search.dialog_query),
+                  path("api/search/flush", search.flush),
+                  path("api/search/restoreSearchRecord", search.restore_search_record),
+                  path("api/study/getUserSearchHistory", search.get_user_search_history),
+                  path('api/search/rebuildKB', search.build_kb),
                   # path('api/search/getSearchRecord', get_search_record),
-                  path('api/search/changeRecordPapers', change_record_papers),
-                  path('api/search/searchWordsStatistic', get_top10_frequency_search_words),
+                  path('api/search/changeRecordPapers', search.change_record_papers),
 
                   # 向量化模块
                   # path("insert_vector_database", insert_vector_database),
