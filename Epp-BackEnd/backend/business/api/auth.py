@@ -109,6 +109,7 @@ def manager_login(request):
         manager = Admin.objects.filter(admin_name=username, password=password).first()
         if manager:
             request.session['managerName'] = manager.admin_name
+            print("管理员登录成功")
             return JsonResponse(
                 {'message': "登录成功", 'MLogin_legal': True})
         else:

@@ -74,6 +74,7 @@ export default {
     },
     methods: {
         async handleEnter() {
+            alert('1')
             await this.$refs.loginForm.validate()
             await this.handleLogin()
         },
