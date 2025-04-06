@@ -16,7 +16,13 @@
 
 本来试了半天的pdfjs-dist来显示pdf，但是各种版本都会受到本地已有的babel的版本过低以及各种奇奇怪怪的版本问题，所以采用直接'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'的方式引入pdfjs，，，即不在本地下载这玩意了，直接网上导入。。应该不需要安装任何东西就可以。
 
+Epp-FrontEnd\Frontend\Epp_FrontEnd\src\components\PaperRead\LocalPaperReader.vue文件修改如下：
+现在可以对框选内容悬置鼠标时候，自动显示所有包含该鼠标点的框的注释，剩下的工作只有，在save和load，Annotation里添加与数据库交互的代码了，以及确保开局就自动把所有注释显示出来即可（需要有一个save函数框架了）
+loadAnnotations和saveAnnotation函数解决（只剩下与后端交互了），就可以实现注释的保存和加载了。
 
+同时，需要进行完善，比如每个评论或许可以同时储存和显示来源（比如时间，发送者，加举报功能，之类的，当然，举报可以都交给自动审核，不允许人工举报，就方便了）
+
+以及，可以加入一个按钮，按了之后就清空annotations，和重新渲染，一个按钮是重新loadAnnotations，便于用户体验，这种任务量应该很小。
 
 <!-- npm install --save pdfjs-dist/legacy/build/pdf -->
 
