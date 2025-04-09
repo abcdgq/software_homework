@@ -87,10 +87,27 @@
                         </div>
                     </div>
                 </div>
-                <!-- 统计图表 -->
+                <!-- 用户新增数量统计图表 -->
                 <div class="chart-box">
                     <div class="chart-box-title"><span>新增用户数量统计（近十月）</span></div>
                     <div id="newUsersChart" class="chart-box-content"></div>
+                </div>
+
+                <!-- 新增： -->
+                <!-- 高频检索词统计 -->
+                <div class="chart-box">
+                    <div class="chart-box-title"><span>高频检索词统计（近一周）</span></div>
+                    <div id="searchWordsChart" class="chart-box-content"></div>
+                </div>
+                <!-- AI对话高频问题统计 -->
+                <div class="chart-box">
+                    <div class="chart-box-title"><span>AI对话高频问题统计(近一周)</span></div>
+                    <div id="aiQuestionsChart" class="chart-box-content"></div>
+                </div>
+                <!-- 用户活跃时段统计 -->
+                <div class="chart-box" style="height: 70vh; margin-bottom: 3vh">
+                    <div class="chart-box-title" style="flex: 2"><span>用户活跃时段统计</span></div>
+                    <div id="userActiveChart" class="chart-box-content"></div>
                 </div>
             </el-collapse-item>
         </el-collapse>
@@ -152,8 +169,8 @@
             <!-- 分页组件 -->
             <el-pagination
                 class="user-manage-pagination"
-                v-model:current-page="currentPage"
-                v-model:page-size="pageSize"
+                v-model="currentPage"
+                :page-size="pageSize"
                 :page-sizes="[10, 25, 50, 100]"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="userData.total"
@@ -165,8 +182,14 @@
 <script>
 import { getCurrentInstance, ref } from 'vue'
 import UserProfile from './UserProfile.vue'
-import { getUserList, getUserOverviewStatistic, getUserMonthlyStatistic } from '@/api/user'
+import { getUserList,
+    getUserOverviewStatistic,
+    getUserMonthlyStatistic,
+    getSearchWordsStatistic,
+    getAIQuestionsStatistic,
+    getUserActiveOption } from '@/api/user'
 import { ElMessage } from 'element-plus'
+// import { time } from 'echarts'
 
 export default {
     components: {
@@ -316,6 +339,254 @@ export default {
         newUsersChart.setOption(option)
         window.addEventListener('resize', function () {
             newUsersChart.resize()
+        })
+
+         // 新图表
+        // 高频检索词统计
+        let searchWordsChart = echarts.init(document.getElementById('searchWordsChart'))
+        let searchWordsOption = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            toolbox: {
+                feature: {
+                    dataView: { show: true, readOnly: false },
+                    magicType: { show: true, type: ['line', 'bar'] },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
+            },
+            legend: {
+                data: ['检索词频率']
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: [],
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    axisLabel: {
+                        rotate: 45, // 设置标签旋转角度为45度
+                        interval: 0, // 确保所有标签都显示（根据需要调整）
+                        formatter: function (value) {
+                            // 如果需要，可以在这里格式化标签文本
+                            return value
+                        }
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    name: '频率',
+                    min: 0,
+                    max: 100,
+                    interval: 20,
+                    axisLabel: {
+                        formatter: '{value} 次'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: '检索词频率',
+                    type: 'bar',
+                    tooltip: {
+                        valueFormatter: function (value) {
+                            return value + ' 次'
+                        }
+                    },
+                    itemStyle: {
+                        color: '#1e90ff'
+                    },
+                    data: []
+                }
+            ]
+        }
+        //获取实时数据
+        await getSearchWordsStatistic({ timeout: 1000 })
+            .then((response) => {
+                console.log(response.data)
+                searchWordsOption.xAxis[0].data = response.data.words
+                searchWordsOption.yAxis[0].max = response.data.max_frequency
+                searchWordsOption.yAxis[0].interval = searchWordsOption.yAxis[0].max / 5
+                searchWordsOption.series[0].data = response.data.frequencies
+            })
+            .catch((error) => {
+                ElMessage.error(error.response.data.message)
+                // 设置默认值
+                searchWordsOption.xAxis[0].data = ['默认词1', '默认词2', '默认词3', '默认词4', '默认词5']
+                searchWordsOption.yAxis[0].max = 40
+                searchWordsOption.yAxis[0].interval = 10
+                searchWordsOption.series[0].data = [2, 4, 6, 8, 10]
+            })
+
+        // 设置实例参数
+        searchWordsChart.setOption(searchWordsOption)
+        window.addEventListener('resize', function () {
+            searchWordsChart.resize()
+        })
+
+        // AI对话高频问题统计
+        let aiQuestionsChart = echarts.init(document.getElementById('aiQuestionsChart'))
+        let aiQuestionsOption = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            toolbox: {
+                feature: {
+                    dataView: { show: true, readOnly: false },
+                    magicType: { show: true, type: ['line', 'bar'] },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
+            },
+            legend: {
+                data: ['问题频率']
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: [],
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    name: '频率',
+                    min: 0,
+                    max: 100,
+                    interval: 20,
+                    axisLabel: {
+                        formatter: '{value} 次'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: '问题频率',
+                    type: 'bar',
+                    tooltip: {
+                        valueFormatter: function (value) {
+                            return value + ' 次'
+                        }
+                    },
+                    itemStyle: {
+                        color: '#ff6347'
+                    },
+                    data: []
+                }
+            ]
+        }
+        // 获取实时数据
+        await getAIQuestionsStatistic({ timeout: 5000 }).then((response) => {
+                aiQuestionsOption.xAxis[0].data = response.data.questions
+                aiQuestionsOption.yAxis[0].max = response.data.max_frequency
+                aiQuestionsOption.yAxis[0].interval = aiQuestionsOption.yAxis[0].max / 5
+                aiQuestionsOption.series[0].data = response.data.frequencies
+            })
+            .catch((error) => {
+                ElMessage.error(error.response.data.message)
+                // 设置默认值
+                aiQuestionsOption.xAxis[0].data = ['默认词1', '默认词2', '默认词3', '默认词4', '默认词5']
+                aiQuestionsOption.yAxis[0].max = 100
+                aiQuestionsOption.yAxis[0].interval = 20
+                aiQuestionsOption.series[0].data = [2, 4, 6, 8, 10]
+            })
+
+        // 设置实例参数
+        aiQuestionsChart.setOption(aiQuestionsOption)
+        window.addEventListener('resize', function () {
+            aiQuestionsChart.resize()
+        })
+
+        // 用户活跃时段统计
+        let userActiveChart = echarts.init(document.getElementById('userActiveChart'))
+        let userActiveOption = {
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params) {
+                    return params.name + ': ' + params.value + '人 (' + params.percent + '%)'
+                }
+            },
+            toolbox: {
+                feature: {
+                    dataView: { show: true, readOnly: false },
+                    magicType: { show: true, type: ['pie', 'funnel'] },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left'
+            },
+            series: [
+                {
+                    name: '用户活跃时段',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 320, name: '00:00-03:00' },
+                        { value: 240, name: '03:00-06:00' },
+                        { value: 149, name: '06:00-09:00' },
+                        { value: 100, name: '09:00-12:00' },
+                        { value: 70, name: '12:00-15:00' },
+                        { value: 50, name: '15:00-18:00' },
+                        { value: 30, name: '18:00-21:00' },
+                        { value: 20, name: '21:00-24:00' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        }
+
+        // 获取实时数据
+        // 假设你有一个 API 可以获取用户活跃时段数据，这里我们先使用默认值
+        // userActiveOption.series[0].data = [
+        //     { value: 320, name: '00:00-03:00' },
+        //     { value: 240, name: '03:00-06:00' },
+        //     { value: 149, name: '06:00-09:00' },
+        //     { value: 100, name: '09:00-12:00' },
+        //     { value: 70, name: '12:00-15:00' },
+        //     { value: 50, name: '15:00-18:00' },
+        //     { value: 30, name: '18:00-21:00' },
+        //     { value: 20, name: '21:00-24:00' }
+        // ]
+        // 清空数据，等待 API 返回
+        await getUserActiveOption({ timeout: 1000 })
+            .then((response) => {
+                console.log(response.data)
+                for (let i = 0; i < response.data.value.length; i++) {
+                    userActiveOption.series[0].data[i].value = response.data.value[i]
+                    userActiveOption.series[0].data[i].name = response.data.name[i]
+                }
+                console.log(userActiveOption.series[0].data)
+            })
+            .catch((error) => {
+                ElMessage.error(error.response.data.message)
+            })
+
+        // 设置实例参数
+        userActiveChart.setOption(userActiveOption)
+        window.addEventListener('resize', function () {
+            userActiveChart.resize()
         })
     },
     methods: {
