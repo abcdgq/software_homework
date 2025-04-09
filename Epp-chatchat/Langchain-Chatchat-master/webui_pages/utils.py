@@ -764,6 +764,9 @@ class ApiRequest:
             "/llm_model/list_running_models",
             json=data,
         )
+
+        logger.info(f'{self.__class__.__name__}:response: {response}')
+        
         return self._get_response_value(response, as_json=True, value_func=lambda r: r.get("data", []))
 
     def get_default_llm_model(self, local_first: bool = True) -> Tuple[str, bool]:
