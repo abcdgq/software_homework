@@ -275,7 +275,7 @@ export default {
   line-height: 178px;
   text-align: center;
 }
-/deep/ .el-dialog {
+.el-dialog {
   border-radius: 12px;
   opacity: 0.9;
 }

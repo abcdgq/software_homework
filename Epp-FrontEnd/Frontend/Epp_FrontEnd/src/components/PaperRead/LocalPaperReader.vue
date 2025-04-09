@@ -166,7 +166,7 @@ export default {
     extractSelectedText (selectionRect) {
       const container = document.getElementById('pdf-viewer-container')
       // 下面的这些坐标是 可能带小数的。其中上方相对视口偏移this.containerOffsetTop = container.getBoundingClientRect().top是永远不变的。有啥用我也不知道。。前四个确定了显示的框位置。滚动那个是确定相对位置的。container我用了相对距离，大概是考虑了不同浏览器的显示问题，有没有用就不知道了。但这里根本没用到页数了。
-      alert('选中区域：宽度：' + selectionRect.width + ' 高度：' + selectionRect.height + ' 左上角X坐标：' + selectionRect.left + ' 左上角Y坐标：' + selectionRect.top + '上方相对视口偏移:' + this.containerOffsetTop + '上下滚动距离' + container.scrollTop)
+      // alert('选中区域：宽度：' + selectionRect.width + ' 高度：' + selectionRect.height + ' 左上角X坐标：' + selectionRect.left + ' 左上角Y坐标：' + selectionRect.top + '上方相对视口偏移:' + this.containerOffsetTop + '上下滚动距离' + container.scrollTop)
       const canvasElements = container.getElementsByTagName('canvas')
 
       for (let canvas of canvasElements) {
@@ -184,15 +184,15 @@ export default {
     // 下面的x,y,width,height,pageNum,comment都是相对于canvas的坐标。
     showCommentDialog (x, y, width, height, pageNum) {
       const comment = prompt('请输入评论:')
-
       if (comment) {
-        this.saveAnnotation(x, y, width, height, pageNum, comment)
+        const isPublic = confirm('是否公开评论？')
+        this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
         this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
       }
     },
     // 把一条注释渲染到页面上，这里的x,y,width,height,pageNum都是相对于canvas的坐标。
     // 具体来说，pageNum确定了页码。x,y是左上角坐标，width,height是宽高。并且这四个是相对于这一页的坐标。
-    renderAnnotation (x, y, width, height, pageNum, comment) {
+    renderAnnotation (x, y, width, height, pageNum) {
       const container = document.getElementById('pdf-viewer-container')
       const canvas = container.querySelector(`canvas[data-page-num="${pageNum}"]`)
       if (!canvas) return
@@ -229,7 +229,8 @@ export default {
       annotationBox.addEventListener('mousemove', (event) => {
         // const overlappingComments = this.findOverlappingComments(x, y, width, height, pageNum)
         const overlappingComments = this.findOverlappingComments(event.clientX, event.clientY, pageNum)
-        tooltip.innerHTML = overlappingComments.map(c => `• ${c}`).join('<br>')
+        // tooltip.innerHTML = overlappingComments.map(c => `• ${c}`).join('<br>')
+        tooltip.innerHTML = overlappingComments.map(c => `• ${c.userName}: ${c.comment}`).join('<br>')
 
         // **调整 tooltip 位置**
         tooltip.style.left = `${canvas.offsetLeft + x}px`
@@ -244,13 +245,6 @@ export default {
       container.appendChild(annotationBox)
       container.appendChild(tooltip)
     },
-    // findOverlappingComments (x, y, width, height, pageNum) {
-    //   return this.annotations
-    //     .filter(annotation => {
-    //       return annotation.pageNum === pageNum && this.isOverlapping(annotation, { x, y, width, height })
-    //     })
-    //     .map(annotation => annotation.comment)
-    // },
     findOverlappingComments (clientX, clientY, pageNum) {
       return this.annotations
         .filter(annotation => {
@@ -260,43 +254,66 @@ export default {
           const adjustY = clientY - canvasRect.top // + canvas.scrollTop // 修正 scrollTop
           return annotation.pageNum === pageNum && this.isInBox(adjustX, adjustY, annotation.x, annotation.y, annotation.width, annotation.height)
         })
-        .map(annotation => annotation.comment)
+        .map(annotation => ({
+          userName: annotation.userName, // 假设 annotation 对象中有一个 userName 属性
+          comment: annotation.comment
+        }))
     },
 
     isInBox (adjustX, adjustY, x, y, width, height) {
       return (adjustX >= x && adjustX <= x + width) && (adjustY >= y && adjustY <= y + height)
     },
-    // 保存一条评论到数据库，具体逻辑还没写，等前端显示好看了再说。，注意的是，这里除了xy等参数，传到后端时候还需要能标注是哪个pdf，比如，pdf的id，url之类的。在fetchPaperPDF函数里获取过了，也保存到data里了
+    // 保存一条评论到数据库.
     // 这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一个canvas）其中x，y是左上角坐标，width,height是宽高。并且这四个是相对于这一页的坐标。
     // 具体格式方面，x，y,width,height,都是小数，pageNum是整数（正整数，但不会很大，直接当整数就行）。comment是字符串。当然，小数那点误差不是很重要。
     // 强转整数也没太大事，但就小数表示吧。虽然是代表像素之类的 ，说是现在为了更精准显示，都是小数.
-    saveAnnotation (x, y, width, height, pageNum, comment) {
-      const annotation = { x, y, width, height, pageNum, comment }
+    saveAnnotation (x, y, width, height, pageNum, comment, isPublic) {
+      const annotation = { x, y, width, height, pageNum, comment, userName: localStorage.getItem('username'), isPublic }
       this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
       // 就按照这个数据格式传就行，这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一canvas）
+      axios.post(this.$BASE_API_URL + '/saveAnnotation', {
+        params: {
+          x, y, width, height, pageNum, comment, paper_id: this.paper_id, isPublic // 虽然没传username，但是后端要存
+          // 后端可以在session里取出username,暂时不管评论时间？
+        }
+      }).then(response => {
+        console.log('保存注释成功', response)
+      }).catch(error => {
+        console.error('保存注释失败', error)
+      })
     },
     // 重新渲染所有注释，也就是删除旧的注释框，重新渲染新的注释框。也就是对每个公开或自己的评论分别renderAnnotation。
     renderAnnotations () {
       const container = document.getElementById('pdf-viewer-container')
       container.querySelectorAll('.annotation-box, .annotation-tooltip').forEach(el => el.remove()) // 清除旧的注释框
       this.annotations.forEach(annotation => {
-        const { x, y, width, height, pageNum, comment } = annotation
-        this.renderAnnotation(x, y, width, height, pageNum, comment)
+        const { x, y, width, height, pageNum, comment, userName, isPublic } = annotation
+        console.log(comment, userName, isPublic)
+        this.renderAnnotation(x, y, width, height, pageNum)
       })
     },
     // 从数据库加载所有已有评论，并渲染到页面上，可以分别renderAnnotation,也可以直接renderAnnotations
     // 这个只在开始调用一次，避免和数据库交互太多，影响性能。
+    // 要求，后端需要返回一个数组，每个元素是一条注释，格式如下：
+    // {
+    //   x: 0.1, // 小数，相对于pageNum所在的canvas的坐标
+    //   y: 0.2, // 小数，相对于pageNum所在的canvas的坐标
+    //   width: 0.3, // 小数，相对于pageNum所在的canvas的坐标
+    //   height: 0.4, // 小数，相对于pageNum所在的canvas的坐标
+    //   pageNum: 1, // 整数，页码
+    //   comment: '这是一条评论', // 字符串
+    //   userName: '用户名', // 字符串
+    //   isPublic: true // 布尔值，是否公开true/false
+    // }
+    // 同时，后端可以根据session里的username来判断是否是自己的评论，只能返回自己的评论和他人的公开评论。
     loadAnnotations () {
-      // axios.get(this.$BASE_API_URL + '/getAnnotations', {
-      //   params: { fileReadingID: this.fileReadingID }
-      // }).then(response => {
-      //   this.annotations = response.data.annotations
-      //   this.annotations.forEach(annotation => {
-      //     this.renderAnnotation(annotation.x, annotation.y, annotation.pageNum, annotation.comment)
-      //   })
-      // }).catch(error => {
-      //   console.error('加载注释失败', error)
-      // })
+      axios.get(this.$BASE_API_URL + '/getAnnotations?document_id=' + this.paper_id)
+        .then(response => {
+          this.annotations = response.data.annotations
+          this.renderAnnotations() // 直接渲染所有注释，这里就不从数据库重新调了
+        }).catch(error => {
+          console.error('加载注释失败', error)
+        })
     }
   }
 }
