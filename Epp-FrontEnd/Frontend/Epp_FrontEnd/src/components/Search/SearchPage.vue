@@ -21,6 +21,8 @@
       </div>
       <!-- 推荐文献表格 -->
       <el-row>
+        <el-switch v-model="isPrivateHot" active-text="个性化文献推荐" inactive-text="热门文献推荐" @change="changePapers">
+        </el-switch>
         <el-col :span="24">
           <el-card class="table-card">
             <el-table :data="displayRecommendations" v-loading="loading" style="width: 100%;">
@@ -93,7 +95,8 @@ export default {
       loading: true,
       currentPage: 1,
       itemsPerPage: 5,
-      isDialogSearch: false
+      isDialogSearch: false,
+      isPrivateHot: false
     }
   },
   computed: {
@@ -110,7 +113,11 @@ export default {
     }
   },
   created () {
-    this.fetchRecommend()
+    if (this.isPrivateHot) {
+      this.fetchPrivateRecommend()
+    } else {
+      this.fetchRecommend()
+    }
   },
   methods: {
     fetchRecommend () {
@@ -124,6 +131,20 @@ export default {
           console.error('Error', error)
         })
     },
+    fetchPrivateRecommend () {
+      // TODO
+      axios
+        .get(this.$BASE_API_URL + '/paperPrivateRecommend')
+        .then(response => {
+          this.recommendations = response.data.papers
+          this.loading = false
+        })
+        .catch(error => {
+          this.recommendations = []
+          this.loading = false
+          console.error('Error', error)
+        })
+    },
     truncateTitle (abstract, maxLength) {
       if (abstract.length > maxLength) {
         return abstract.substring(0, maxLength) + '...'
@@ -132,6 +153,13 @@ export default {
     },
     changePage (page) {
       this.currentPage = page
+    },
+    changePapers () {
+      if (this.isPrivateHot) {
+        this.fetchPrivateRecommend()
+      } else {
+        this.fetchRecommend()
+      }
     }
   }
 }

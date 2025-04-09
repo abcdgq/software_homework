@@ -3,19 +3,25 @@
     api/manage/...
     鉴权先不加了吧...
 """
+from math import frexp
+
 from django.views.decorators.http import require_http_methods
 from django.db.models import Count
 from django.db.models.functions import TruncHour
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.utils import timezone  # 时间处理
+from django.db.models import Count  # 聚合计数
+from django.db.models.functions import ExtractHour  # 提取小时函数
 
 import math
 import json
 import requests
 import datetime
-from collections import defaultdict
+from pathlib import Path
+from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
-    Subclass, UserVisit
-from business.utils import reply
+    Subclass, UserVisit, SearchRecord
+from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
 
 
@@ -28,6 +34,8 @@ def get_last_10_months():
         current_date = current_date.replace(day=1)
         months.append(current_date)
         current_date -= datetime.timedelta(days=current_date.day)
+
+    print(months[::-1])
 
     return months[::-1]
 
@@ -350,7 +358,9 @@ def user_statistic(request):
         # 月统计数据对象
         month_data = {month.strftime('%Y-%m'): {'user_addition': 0, 'user_total': 0} for month in months}
         for addition in user_addition:
-            month_data[addition.date.strftime('%Y-%m')]['user_addition'] += addition.addition
+            date = addition.date.strftime('%Y-%m')
+            if date in month_data:
+                month_data[date]['user_addition'] += addition.addition
 
         # 返回统计数据
         total = User.objects.count()  # 用户总数
@@ -527,3 +537,161 @@ def visit_statistic(request):
         data['data'].append(visits_dict.get(hour, 0))
 
     return reply.success(data=data, msg="访问量统计信息获取成功")
+
+
+@require_http_methods('GET')
+def user_active_option(request):
+    """用户活跃时段统计（按3小时分段）"""
+    mode = request.GET.get('mode', '1')  # 默认模式1
+    if mode not in ('1', '2', '3'):
+        return reply.fail(msg="非法mode参数")
+
+    now = timezone.now()
+    periods = [
+        (0, 3, '00:00-03:00'),
+        (3, 6, '03:00-06:00'),
+        (6, 9, '06:00-09:00'),
+        (9, 12, '09:00-12:00'),
+        (12, 15, '12:00-15:00'),
+        (15, 18, '15:00-18:00'),
+        (18, 21, '18:00-21:00'),
+        (21, 24, '21:00-24:00')
+    ]
+
+    # 当天统计
+    start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+    hourly_day = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_of_day, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    day_counts = {h['hour']: h['count'] for h in hourly_day}
+
+    # 近一周统计
+    start_week = (now - datetime.timedelta(days=6)).replace(hour=0, minute=0, second=0, microsecond=0)
+    weekly_hours = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_week, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    week_counts = defaultdict(int)
+    for h in weekly_hours:
+        week_counts[h['hour']] += h['count']
+    days_in_week = 7  # 直接固定为7天更准确
+
+    # 近一月统计
+    start_month = (now - datetime.timedelta(days=29)).replace(hour=0, minute=0, second=0, microsecond=0)
+    monthly_hours = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_month, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    month_counts = defaultdict(int)
+    for h in monthly_hours:
+        month_counts[h['hour']] += h['count']
+    days_in_month = 30  # 固定为30天避免日期差计算误差
+
+    # 构建结果
+    data = {
+        "value": [],
+        "name": []
+    }
+
+    for start_h, end_h, label in periods:
+        # 计算各时段总和
+        day_total = sum(day_counts.get(h, 0) for h in range(start_h, end_h))
+        week_total = sum(week_counts.get(h, 0) for h in range(start_h, end_h))
+        month_total = sum(month_counts.get(h, 0) for h in range(start_h, end_h))
+
+        # 计算平均值
+        week_avg = round(week_total / days_in_week, 2) if days_in_week else 0
+        month_avg = round(month_total / days_in_month, 2) if days_in_month else 0
+
+        # 根据mode选择value
+        if mode == '1':
+            value = day_total
+        elif mode == '2':
+            value = week_avg
+        elif mode == '3':
+            value = month_avg
+
+        data['value'].append(value)
+        data['name'].append(label)
+
+    print(data)
+
+    return reply.success(data=data, msg="用户活跃统计获取成功")
+
+
+@require_http_methods('GET')
+def hot_promptword_statistic(request):
+    """ 高频提示词统计数据 """
+    mode = int(request.GET.get('mode', default=0))
+    if mode == 1:
+        #
+        texts = []
+        top_n = 10
+
+        '''
+            从对话历史记录中提取用户提问
+        '''
+        # 遍历'resource/database/users/conversation/search'
+        path = Path(settings.USER_SEARCH_CONSERVATION_PATH)
+        for json_file in path.rglob('*.json'):
+            print(f"Found JSON file: {json_file}")
+            # 你可以在这里加载和处理 JSON 文件
+            with open(json_file, 'r', encoding='utf-8') as f:
+                conversation_data = json.load(json_file)
+                for conversation in conversation_data.get('conversation', []):
+                    if conversation.get('role') == 'user':
+                        texts.append(conversation.get('content', ''))
+
+        results = analyze_dialog(texts, top_n)
+
+        data = {
+            "words": [],
+            "freqs": []
+        }
+
+        for word, freq in results:
+            data['words'].append(word)
+            data['freqs'].append(freq)
+
+        print(data)
+
+        return reply.success(data=data, msg="高频统计词获取成功")
+
+    else:
+        return reply.fail(msg="mode参数错误")
+
+
+@require_http_methods(["GET"])
+def hot_searchword_statistic(request):
+
+    search_word_counter = Counter(list(SearchRecord.objects.values_list('keyword', flat=True)))
+
+    high_frequency_words = search_word_counter.most_common(10)
+
+    data = {
+        "words": [],
+        "frequencies": [],
+        "max_frequency": 0
+    }
+
+    for word, frequency in high_frequency_words:
+        data['words'].append(word)
+        data['frequencies'].append(frequency)
+
+    data['max_frequency'] = max(data['frequencies'])
+
+    print(data)
+
+    return reply.success(data=data, msg="获取高频检索词成功")
+

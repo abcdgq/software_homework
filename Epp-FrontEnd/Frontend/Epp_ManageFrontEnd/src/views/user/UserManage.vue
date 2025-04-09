@@ -368,6 +368,14 @@ export default {
                     data: [],
                     axisPointer: {
                         type: 'shadow'
+                    },
+                    axisLabel: {
+                        rotate: 45, // 设置标签旋转角度为45度
+                        interval: 0, // 确保所有标签都显示（根据需要调整）
+                        formatter: function (value) {
+                            // 如果需要，可以在这里格式化标签文本
+                            return value
+                        }
                     }
                 }
             ],
@@ -402,6 +410,7 @@ export default {
         //获取实时数据
         await getSearchWordsStatistic({ timeout: 1000 })
             .then((response) => {
+                console.log(response.data)
                 searchWordsOption.xAxis[0].data = response.data.words
                 searchWordsOption.yAxis[0].max = response.data.max_frequency
                 searchWordsOption.yAxis[0].interval = searchWordsOption.yAxis[0].max / 5
@@ -485,14 +494,15 @@ export default {
                 aiQuestionsOption.yAxis[0].max = response.data.max_frequency
                 aiQuestionsOption.yAxis[0].interval = aiQuestionsOption.yAxis[0].max / 5
                 aiQuestionsOption.series[0].data = response.data.frequencies
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 ElMessage.error(error.response.data.message)
                 // 设置默认值
                 aiQuestionsOption.xAxis[0].data = ['默认词1', '默认词2', '默认词3', '默认词4', '默认词5']
                 aiQuestionsOption.yAxis[0].max = 100
                 aiQuestionsOption.yAxis[0].interval = 20
                 aiQuestionsOption.series[0].data = [2, 4, 6, 8, 10]
-        })
+            })
 
         // 设置实例参数
         aiQuestionsChart.setOption(aiQuestionsOption)
@@ -549,32 +559,29 @@ export default {
 
         // 获取实时数据
         // 假设你有一个 API 可以获取用户活跃时段数据，这里我们先使用默认值
-        userActiveOption.series[0].data = [
-            { value: 320, name: '00:00-03:00' },
-            { value: 240, name: '03:00-06:00' },
-            { value: 149, name: '06:00-09:00' },
-            { value: 100, name: '09:00-12:00' },
-            { value: 70, name: '12:00-15:00' },
-            { value: 50, name: '15:00-18:00' },
-            { value: 30, name: '18:00-21:00' },
-            { value: 20, name: '21:00-24:00' }
-        ]
-        await getUserActiveOption({ timeout: 1000 }).then((response) => {
-                userActiveOption.series[0].data = response.data
-            }).catch((error) => {
+        // userActiveOption.series[0].data = [
+        //     { value: 320, name: '00:00-03:00' },
+        //     { value: 240, name: '03:00-06:00' },
+        //     { value: 149, name: '06:00-09:00' },
+        //     { value: 100, name: '09:00-12:00' },
+        //     { value: 70, name: '12:00-15:00' },
+        //     { value: 50, name: '15:00-18:00' },
+        //     { value: 30, name: '18:00-21:00' },
+        //     { value: 20, name: '21:00-24:00' }
+        // ]
+        // 清空数据，等待 API 返回
+        await getUserActiveOption({ timeout: 1000 })
+            .then((response) => {
+                console.log(response.data)
+                for (let i = 0; i < response.data.value.length; i++) {
+                    userActiveOption.series[0].data[i].value = response.data.value[i]
+                    userActiveOption.series[0].data[i].name = response.data.name[i]
+                }
+                console.log(userActiveOption.series[0].data)
+            })
+            .catch((error) => {
                 ElMessage.error(error.response.data.message)
-            // 设置默认值
-            userActiveOption.series[0].data = [
-                { value: 320, name: '00:00-03:00' },
-                { value: 240, name: '03:00-06:00' },
-                { value: 149, name: '06:00-09:00' },
-                { value: 100, name: '09:00-12:00' },
-                { value: 70, name: '12:00-15:00' },
-                { value: 50, name: '15:00-18:00' },
-                { value: 30, name: '18:00-21:00' },
-                { value: 20, name: '21:00-24:00' }
-            ]
-        }),
+            })
 
         // 设置实例参数
         userActiveChart.setOption(userActiveOption)
