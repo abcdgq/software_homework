@@ -13,6 +13,21 @@
             </el-menu>
             <div style="padding: 10px"><router-view></router-view></div>
         </el-collapse-item>
+
+        <!-- 新增的AI审核部分 -->
+        <el-collapse-item name="2">
+            <template #title>
+                <div class="collapse-title">
+                    <el-icon><i-ep-Cpu /></el-icon>
+                    <span class="collapse-title-text">AI审核评论</span>
+                </div>
+            </template>
+            <el-menu :default-active="$route.path" class="menu" mode="horizontal" :ellipsis="false" router>
+                <el-menu-item class="menu-content" index="/report/handled">全部审核内容</el-menu-item>
+                <el-menu-item class="menu-content" index="/report/unhandled">未通过内容</el-menu-item>
+            </el-menu>
+            <div style="padding: 10px"><router-view></router-view></div>
+        </el-collapse-item>
     </el-collapse>
 </template>
 

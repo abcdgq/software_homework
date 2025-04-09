@@ -103,7 +103,7 @@ export default {
     methods: {
         async handleSearch() {
             this.isLoading = true
-            await getHandledReportList({
+            await getHandledReprtList({
                 date: this.searchDate,
                 page_num: this.currentPage,
                 page_size: this.pageSize
