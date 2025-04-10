@@ -457,8 +457,8 @@ export default {
 }
 .comment-container {
   overflow-y: auto;
-  height: calc(100vh - 50px - 20px - 30px);
-  /* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间30px（可大可小) */
+  height: calc(100vh - 50px - 20px - 150px);
+  /* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间150px（可大可小,应该是前面漏减了，这里必须多减点) */
   /* */
   /* flex-grow: 1 */
 }
