@@ -13,7 +13,7 @@
         </div>
         <!-- 表格内容 -->
         <el-table
-            :data="reportData.reports"
+            :data="aiReviewData.content"
             stripe
             style="width: 96%; border-top: 1px solid #edebeb; font-size: 15px; margin: 0 auto"
             size="large"
@@ -31,23 +31,30 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column label="被举报评论">
+            <el-table-column label="评论内容">
                 <template v-slot="scope">
                     <div class="table-text">
                         {{ scope.row.comment.content }}
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column label="举报意见">
+            <el-table-column label="是否通过">
                 <template v-slot="scope">
                     <div class="table-text">
-                        {{ scope.row.content }}
+                        {{ scope.isPassed }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column label="原因">
+                <template v-slot="scope">
+                    <div class="table-text">
+                        {{ scope.row.reason}}
                     </div>
                 </template>
             </el-table-column>
             <el-table-column type="expand">
                 <template #default="props">
-                    <ReportDetail :reportID="props.row.id"></ReportDetail>
+                    <a-i-review-detail :reviewID="props.row.id"></a-i-review-detail>
                 </template>
             </el-table-column>
             <template v-slot:empty>
@@ -61,7 +68,7 @@
             v-model:page-size="pageSize"
             :page-sizes="[10, 25, 50]"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="reportData.total"
+            :total="aiReviewData.total"
         />
     </div>
 </template>
@@ -70,16 +77,18 @@
 import { getHandledReportList } from '@/api/report'
 import ReportDetail from './ReportDetail.vue'
 import { ElMessage } from 'element-plus'
+import AIReviewDetail from "@/views/report/AIReviewDetail.vue";
 export default {
     components: {
+        AIReviewDetail,
         ReportDetail
     },
     data() {
         return {
             isLoading: false,
-            reportData: {
+            aiReviewData: {
                 total: 2,
-                reports: [
+                content: [
                     {
                         id: 9,
                         comment: {
@@ -91,7 +100,8 @@ export default {
                             user_name: 'Ank'
                         },
                         date: '',
-                        content: ''
+                        isPassed: '是',
+                        reason: ''
                     }
                 ]
             },
@@ -109,9 +119,11 @@ export default {
                 page_size: this.pageSize
             })
                 .then((response) => {
-                    console.log('返回/n', response)
                     this.keywordBuffer = this.keyword
-                    this.reportData = response.data
+                    this.aiReviewData = {
+                        total: response.data.total,
+                        content: response.data.reports
+                    }
                 })
                 .catch((error) => {
                     ElMessage.error(error.response.data.message)

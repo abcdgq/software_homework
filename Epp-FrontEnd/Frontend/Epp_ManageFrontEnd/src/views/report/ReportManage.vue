@@ -23,8 +23,8 @@
                 </div>
             </template>
             <el-menu :default-active="$route.path" class="menu" mode="horizontal" :ellipsis="false" router>
-                <el-menu-item class="menu-content" index="/report/handled">全部审核内容</el-menu-item>
-                <el-menu-item class="menu-content" index="/report/unhandled">未通过内容</el-menu-item>
+                <el-menu-item class="menu-content" index="/report/ai-review">全部审核内容</el-menu-item>
+                <el-menu-item class="menu-content" index="/report/ai-reject">未通过内容</el-menu-item>
             </el-menu>
             <div style="padding: 10px"><router-view></router-view></div>
         </el-collapse-item>
@@ -37,7 +37,7 @@ export default {
     props: {},
     data() {
         return {
-            isClsActive: '1'
+            isClsActive: '0'
         }
     },
     watch: {},
