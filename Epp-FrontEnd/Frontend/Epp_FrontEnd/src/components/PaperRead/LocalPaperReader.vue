@@ -1,12 +1,51 @@
 <template>
     <el-row style="overflow: hidden; height: 100vh;">
-      <el-col :span="16" style="margin-top: 60px;">
+      <el-col :span="16" style="margin-top: 50px;">
         <!-- <iframe :src="pdfUrl" style="width: 100%; height: 755px;" frameborder="0"> -->
         <!-- </iframe> -->
         <div id="pdf-viewer-container" style="width: 100%; height: 755px;"></div>
       </el-col>
-      <el-col :span="8" style="margin-top: 60px">
-        <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" />
+      <el-col :span="8" style="margin-top: 50px">
+        <!-- <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" /> -->
+        <div style="margin-bottom: 20px;">
+          <el-button @click="showReadAssistant = true" :type="showReadAssistant ? 'primary' : ''">阅读助手</el-button>
+          <el-button @click="showReadAssistant = false" :type="!showReadAssistant ? 'primary' : ''">评论管理</el-button>
+        </div>
+        <div v-if="showReadAssistant">
+          <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" />
+        </div>
+        <div v-else>
+          <!-- 这里放置评论展示与删除的，目前筛选还没实现，预计筛选后，用一个新的annotation数组来保存筛选后的注释，然后渲染到页面上,并且从数据库拿到的所有评论和筛选后的注释分别储存，方便随时切换 -->
+          <!-- 新增的选择器和确认按钮 -->
+        <div style="margin-bottom: 20px;">
+          <el-select v-model="filterType" placeholder="筛选批注" @change="filterComments">
+            <el-option label="全部" value="all"></el-option>
+            <el-option label="我的批注" value="mine"></el-option>
+            <el-option label="他人批注" value="others"></el-option>
+          </el-select>
+          <el-select v-model="displayType" placeholder="显示类型" @change="filterComments">
+            <el-option label="全部显示" value="all"></el-option>
+            <el-option v-for="pageNum in allPageNumbers" :key="pageNum" :label="'第 ' + pageNum + ' 页'" :value="pageNum"></el-option>
+          </el-select>
+        </div>
+          <div class="comment-container">
+            <div v-for="annotation in annotations" :key="annotation.id">
+              <div class="annotation">
+                <div class="annotation-content">
+                  <p>{{ annotation.comment }}</p>
+                </div>
+                <div class="annotation-actions">
+                  <div v-if="annotation.userName === currentUser">
+                    <el-button type="text" @click="deleteAnnotation(annotation.id)">删除</el-button>
+                  </div>
+                  <div v-else>
+                    <el-button type="text" @click="reportAnnotation(annotation.id)">举报</el-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </el-col>
     </el-row>
 </template>
@@ -32,9 +71,15 @@ export default {
       startX: 0, // 框选起始点的X坐标
       startY: 0, // 框选起始点的Y坐标
       selectionBox: null, // 保存框选区域的DOM元素
-      annotations: [], // 保存注释，每次渲染时从服务器获取即可，格式下面有样例
+      annotations: [], // 保存用来显示的注释。初始等于下面，但是后续会根据筛选调整，保证论文和评论展示区都能只显示筛选后的注释
+      allAnnotations: [], // 保存所有注释，每次渲染时从服务器获取即可，格式下面有样例
       pdfInstance: null, // PDF.js 实例
-      containerOffsetTop: 0 // PDF 容器的顶部偏移
+      containerOffsetTop: 0, // PDF 容器的顶部偏移
+      showReadAssistant: true, // 是否显示阅读助手
+      currentUser: localStorage.getItem('username'), // 当前用户
+      filterType: 'all', // 筛选类型
+      displayType: 'all', // 显示类型
+      allPageNumbers: [] // 所有页面的页码
     }
   },
   created () {
@@ -98,6 +143,7 @@ export default {
     // 渲染所有页面
     renderAllPages (pdf, container) {
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        this.allPageNumbers.push(pageNum)
         pdf.getPage(pageNum).then(page => {
           const viewport = page.getViewport({ scale: 1.5 })
           const canvas = document.createElement('canvas')
@@ -268,8 +314,10 @@ export default {
     // 具体格式方面，x，y,width,height,都是小数，pageNum是整数（正整数，但不会很大，直接当整数就行）。comment是字符串。当然，小数那点误差不是很重要。
     // 强转整数也没太大事，但就小数表示吧。虽然是代表像素之类的 ，说是现在为了更精准显示，都是小数.
     saveAnnotation (x, y, width, height, pageNum, comment, isPublic) {
-      const annotation = { x, y, width, height, pageNum, comment, userName: localStorage.getItem('username'), isPublic }
+      const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: Math.floor(Math.random() * 100) + 1 } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
       this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
+      this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
+      // TODO 等之后前后端连通，上面这两行就不需要了，因为下面会push进去。
       // 就按照这个数据格式传就行，这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一canvas）
       axios.post(this.$BASE_API_URL + '/saveAnnotation', {
         params: {
@@ -278,6 +326,11 @@ export default {
         }
       }).then(response => {
         console.log('保存注释成功', response)
+        // window.location.reload()// 刷新页面，重新渲染所有注释，因为注释的id是后端生成的，只能重新从后端获取。
+        // 当前，也可以在这个response里，把新加的注释的id返回给前端，前端再把id存到本地，这样就不用重新刷新页面了。
+        const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: response.data.id } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
+        this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
+        this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
       }).catch(error => {
         console.error('保存注释失败', error)
       })
@@ -287,8 +340,8 @@ export default {
       const container = document.getElementById('pdf-viewer-container')
       container.querySelectorAll('.annotation-box, .annotation-tooltip').forEach(el => el.remove()) // 清除旧的注释框
       this.annotations.forEach(annotation => {
-        const { x, y, width, height, pageNum, comment, userName, isPublic } = annotation
-        console.log(comment, userName, isPublic)
+        const { x, y, width, height, pageNum, comment, userName, isPublic, id } = annotation
+        console.log(comment, userName, isPublic, id)
         this.renderAnnotation(x, y, width, height, pageNum)
       })
     },
@@ -309,16 +362,104 @@ export default {
     loadAnnotations () {
       axios.get(this.$BASE_API_URL + '/getAnnotations?document_id=' + this.paper_id)
         .then(response => {
-          this.annotations = response.data.annotations
+          this.allAnnotations = response.data.annotations
+          this.annotations = this.allAnnotations
           this.renderAnnotations() // 直接渲染所有注释，这里就不从数据库重新调了
         }).catch(error => {
           console.error('加载注释失败', error)
         })
+    },
+    deleteAnnotation (annotationId) {
+      this.annotations = this.annotations.filter(annotation => annotation.id !== annotationId) // 从本地数组中删除注释
+      this.allAnnotations = this.allAnnotations.filter(annotation => annotation.id !== annotationId) // 从本地数组中删除注释
+      this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+      // TODO 可以把删除注释的放在post返回结果后再进行，但是我相信他会删成功，就直接这样了.
+      axios.post(this.$BASE_API_URL + '/deleteAnnotation', { 'annotation_id': annotationId })
+        .then(response => {
+          this.$message({
+            message: '删除批注成功',
+            type: 'success'
+          })
+          // this.loadAnnotations() // 重新加载注释
+        }).catch(error => {
+          console.error('删除批注失败', error)
+          this.$message({
+            message: '删除批注失败',
+            type: 'error'
+          })
+        })
+    },
+    reportAnnotation (annotationId) {
+      // TODO 这里应该弹出一个对话框，让用户输入举报理由，然后把举报信息发送给后端。
+      const reason = prompt('请输入举报理由:') // 弹出提示框，让用户输入举报理由
+      axios.post(this.$BASE_API_URL + '/reportAnnotation', { 'annotation_id': annotationId, 'reason': reason })
+        .then(response => {
+          this.$message({
+            message: '举报批注成功',
+            type: 'success'
+          })
+          // this.loadAnnotations() // 重新加载注释
+        }).catch(error => {
+          console.error('举报批注失败', error)
+          this.$message({
+            message: '举报批注失败',
+            type: 'error'
+          })
+        })
+    },
+    filterComments () {
+      this.annotations = this.allAnnotations.filter(annotation => {
+        // 根据筛选类型过滤
+        if (this.filterType === 'mine') {
+          return annotation.userName === this.currentUser
+        } else if (this.filterType === 'others') {
+          return annotation.userName !== this.currentUser
+        } else {
+          return true // 全部
+        }
+      }).filter(annotation => {
+        // 根据显示类型过滤
+        if (this.displayType !== 'all') {
+          return annotation.pageNum === this.displayType // 假设currentPage是当前显示的页码
+        } else {
+          return true // 全部显示
+        }
+      })
+      this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
     }
   }
 }
 </script>
 
 <style scoped>
+.annotation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
 
+.annotation-content {
+  flex-grow: 1;
+}
+
+.annotation-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.annotation-content p {
+  margin: 0;
+}
+.comment-container {
+  overflow-y: auto;
+  height: calc(100vh - 50px - 20px - 30px);
+  /* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间30px（可大可小) */
+  /* */
+  /* flex-grow: 1 */
+}
 </style>
