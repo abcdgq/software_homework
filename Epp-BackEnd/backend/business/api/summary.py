@@ -23,10 +23,12 @@ from urllib3.util.retry import Retry
 
 def queryGLM(msg: str, history=None) -> str:
     '''
-    对chatGLM3-6B发出一次单纯的询问
+    对chatGLM3-6B发出一次单纯的询问(目前改为zhipu-api)
     '''
     print(msg)
-    chat_chat_url = 'http://172.17.62.88:7861/chat/chat'
+    # chat_chat_url = 'http://172.17.62.88:7861/chat/chat'
+    # chat_chat_url = 'http://114.116.205.43:7861/chat/chat'
+    chat_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/chat'
     headers = {
         'Content-Type': 'application/json'
     }
@@ -433,3 +435,6 @@ class abs_gen_thread(threading.Thread):
     def stop(self):
         # 设置线程停止
         self.isend = True
+
+if __name__ == '__main__':
+    queryGLM("你好")
