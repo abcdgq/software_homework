@@ -96,6 +96,9 @@ urlpatterns = [
                   path("api/manage/userActiveOption", manage.user_active_option),
                   path("api/manage/promptwordStatistic", manage.hot_promptword_statistic),
                   path("api/manage/searchWordStatistic", manage.hot_searchword_statistic),
+                  path("api/manage/autoCommentReports"),
+                  path("api/manage/autoCommentReportDetail"),
+
 
                   # 信息检索模块
                   path("api/search/easyVectorQuery", easy_vector_query),
