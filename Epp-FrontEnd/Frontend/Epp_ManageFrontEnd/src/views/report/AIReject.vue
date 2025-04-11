@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import { getHandledReportList } from '@/api/report'
+import { getAIReviewReject } from '@/api/aiReview'
 import ReportDetail from './ReportDetail.vue'
 import { ElMessage } from 'element-plus'
 import AIReviewDetail from "@/views/report/AIReviewDetail.vue";
@@ -113,7 +113,7 @@ export default {
     methods: {
         async handleSearch() {
             this.isLoading = true
-            await getHandledReportList({
+            await getAIReviewReject({
                 date: this.searchDate,
                 page_num: this.currentPage,
                 page_size: this.pageSize

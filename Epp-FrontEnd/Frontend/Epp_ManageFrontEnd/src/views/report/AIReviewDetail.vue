@@ -95,6 +95,7 @@
 import {getReportDetail, judgeReport} from '@/api/report'
 import {ElMessage} from 'element-plus'
 import AIReview from "./AIReview.vue";
+import {getAIReviewDetail} from "@/api/aiReview.js";
 
 export default {
     components: {},
@@ -137,7 +138,7 @@ export default {
     computed: {},
     methods: {
         async draw() {
-            await getReportDetail(this.$props.reviewID)
+            await getAIReviewDetail(this.$props.reviewID)
                 .then((response) => {
                     this.aiReviewData = response.data
                     this.judgment.text = response.data.judgment
