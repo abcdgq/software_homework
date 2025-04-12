@@ -750,3 +750,37 @@ def auto_comment_report_list(request):
         data['total'] = data['total'] + 1
 
     return reply.success(data=data, msg="成功获取自动审核中存在问题的评论")
+
+
+@require_http_methods('GET')
+def auto_comment_report_detail(request):
+    review_id = request.GET.get('review_id')
+    report = auto_check_record.objects.filter(check_record_id=review_id).first()
+    comment = report.comment_1 if report.comment_level == 1 else report.comment_2
+
+    data = {
+        'id': review_id,
+        'comment': {
+            'comment_id': comment.comment_id,
+            'user': {
+                'user_id': comment.user_id,
+                'user_name': User.objects.filter(user_id=comment.user_id).first().username
+            },
+            'paper': {
+                'paper_id': comment.paper_id,
+                'title': Paper.objects.filter(paper_id=comment.paper_id).first().title
+            },
+            'date': comment.date,
+            'content': comment.text,
+            'visibility': comment.visibility
+        },
+        'comment_level': report.comment_level,
+        'date': report.date,
+        'isPassed': report.security,
+        'reason': {
+            'riskTips': record.reason['riskTips'],
+            'riskWords': record.reason['riskWords']
+        }
+    }
+
+    return reply.success(data=data, msg="成功获取自动审核详细信息")
