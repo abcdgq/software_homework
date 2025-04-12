@@ -169,5 +169,5 @@ cython_debug/
 # 忽略setting.py #
 backend/settings.py
 
-/backedn/business/migrations/*
+/backend/business/migrations/*
 
