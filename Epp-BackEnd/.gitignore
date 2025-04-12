@@ -168,3 +168,5 @@ cython_debug/
 
 # 忽略setting.py #
 backend/settings.py
+
+business/migrations/*

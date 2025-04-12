@@ -7,6 +7,8 @@ from alibabacloud_tea_util import models as util_models
 import json
 import uuid
 
+from business.utils.reply import success
+
 # 内容安全API(阿里绿网) 7.5r/万次
 access_key_id='LTAI5tA1748XZkNXokKZ9xSe'
 access_key_secret='3vONTV9YqT39jB8qTpKOHzgw6LswNe'
@@ -79,10 +81,16 @@ def auto_comment_detection(content:str):
             if result.code == 200:
                 resultData = result.data
                 print('labels:{}, reason:{}'.format(resultData.labels, resultData.reason))
+
+                return True, response.status_code, resultData.labels, resultData.reason
+
         else:
             print('response not success. status:{} ,result:{}'.format(response.status_code, response))
+            return False, response.status_code, None, None
+
     except Exception as err:
         print(err)
 
-# if __name__ == '__main__':
-#     auto_comment_detection('色情服务')
+if __name__ == '__main__':
+    auto_comment_detection('海洛因和色情服务')
+    auto_comment_detection('我喜欢小汽车')

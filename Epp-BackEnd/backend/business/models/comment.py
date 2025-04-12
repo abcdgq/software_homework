@@ -27,7 +27,9 @@ class FirstLevelComment(models.Model):
     text = models.TextField()
     like_count = models.IntegerField(default=0)
     liked_by_users = models.ManyToManyField(User, related_name='liked_first_level_comments', blank=True)
-    visibility = models.BooleanField(default=True)
+    # 先经过自动审核，通过后才可见
+    # visibility = models.BooleanField(default=True)
+    visibility = models.BooleanField(default=False)
 
 
 class SecondLevelComment(models.Model):
@@ -53,4 +55,6 @@ class SecondLevelComment(models.Model):
     level1_comment = models.ForeignKey(FirstLevelComment, on_delete=models.CASCADE)
     reply_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     liked_by_users = models.ManyToManyField(User, related_name='liked_second_level_comments', blank=True)
-    visibility = models.BooleanField(default=True)
+    # 先经过自动审核，通过后才可见
+    # visibility = models.BooleanField(default=True)
+    visibility = models.BooleanField(default=False)
