@@ -97,7 +97,7 @@ urlpatterns = [
                   path("api/manage/promptwordStatistic", manage.hot_promptword_statistic),
                   path("api/manage/searchWordStatistic", manage.hot_searchword_statistic),
                   path("api/manage/autoCommentReports", manage.auto_comment_report_list),
-                  # path("api/manage/autoCommentReportDetail"),
+                  path("api/manage/autoCommentReportDetail", manage.auto_comment_report_detail),
 
 
                   # 信息检索模块
