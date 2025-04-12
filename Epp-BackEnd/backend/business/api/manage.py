@@ -21,6 +21,7 @@ from pathlib import Path
 from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
     Subclass, UserVisit, SearchRecord
+from business.models.auto_check_risk import AutoRiskRecord
 from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
 
@@ -169,10 +170,10 @@ def comment_report_list(request):
         obj = {
             'id': report.id,
             'comment': {
-                "date": report.comment_id_1.date.strftime(
-                    "%Y-%m-%d %H:%M:%S") if report.comment_id_1 else report.comment_id_2.date.strftime(
+                "date": report.comment_1.date.strftime(
+                    "%Y-%m-%d %H:%M:%S") if report.comment_1 else report.comment_2.date.strftime(
                     "%Y-%m-%d %H:%M:%S"),
-                "content": report.comment_id_1.text if report.comment_id_1 else report.comment_id_2.text
+                "content": report.comment_1.text if report.comment_1 else report.comment_2.text
             },
             'user': report.user_id.simply_desc(),
             'date': report.date.strftime("%Y-%m-%d %H:%M:%S"),
@@ -192,14 +193,14 @@ def comment_report_detail(request):
         data = {
             'id': report.id,
             'comment': {
-                "comment_id": report.comment_id_1.comment_id if report.comment_id_1 else report.comment_id_2.comment_id,
-                "user": report.comment_id_1.user_id.simply_desc() if report.comment_id_1 else report.comment_id_2.user_id.simply_desc(),
-                "paper": report.comment_id_1.paper_id.simply_desc() if report.comment_id_1 else report.comment_id_2.paper_id.simply_desc(),
-                "date": report.comment_id_1.date.strftime(
-                    "%Y-%m-%d %H:%M:%S") if report.comment_id_1 else report.comment_id_2.date.strftime(
+                "comment_id": report.comment_1.comment_id if report.comment_1 else report.comment_2.comment_id,
+                "user": report.comment_1.user_id.simply_desc() if report.comment_1 else report.comment_2.user_id.simply_desc(),
+                "paper": report.comment_1.paper_id.simply_desc() if report.comment_1 else report.comment_2.paper_id.simply_desc(),
+                "date": report.comment_1.date.strftime(
+                    "%Y-%m-%d %H:%M:%S") if report.comment_1 else report.comment_2.date.strftime(
                     "%Y-%m-%d %H:%M:%S"),
-                "content": report.comment_id_1.text if report.comment_id_1 else report.comment_id_2.text,
-                "visibility": report.comment_id_1.visibility if report.comment_id_1 else report.comment_id_2.visibility
+                "content": report.comment_1.text if report.comment_1 else report.comment_2.text,
+                "visibility": report.comment_1.visibility if report.comment_1 else report.comment_2.visibility
             },
             'user': report.user_id.simply_desc(),
             'comment_level': report.comment_level,
@@ -227,7 +228,7 @@ def judge_comment_report(request):
     if not report:
         return reply.fail(msg="举报信息不存在")
     level = report.comment_level
-    comment = report.comment_id_1 if level == 1 else report.comment_id_2
+    comment = report.comment_1 if level == 1 else report.comment_2
 
     # 校对审核信息
     if text == report.judgment and visibility == comment.visibility:
@@ -273,20 +274,20 @@ def judge_comment_report(request):
 #     # 删除评论并通知用户
 #     level = report.comment_level
 #     if level == 1:
-#         Notification(user_id=report.comment_id_1.user_id, title="您的评论被举报了！",
-#                      content=f"您在 {report.comment_id_1.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_id_1.paper_id.title}》的评论内容 \"{report.comment_id_1.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
+#         Notification(user_id=report.comment_1.user_id, title="您的评论被举报了！",
+#                      content=f"您在 {report.comment_1.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_1.paper_id.title}》的评论内容 \"{report.comment_1.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
 #                      ).save()
-#         report.comment_id_1.visibility = False
-#         report.comment_id_1.save()
+#         report.comment_1.visibility = False
+#         report.comment_1.save()
 #         report.processed = True
 #         report.save()
 #
 #     elif level == 2:
-#         Notification(user_id=report.comment_id_2.user_id, title="您的评论被举报了！",
-#                      content=f"您在 {report.comment_id_2.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_id_2.paper_id.title}》的评论内容 \"{report.comment_id_2.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
+#         Notification(user_id=report.comment_2.user_id, title="您的评论被举报了！",
+#                      content=f"您在 {report.comment_2.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_2.paper_id.title}》的评论内容 \"{report.comment_2.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
 #                      ).save()
-#         report.comment_id_2.visibility = False
-#         report.comment_id_2.save()
+#         report.comment_2.visibility = False
+#         report.comment_2.save()
 #         report.processed = True
 #         report.save()
 #
@@ -695,3 +696,57 @@ def hot_searchword_statistic(request):
 
     return reply.success(data=data, msg="获取高频检索词成功")
 
+
+@require_http_methods('GET')
+def auto_comment_report_list(request):
+
+    data = {
+        'total': 0,
+        'content': [
+            # {
+            #     'id': 9,
+            #     'comment': {
+            #         'date': '2024-04-29 22:58:41',
+            #         'content': '测试评论'
+            #     },
+            #     'user': {
+            #         'user_id': '063eccd4-76b3-4755-84c0-eef9baf16c04',
+            #         'user_name': 'Ank'
+            #     },
+            #     'date': '',         # 审核时间
+            #     'isPassed': True,   # 是否通过
+            #     'reason': {         # 原因
+            #         'riskTips': [],
+            #         'riskWords': []
+            #     }
+            # }
+        ]
+    }
+
+    auto_record_list = AutoRiskRecord.objects.values_list('check_record', flat=True)
+    for record in auto_record_list:
+        comment = record.comment_1 if record.comment_level == 1 else record.comment_2
+        date = comment.date
+        content = comment.text
+        user_id = comment.user_id
+        auto_check_record = {
+                                'id': record.check_record_id,
+                                'comment': {
+                                    'date': date.strftime("%Y-%m-%d %H:%M:%S"),
+                                    'content': content
+                                },
+                                'user': {
+                                    'user_id': user_id,
+                                    'user_name': User.objects.filter(user_id=user_id).first().username
+                                },
+                                'date': record.date.strftime("%Y-%m-%d %H:%M:%S"),  # 审核时间
+                                'isPassed': record.security,                        # 是否通过
+                                'reason': {                                         # 原因
+                                    'riskTips': record.reason['riskTips'],
+                                    'riskWords': record.reason['riskWords']
+                                }
+                            }
+        data['content'].append(auto_check_record)
+        data['total'] = data['total'] + 1
+
+    return reply.success(data=data, msg="成功获取自动审核中存在问题的评论")
