@@ -126,8 +126,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': '2024_EPP',
         'USER': 'root',
-        # 'PASSWORD': '2883536Dgq',
-        'PASSWORD': '58',
+        # 'PASSWORD': '2003',
+        'PASSWORD': '2003',
         #  'HOST': '114.116.214.56',
         'HOST': '127.0.0.1',
         'PORT': '3306',
@@ -194,10 +194,12 @@ MAX_Similarity = 0.8  # 最大相似度，介于-1和1之间，不确定
 
 # 远程模型部署开放的API接口
 # REMOTE_MODEL_BASE_PATH = '172.17.62.88:7861'
-REMOTE_MODEL_BASE_PATH = '114.116.205.43:7861'
+#REMOTE_MODEL_BASE_PATH = '114.116.205.43:7861'
+REMOTE_MODEL_BASE_PATH = '115.190.109.233:7861'
 # 使用openai流式接口调用glm3大模型，不附带知识库
 # REMOTE_CHATCHAT_GLM3_OPENAI_PATH = '172.17.62.88:20005'
-REMOTE_CHATCHAT_GLM3_OPENAI_PATH = '114.116.205.43:20005'
+#REMOTE_CHATCHAT_GLM3_OPENAI_PATH = '114.116.205.43:20005'
+REMOTE_CHATCHAT_GLM3_OPENAI_PATH = '115.190.109.233:20005'
 
 # 语义检索相关
 VECTOR_DIM = 1024
