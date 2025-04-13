@@ -38,7 +38,7 @@ class FileNote(models.Model):
     y = models.FloatField(default=0.0)
     width = models.FloatField(default=0.0)
     height = models.FloatField(default=0.0)
-    pageNum = models.IntField(defult=1)
+    pageNum = models.IntegerField(default=1)
     comment = models.TextField(default="")
     username = models.CharField(max_length=255)
     isPublic = models.BooleanField(default=False)
