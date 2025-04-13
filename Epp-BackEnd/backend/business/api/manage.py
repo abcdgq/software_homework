@@ -754,7 +754,7 @@ def auto_comment_report_list(request):
 
 @require_http_methods('GET')
 def auto_comment_report_detail(request):
-    review_id = request.GET.get('review_id')
+    review_id = request.body.get('review_id')
     report = auto_check_record.objects.filter(check_record_id=review_id).first()
     comment = report.comment_1 if report.comment_level == 1 else report.comment_2
 
