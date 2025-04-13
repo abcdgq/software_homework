@@ -121,7 +121,7 @@ export default {
 
                 comment_level: 1, // 评论级别（原有）
                 date: '', // ai审核日期
-                isPassed: '', // 是否通过
+                isPassed: true, // 是否通过
                 reason: '', // ai审核意见
             },
         }

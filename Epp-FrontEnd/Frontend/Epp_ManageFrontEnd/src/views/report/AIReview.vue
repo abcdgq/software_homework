@@ -100,7 +100,7 @@ export default {
                             user_name: 'Ank'
                         },
                         date: '',
-                        isPassed: '是',
+                        isPassed: true,
                         reason: ''
                     }
                 ]
@@ -122,7 +122,7 @@ export default {
                     this.keywordBuffer = this.keyword
                     this.aiReviewData = {
                         total: response.data.total,
-                        content: response.data.reports
+                        content: response.data.content
                     }
                 })
                 .catch((error) => {
