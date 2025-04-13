@@ -8,8 +8,13 @@ import zipfile
 import os
 from django.http import JsonResponse
 from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification
+from business.models.auto_check_record import AutoCheckRecord
+from business.models.auto_check_risk import AutoRiskRecord
+from business.models.auto_check_undo import AutoUndoRecord
 from business.utils.download_paper import downloadPaper
 from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL, USER_DOCUMENTS_PATH, USER_DOCUMENTS_URL
+
+from scripts.aliyun_test import auto_comment_detection
 
 if not os.path.exists(BATCH_DOWNLOAD_PATH):
     os.makedirs(BATCH_DOWNLOAD_PATH)
@@ -128,10 +133,12 @@ def report_comment(request):
             comment = SecondLevelComment.objects.filter(comment_id=comment_id).first()
         if user and comment:
             if comment_level == 1:
-                report_com = CommentReport(comment_id_1=comment, comment_level=1, user_id=user, content=report)
+                # 一级评论
+                report_com = CommentReport(comment_1=comment, comment_level=1, user_id=user, content=report)
                 report_com.save()
             elif comment_level == 2:
-                report_com = CommentReport(comment_id_2=comment, comment_level=2, user_id=user, content=report)
+                # 二级评论
+                report_com = CommentReport(comment_2=comment, comment_level=2, user_id=user, content=report)
                 report_com.save()
             return JsonResponse({'message': '举报成功', 'is_success': True})
         else:
@@ -156,6 +163,25 @@ def comment_paper(request):
             if comment_level == 1:
                 comment = FirstLevelComment(user_id=user, paper_id=paper, text=text)
                 comment.save()
+                # 启动自动审核程序
+                if_success, status_code, labels, reason = auto_comment_detection(text)
+                if if_success:
+                    auto_record = AutoCheckRecord(comment_1=comment, comment_level=1, labels=labels, reason=reason)
+                    auto_record.save()
+                    if len(labels) == 0 or labels.isspace():
+                        comment.visibility = True
+                        auto_record.security = True
+                        comment.save()
+                        auto_record.save()
+                    else:
+                        # 将不安全审核记录到表中
+                        risk_record = AutoRiskRecord(auto_record)
+                        risk_record.save()
+                else:
+                    # 将未成功自动审核的评论记录
+                    undo_record = AutoUndoRecord(comment_1=comment, comment_level=1)
+                    undo_record.save()
+
             elif comment_level == 2:
                 level1_comment_id = data.get('level1_comment_id')
                 level1_comment = FirstLevelComment.objects.filter(comment_id=level1_comment_id).first()
@@ -167,6 +193,26 @@ def comment_paper(request):
                 comment = SecondLevelComment(user_id=user, paper_id=paper, text=text, level1_comment=level1_comment,
                                              reply_comment=reply_comment)
                 comment.save()
+                # 启动自动审核程序
+                if_success, status_code, labels, reason = auto_comment_detection(text)
+                if if_success:
+                    auto_record = AutoCheckRecord(comment_2=comment.comment_id, comment_level=2, labels=labels,
+                                                  reason=reason)
+                    auto_record.save()
+                    if len(labels) == 0 or labels.isspace():
+                        comment.visibility = True
+                        auto_record.security = True
+                        comment.save()
+                        auto_record.save()
+                    else:
+                        # 将不安全审核记录到表中
+                        risk_record = AutoRiskRecord(auto_record)
+                        risk_record.save()
+                else:
+                    # 将未成功自动审核的评论记录
+                    undo_record = AutoUndoRecord(comment_2=comment.comment_id, comment_level=2)
+                    undo_record.save()
+
             paper.comment_count += 1
             paper.save()
             return JsonResponse({'message': '评论成功', 'is_success': True})

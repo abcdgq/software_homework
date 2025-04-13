@@ -3,19 +3,26 @@
     api/manage/...
     鉴权先不加了吧...
 """
+from math import frexp
+
 from django.views.decorators.http import require_http_methods
 from django.db.models import Count
 from django.db.models.functions import TruncHour
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.utils import timezone  # 时间处理
+from django.db.models import Count  # 聚合计数
+from django.db.models.functions import ExtractHour  # 提取小时函数
 
 import math
 import json
 import requests
 import datetime
-from collections import defaultdict
+from pathlib import Path
+from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
-    Subclass, UserVisit
-from business.utils import reply
+    Subclass, UserVisit, SearchRecord
+from business.models.auto_check_risk import AutoRiskRecord
+from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
 
 
@@ -28,6 +35,8 @@ def get_last_10_months():
         current_date = current_date.replace(day=1)
         months.append(current_date)
         current_date -= datetime.timedelta(days=current_date.day)
+
+    print(months[::-1])
 
     return months[::-1]
 
@@ -161,10 +170,10 @@ def comment_report_list(request):
         obj = {
             'id': report.id,
             'comment': {
-                "date": report.comment_id_1.date.strftime(
-                    "%Y-%m-%d %H:%M:%S") if report.comment_id_1 else report.comment_id_2.date.strftime(
+                "date": report.comment_1.date.strftime(
+                    "%Y-%m-%d %H:%M:%S") if report.comment_1 else report.comment_2.date.strftime(
                     "%Y-%m-%d %H:%M:%S"),
-                "content": report.comment_id_1.text if report.comment_id_1 else report.comment_id_2.text
+                "content": report.comment_1.text if report.comment_1 else report.comment_2.text
             },
             'user': report.user_id.simply_desc(),
             'date': report.date.strftime("%Y-%m-%d %H:%M:%S"),
@@ -184,14 +193,14 @@ def comment_report_detail(request):
         data = {
             'id': report.id,
             'comment': {
-                "comment_id": report.comment_id_1.comment_id if report.comment_id_1 else report.comment_id_2.comment_id,
-                "user": report.comment_id_1.user_id.simply_desc() if report.comment_id_1 else report.comment_id_2.user_id.simply_desc(),
-                "paper": report.comment_id_1.paper_id.simply_desc() if report.comment_id_1 else report.comment_id_2.paper_id.simply_desc(),
-                "date": report.comment_id_1.date.strftime(
-                    "%Y-%m-%d %H:%M:%S") if report.comment_id_1 else report.comment_id_2.date.strftime(
+                "comment_id": report.comment_1.comment_id if report.comment_1 else report.comment_2.comment_id,
+                "user": report.comment_1.user_id.simply_desc() if report.comment_1 else report.comment_2.user_id.simply_desc(),
+                "paper": report.comment_1.paper_id.simply_desc() if report.comment_1 else report.comment_2.paper_id.simply_desc(),
+                "date": report.comment_1.date.strftime(
+                    "%Y-%m-%d %H:%M:%S") if report.comment_1 else report.comment_2.date.strftime(
                     "%Y-%m-%d %H:%M:%S"),
-                "content": report.comment_id_1.text if report.comment_id_1 else report.comment_id_2.text,
-                "visibility": report.comment_id_1.visibility if report.comment_id_1 else report.comment_id_2.visibility
+                "content": report.comment_1.text if report.comment_1 else report.comment_2.text,
+                "visibility": report.comment_1.visibility if report.comment_1 else report.comment_2.visibility
             },
             'user': report.user_id.simply_desc(),
             'comment_level': report.comment_level,
@@ -219,7 +228,7 @@ def judge_comment_report(request):
     if not report:
         return reply.fail(msg="举报信息不存在")
     level = report.comment_level
-    comment = report.comment_id_1 if level == 1 else report.comment_id_2
+    comment = report.comment_1 if level == 1 else report.comment_2
 
     # 校对审核信息
     if text == report.judgment and visibility == comment.visibility:
@@ -265,20 +274,20 @@ def judge_comment_report(request):
 #     # 删除评论并通知用户
 #     level = report.comment_level
 #     if level == 1:
-#         Notification(user_id=report.comment_id_1.user_id, title="您的评论被举报了！",
-#                      content=f"您在 {report.comment_id_1.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_id_1.paper_id.title}》的评论内容 \"{report.comment_id_1.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
+#         Notification(user_id=report.comment_1.user_id, title="您的评论被举报了！",
+#                      content=f"您在 {report.comment_1.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_1.paper_id.title}》的评论内容 \"{report.comment_1.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
 #                      ).save()
-#         report.comment_id_1.visibility = False
-#         report.comment_id_1.save()
+#         report.comment_1.visibility = False
+#         report.comment_1.save()
 #         report.processed = True
 #         report.save()
 #
 #     elif level == 2:
-#         Notification(user_id=report.comment_id_2.user_id, title="您的评论被举报了！",
-#                      content=f"您在 {report.comment_id_2.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_id_2.paper_id.title}》的评论内容 \"{report.comment_id_2.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
+#         Notification(user_id=report.comment_2.user_id, title="您的评论被举报了！",
+#                      content=f"您在 {report.comment_2.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{report.comment_2.paper_id.title}》的评论内容 \"{report.comment_2.text}\" 被其他用户举报，根据EPP平台管理规定，检测到您的评论确为不合规，该评论现已删除。\n请注意遵守平台评论规范，理性发言！"
 #                      ).save()
-#         report.comment_id_2.visibility = False
-#         report.comment_id_2.save()
+#         report.comment_2.visibility = False
+#         report.comment_2.save()
 #         report.processed = True
 #         report.save()
 #
@@ -350,7 +359,9 @@ def user_statistic(request):
         # 月统计数据对象
         month_data = {month.strftime('%Y-%m'): {'user_addition': 0, 'user_total': 0} for month in months}
         for addition in user_addition:
-            month_data[addition.date.strftime('%Y-%m')]['user_addition'] += addition.addition
+            date = addition.date.strftime('%Y-%m')
+            if date in month_data:
+                month_data[date]['user_addition'] += addition.addition
 
         # 返回统计数据
         total = User.objects.count()  # 用户总数
@@ -527,3 +538,249 @@ def visit_statistic(request):
         data['data'].append(visits_dict.get(hour, 0))
 
     return reply.success(data=data, msg="访问量统计信息获取成功")
+
+
+@require_http_methods('GET')
+def user_active_option(request):
+    """用户活跃时段统计（按3小时分段）"""
+    mode = request.GET.get('mode', '1')  # 默认模式1
+    if mode not in ('1', '2', '3'):
+        return reply.fail(msg="非法mode参数")
+
+    now = timezone.now()
+    periods = [
+        (0, 3, '00:00-03:00'),
+        (3, 6, '03:00-06:00'),
+        (6, 9, '06:00-09:00'),
+        (9, 12, '09:00-12:00'),
+        (12, 15, '12:00-15:00'),
+        (15, 18, '15:00-18:00'),
+        (18, 21, '18:00-21:00'),
+        (21, 24, '21:00-24:00')
+    ]
+
+    # 当天统计
+    start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+    hourly_day = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_of_day, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    day_counts = {h['hour']: h['count'] for h in hourly_day}
+
+    # 近一周统计
+    start_week = (now - datetime.timedelta(days=6)).replace(hour=0, minute=0, second=0, microsecond=0)
+    weekly_hours = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_week, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    week_counts = defaultdict(int)
+    for h in weekly_hours:
+        week_counts[h['hour']] += h['count']
+    days_in_week = 7  # 直接固定为7天更准确
+
+    # 近一月统计
+    start_month = (now - datetime.timedelta(days=29)).replace(hour=0, minute=0, second=0, microsecond=0)
+    monthly_hours = (
+        UserVisit.objects
+        .filter(timestamp__range=(start_month, end_of_day))
+        .annotate(hour=ExtractHour('timestamp'))
+        .values('hour')
+        .annotate(count=Count('id'))
+    )
+    month_counts = defaultdict(int)
+    for h in monthly_hours:
+        month_counts[h['hour']] += h['count']
+    days_in_month = 30  # 固定为30天避免日期差计算误差
+
+    # 构建结果
+    data = {
+        "value": [],
+        "name": []
+    }
+
+    for start_h, end_h, label in periods:
+        # 计算各时段总和
+        day_total = sum(day_counts.get(h, 0) for h in range(start_h, end_h))
+        week_total = sum(week_counts.get(h, 0) for h in range(start_h, end_h))
+        month_total = sum(month_counts.get(h, 0) for h in range(start_h, end_h))
+
+        # 计算平均值
+        week_avg = round(week_total / days_in_week, 2) if days_in_week else 0
+        month_avg = round(month_total / days_in_month, 2) if days_in_month else 0
+
+        # 根据mode选择value
+        if mode == '1':
+            value = day_total
+        elif mode == '2':
+            value = week_avg
+        elif mode == '3':
+            value = month_avg
+
+        data['value'].append(value)
+        data['name'].append(label)
+
+    print(data)
+
+    return reply.success(data=data, msg="用户活跃统计获取成功")
+
+
+@require_http_methods('GET')
+def hot_promptword_statistic(request):
+    """ 高频提示词统计数据 """
+    mode = int(request.GET.get('mode', default=0))
+    if mode == 1:
+        #
+        texts = []
+        top_n = 10
+
+        '''
+            从对话历史记录中提取用户提问
+        '''
+        # 遍历'resource/database/users/conversation/search'
+        path = Path(settings.USER_SEARCH_CONSERVATION_PATH)
+        for json_file in path.rglob('*.json'):
+            print(f"Found JSON file: {json_file}")
+            # 你可以在这里加载和处理 JSON 文件
+            with open(json_file, 'r', encoding='utf-8') as f:
+                conversation_data = json.load(json_file)
+                for conversation in conversation_data.get('conversation', []):
+                    if conversation.get('role') == 'user':
+                        texts.append(conversation.get('content', ''))
+
+        results = analyze_dialog(texts, top_n)
+
+        data = {
+            "words": [],
+            "freqs": []
+        }
+
+        for word, freq in results:
+            data['words'].append(word)
+            data['freqs'].append(freq)
+
+        print(data)
+
+        return reply.success(data=data, msg="高频统计词获取成功")
+
+    else:
+        return reply.fail(msg="mode参数错误")
+
+
+@require_http_methods(["GET"])
+def hot_searchword_statistic(request):
+
+    search_word_counter = Counter(list(SearchRecord.objects.values_list('keyword', flat=True)))
+
+    high_frequency_words = search_word_counter.most_common(10)
+
+    data = {
+        "words": [],
+        "frequencies": [],
+        "max_frequency": 0
+    }
+
+    for word, frequency in high_frequency_words:
+        data['words'].append(word)
+        data['frequencies'].append(frequency)
+
+    data['max_frequency'] = max(data['frequencies'])
+
+    print(data)
+
+    return reply.success(data=data, msg="获取高频检索词成功")
+
+
+@require_http_methods('GET')
+def auto_comment_report_list(request):
+
+    data = {
+        'total': 0,
+        'content': [
+            # {
+            #     'id': 9,
+            #     'comment': {
+            #         'date': '2024-04-29 22:58:41',
+            #         'content': '测试评论'
+            #     },
+            #     'user': {
+            #         'user_id': '063eccd4-76b3-4755-84c0-eef9baf16c04',
+            #         'user_name': 'Ank'
+            #     },
+            #     'date': '',         # 审核时间
+            #     'isPassed': True,   # 是否通过
+            #     'reason': {         # 原因
+            #         'riskTips': [],
+            #         'riskWords': []
+            #     }
+            # }
+        ]
+    }
+
+    auto_record_list = AutoRiskRecord.objects.values_list('check_record', flat=True)
+    for record in auto_record_list:
+        comment = record.comment_1 if record.comment_level == 1 else record.comment_2
+        date = comment.date
+        content = comment.text
+        user_id = comment.user_id
+        auto_check_record = {
+                                'id': record.check_record_id,
+                                'comment': {
+                                    'date': date.strftime("%Y-%m-%d %H:%M:%S"),
+                                    'content': content
+                                },
+                                'user': {
+                                    'user_id': user_id,
+                                    'user_name': User.objects.filter(user_id=user_id).first().username
+                                },
+                                'date': record.date.strftime("%Y-%m-%d %H:%M:%S"),  # 审核时间
+                                'isPassed': record.security,                        # 是否通过
+                                'reason': {                                         # 原因
+                                    'riskTips': record.reason['riskTips'],
+                                    'riskWords': record.reason['riskWords']
+                                }
+                            }
+        data['content'].append(auto_check_record)
+        data['total'] = data['total'] + 1
+
+    return reply.success(data=data, msg="成功获取自动审核中存在问题的评论")
+
+
+@require_http_methods('GET')
+def auto_comment_report_detail(request):
+    review_id = request.GET.get('review_id')
+    report = auto_check_record.objects.filter(check_record_id=review_id).first()
+    comment = report.comment_1 if report.comment_level == 1 else report.comment_2
+
+    data = {
+        'id': review_id,
+        'comment': {
+            'comment_id': comment.comment_id,
+            'user': {
+                'user_id': comment.user_id,
+                'user_name': User.objects.filter(user_id=comment.user_id).first().username
+            },
+            'paper': {
+                'paper_id': comment.paper_id,
+                'title': Paper.objects.filter(paper_id=comment.paper_id).first().title
+            },
+            'date': comment.date,
+            'content': comment.text,
+            'visibility': comment.visibility
+        },
+        'comment_level': report.comment_level,
+        'date': report.date,
+        'isPassed': report.security,
+        'reason': {
+            'riskTips': record.reason['riskTips'],
+            'riskWords': record.reason['riskWords']
+        }
+    }
+
+    return reply.success(data=data, msg="成功获取自动审核详细信息")

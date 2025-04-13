@@ -7,7 +7,7 @@ api/serach/...
 import re
 
 import Levenshtein
-
+from django.views.decorators.http import require_http_methods
 
 def insert_search_record_2_kb(search_record_id, tmp_kb_id):
     search_record_id = str(search_record_id)
@@ -37,7 +37,7 @@ def get_tmp_kb_id(search_record_id):
 
 def queryGLM(msg: str, history=None) -> str:
     '''
-    对chatGLM3-6B发出一次单纯的询问
+    对chatGLM3-6B发出一次单纯的询问(目前改为zhipu-api)
     '''
     openai.api_base = f'http://{settings.REMOTE_CHATCHAT_GLM3_OPENAI_PATH}/v1'
     openai.api_key = "none"
@@ -51,9 +51,6 @@ def queryGLM(msg: str, history=None) -> str:
         stream=False
     )
     return response.choices[0].message.content
-
-
-from django.views.decorators.http import require_http_methods
 
 
 def search_papers_by_keywords(keywords):
@@ -859,7 +856,6 @@ def vector_query(request):
     # 'keywords': keywords
     return JsonResponse({"paper_infos": filtered_papers_list, 'ai_reply': ai_reply, 'search_record_id' : search_record.search_record_id}, status=200)
 
-
 @require_http_methods(["GET"])
 def restore_search_record(request):
     # 鉴权
@@ -1124,4 +1120,4 @@ def flush(request):
             os.remove(conversation_path)
         sr.delete()
         HttpRequest('清空成功', status=200)
-        
+
