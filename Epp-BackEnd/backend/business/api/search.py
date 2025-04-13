@@ -37,7 +37,7 @@ def get_tmp_kb_id(search_record_id):
 
 def queryGLM(msg: str, history=None) -> str:
     '''
-    对chatGLM3-6B发出一次单纯的询问
+    对chatGLM3-6B发出一次单纯的询问(目前改为zhipu-api)
     '''
     openai.api_base = f'http://{settings.REMOTE_CHATCHAT_GLM3_OPENAI_PATH}/v1'
     openai.api_key = "none"
