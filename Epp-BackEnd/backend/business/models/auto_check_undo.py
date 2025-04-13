@@ -16,6 +16,6 @@ class AutoUndoRecord(models.Model):
         - comment_level         评论等级
     '''
     undo_record_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    comment_1 = models.ForeignKey(FirstLevelComment, on_delete=models.CASCADE, null=True, blank=True)
-    comment_2 = models.ForeignKey(SecondLevelComment, on_delete=models.CASCADE, null=True, blank=True)
+    comment_id_1 = models.ForeignKey(FirstLevelComment, on_delete=models.CASCADE, null=True, blank=True)
+    comment_id_2 = models.ForeignKey(SecondLevelComment, on_delete=models.CASCADE, null=True, blank=True)
     comment_level = models.IntegerField(default=1)  # 1代表一级评论，2代表二级评论

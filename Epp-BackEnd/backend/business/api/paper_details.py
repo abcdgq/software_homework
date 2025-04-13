@@ -139,11 +139,11 @@ def report_comment(request):
         if user and comment:
             if comment_level == 1:
                 # 一级评论
-                report_com = CommentReport(comment_1=comment, comment_level=1, user_id=user, content=report)
+                report_com = CommentReport(comment_id_1=comment, comment_level=1, user_id=user, content=report)
                 report_com.save()
             elif comment_level == 2:
                 # 二级评论
-                report_com = CommentReport(comment_2=comment, comment_level=2, user_id=user, content=report)
+                report_com = CommentReport(comment_id_2=comment, comment_level=2, user_id=user, content=report)
                 report_com.save()
             return JsonResponse({'message': '举报成功', 'is_success': True})
         else:
@@ -171,7 +171,7 @@ def comment_paper(request):
                 # 启动自动审核程序
                 if_success, status_code, labels, reason = auto_comment_detection(text)
                 if if_success:
-                    auto_record = AutoCheckRecord(comment_1=comment, comment_level=1, labels=labels, reason=reason)
+                    auto_record = AutoCheckRecord(comment_id_1=comment, comment_level=1, labels=labels, reason=reason)
                     auto_record.save()
                     if len(labels) == 0 or labels.isspace():
                         comment.visibility = True
@@ -184,7 +184,7 @@ def comment_paper(request):
                         risk_record.save()
                 else:
                     # 将未成功自动审核的评论记录
-                    undo_record = AutoUndoRecord(comment_1=comment, comment_level=1)
+                    undo_record = AutoUndoRecord(comment_id_1=comment, comment_level=1)
                     undo_record.save()
 
             elif comment_level == 2:
@@ -201,7 +201,7 @@ def comment_paper(request):
                 # 启动自动审核程序
                 if_success, status_code, labels, reason = auto_comment_detection(text)
                 if if_success:
-                    auto_record = AutoCheckRecord(comment_2=comment.comment_id, comment_level=2, labels=labels,
+                    auto_record = AutoCheckRecord(comment_id_2=comment.comment_id, comment_level=2, labels=labels,
                                                   reason=reason)
                     auto_record.save()
                     if len(labels) == 0 or labels.isspace():
@@ -215,7 +215,7 @@ def comment_paper(request):
                         risk_record.save()
                 else:
                     # 将未成功自动审核的评论记录
-                    undo_record = AutoUndoRecord(comment_2=comment.comment_id, comment_level=2)
+                    undo_record = AutoUndoRecord(comment_id_2=comment.comment_id, comment_level=2)
                     undo_record.save()
 
             paper.comment_count += 1
