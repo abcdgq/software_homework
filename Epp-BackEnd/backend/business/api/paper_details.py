@@ -6,11 +6,16 @@ import random
 import time
 import zipfile
 import os
+
+from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification
+from business.models.annotation import FileAnnotation
 from business.models.auto_check_record import AutoCheckRecord
 from business.models.auto_check_risk import AutoRiskRecord
 from business.models.auto_check_undo import AutoUndoRecord
+from business.models.note import FileNote
+from business.utils import reply
 from business.utils.download_paper import downloadPaper
 from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL, USER_DOCUMENTS_PATH, USER_DOCUMENTS_URL
 
@@ -421,3 +426,81 @@ def get_user_paper_info(request):
                                  'is_success': True})
         else:
             return JsonResponse({'error': '用户或文献不存在', 'is_success': False}, status=400)
+
+
+@require_http_methods('POST')
+def save_annotation(request):
+    '''
+    保存用户的笔记和批注
+    '''
+    x = request.body.get('x')
+    y = request.body.get('y')
+    width = request.body.get('width')
+    height = request.body.get('height')
+    pageNum = request.body.get('pageNum')
+    comment = request.body.get('comment')
+    paper_id = request.body.get('paper_id')
+    isPublic = request.body.get('isPublic')
+    username = request.session.get('username')
+
+    user = username.objects.filter(username=username).first()
+
+    note = FileNote(user_id=user.user_id, paper_id=paper_id, x=x, y=y, width=width, height=height, pageNum=pageNum,
+                    comment=comment, username=username, isPublic=isPublic)
+    note.save()
+    if isPublic:
+        # 将笔记公开
+        annotation = FileAnnotation(note=note, user_id=user.user_id, paper_id=paper_id)
+        annotation.save()
+
+    data = {
+        'x': x,
+        'y': y,
+        'width': width,
+        'height': height,
+        'pageNum': pageNum,
+        'comment': comment,
+        'userName': username,
+        'isPublic': isPublic,
+        'id': note.note_id
+    }
+
+    return reply.success(data=data, msg="成功保存笔记或批注")
+
+
+@require_http_methods("GET")
+def get_annotation(request):
+    '''
+    获得公开批注
+    '''
+    paper_id = request.GET.get('document_id')
+
+    data = {
+        'annotaionList': []
+    }
+
+    note_list = FileAnnotation.objects.filter(paper_id=paper_id).value_list('note', flat=True)
+
+    for note in note_list:
+        x = note.x
+        y = note.y
+        width = note.width
+        height = note.height
+        pageNum = note.pageNum
+        comment = note.comment
+        username = note.username
+        isPublic = note.isPublic
+        id = note.note_id
+        data['annotaionList'].append({
+            'x': x,
+            'y': y,
+            'width': width,
+            'height': height,
+            'pageNum': pageNum,
+            'comment': comment,
+            'userName': username,
+            'isPublic': isPublic,
+            'id': id
+        })
+
+    return reply.success(data=data, msg="成功获取公开批注")
