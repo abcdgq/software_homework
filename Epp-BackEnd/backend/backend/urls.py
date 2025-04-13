@@ -46,7 +46,7 @@ urlpatterns = [
                   path("api/getComment2", paper_details.get_second_comment),
                   path("api/likeComment", paper_details.like_comment),
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
-                  path("api/saveAnnotation", ),
+                  path("api/saveAnnotation", paper_details.save_annotation),
 
                   # 用户上传论文模块
                   path("api/uploadPaper", upload_document.upload_paper),
