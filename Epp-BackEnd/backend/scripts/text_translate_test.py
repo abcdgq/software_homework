@@ -35,7 +35,7 @@ def do_request(data):
     return requests.post(YOUDAO_URL, data=data, headers=headers)
 
 
-def connect(sentence:str):
+def connect(sentence:str, domain="general"):
     q = sentence
 
     data = {}
@@ -54,6 +54,7 @@ def connect(sentence:str):
     data['sign'] = sign #自动生成
     #TODO:用户词表项非必填，以后可扩展实现该功能，即用户自定义用户词表
     #data['vocabId'] = "您的用户词表ID"
+    data['domain'] = domain
 
     response = do_request(data)
     contentType = response.headers['Content-Type']
@@ -69,3 +70,6 @@ def connect(sentence:str):
         #返回翻译好的句子
         return formatted_response["translation"] 
     
+
+if __name__ == '__main__':
+    connect("返回翻译好的句子", "game")
