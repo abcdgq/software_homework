@@ -19,8 +19,8 @@ class CommentReport(models.Model):
         - judgment          处理意见
         - processed         举报完成情况
     """
-    comment_1 = models.ForeignKey(FirstLevelComment, on_delete=models.CASCADE, null=True, blank=True)
-    comment_2 = models.ForeignKey(SecondLevelComment, on_delete=models.CASCADE, null=True, blank=True)
+    comment_id_1 = models.ForeignKey(FirstLevelComment, on_delete=models.CASCADE, null=True, blank=True)
+    comment_id_2 = models.ForeignKey(SecondLevelComment, on_delete=models.CASCADE, null=True, blank=True)
     comment_level = models.IntegerField(default=1)  # 1代表一级评论，2代表二级评论
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
