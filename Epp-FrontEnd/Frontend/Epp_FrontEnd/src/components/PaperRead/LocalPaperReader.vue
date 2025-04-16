@@ -1,12 +1,51 @@
 <template>
     <el-row style="overflow: hidden; height: 100vh;">
-      <el-col :span="16" style="margin-top: 60px;">
+      <el-col :span="16" style="margin-top: 50px;">
         <!-- <iframe :src="pdfUrl" style="width: 100%; height: 755px;" frameborder="0"> -->
         <!-- </iframe> -->
         <div id="pdf-viewer-container" style="width: 100%; height: 755px;"></div>
       </el-col>
-      <el-col :span="8" style="margin-top: 60px">
-        <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" />
+      <el-col :span="8" style="margin-top: 50px">
+        <!-- <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" /> -->
+        <div style="margin-bottom: 20px;">
+          <el-button @click="showReadAssistant = true" :type="showReadAssistant ? 'primary' : ''">阅读助手</el-button>
+          <el-button @click="showReadAssistant = false" :type="!showReadAssistant ? 'primary' : ''">评论管理</el-button>
+        </div>
+        <div v-if="showReadAssistant">
+          <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" />
+        </div>
+        <div v-else>
+          <!-- 这里放置评论展示与删除的，目前筛选还没实现，预计筛选后，用一个新的annotation数组来保存筛选后的注释，然后渲染到页面上,并且从数据库拿到的所有评论和筛选后的注释分别储存，方便随时切换 -->
+          <!-- 新增的选择器和确认按钮 -->
+        <div style="margin-bottom: 20px;">
+          <el-select v-model="filterType" placeholder="筛选批注" @change="filterComments">
+            <el-option label="全部" value="all"></el-option>
+            <el-option label="我的批注" value="mine"></el-option>
+            <el-option label="他人批注" value="others"></el-option>
+          </el-select>
+          <el-select v-model="displayType" placeholder="显示类型" @change="filterComments">
+            <el-option label="全部显示" value="all"></el-option>
+            <el-option v-for="pageNum in allPageNumbers" :key="pageNum" :label="'第 ' + pageNum + ' 页'" :value="pageNum"></el-option>
+          </el-select>
+        </div>
+          <div class="comment-container">
+            <div v-for="annotation in annotations" :key="annotation.id">
+              <div class="annotation">
+                <div class="annotation-content">
+                  <p>{{ annotation.comment }}</p>
+                </div>
+                <div class="annotation-actions">
+                  <div v-if="annotation.userName === currentUser">
+                    <el-button type="text" @click="deleteAnnotation(annotation.id)">删除</el-button>
+                  </div>
+                  <div v-else>
+                    <el-button type="text" @click="reportAnnotation(annotation.id)">举报</el-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </el-col>
     </el-row>
 </template>
@@ -32,9 +71,15 @@ export default {
       startX: 0, // 框选起始点的X坐标
       startY: 0, // 框选起始点的Y坐标
       selectionBox: null, // 保存框选区域的DOM元素
-      annotations: [], // 保存注释，每次渲染时从服务器获取即可，格式下面有样例
+      annotations: [], // 保存用来显示的注释。初始等于下面，但是后续会根据筛选调整，保证论文和评论展示区都能只显示筛选后的注释
+      allAnnotations: [], // 保存所有注释，每次渲染时从服务器获取即可，格式下面有样例
       pdfInstance: null, // PDF.js 实例
-      containerOffsetTop: 0 // PDF 容器的顶部偏移
+      containerOffsetTop: 0, // PDF 容器的顶部偏移
+      showReadAssistant: true, // 是否显示阅读助手
+      currentUser: localStorage.getItem('username'), // 当前用户
+      filterType: 'all', // 筛选类型
+      displayType: 'all', // 显示类型
+      allPageNumbers: [] // 所有页面的页码
     }
   },
   created () {
@@ -98,6 +143,7 @@ export default {
     // 渲染所有页面
     renderAllPages (pdf, container) {
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        this.allPageNumbers.push(pageNum)
         pdf.getPage(pageNum).then(page => {
           const viewport = page.getViewport({ scale: 1.5 })
           const canvas = document.createElement('canvas')
@@ -166,7 +212,7 @@ export default {
     extractSelectedText (selectionRect) {
       const container = document.getElementById('pdf-viewer-container')
       // 下面的这些坐标是 可能带小数的。其中上方相对视口偏移this.containerOffsetTop = container.getBoundingClientRect().top是永远不变的。有啥用我也不知道。。前四个确定了显示的框位置。滚动那个是确定相对位置的。container我用了相对距离，大概是考虑了不同浏览器的显示问题，有没有用就不知道了。但这里根本没用到页数了。
-      alert('选中区域：宽度：' + selectionRect.width + ' 高度：' + selectionRect.height + ' 左上角X坐标：' + selectionRect.left + ' 左上角Y坐标：' + selectionRect.top + '上方相对视口偏移:' + this.containerOffsetTop + '上下滚动距离' + container.scrollTop)
+      // alert('选中区域：宽度：' + selectionRect.width + ' 高度：' + selectionRect.height + ' 左上角X坐标：' + selectionRect.left + ' 左上角Y坐标：' + selectionRect.top + '上方相对视口偏移:' + this.containerOffsetTop + '上下滚动距离' + container.scrollTop)
       const canvasElements = container.getElementsByTagName('canvas')
 
       for (let canvas of canvasElements) {
@@ -184,15 +230,15 @@ export default {
     // 下面的x,y,width,height,pageNum,comment都是相对于canvas的坐标。
     showCommentDialog (x, y, width, height, pageNum) {
       const comment = prompt('请输入评论:')
-
       if (comment) {
-        this.saveAnnotation(x, y, width, height, pageNum, comment)
+        const isPublic = confirm('是否公开评论？')
+        this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
         this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
       }
     },
     // 把一条注释渲染到页面上，这里的x,y,width,height,pageNum都是相对于canvas的坐标。
     // 具体来说，pageNum确定了页码。x,y是左上角坐标，width,height是宽高。并且这四个是相对于这一页的坐标。
-    renderAnnotation (x, y, width, height, pageNum, comment) {
+    renderAnnotation (x, y, width, height, pageNum) {
       const container = document.getElementById('pdf-viewer-container')
       const canvas = container.querySelector(`canvas[data-page-num="${pageNum}"]`)
       if (!canvas) return
@@ -229,7 +275,8 @@ export default {
       annotationBox.addEventListener('mousemove', (event) => {
         // const overlappingComments = this.findOverlappingComments(x, y, width, height, pageNum)
         const overlappingComments = this.findOverlappingComments(event.clientX, event.clientY, pageNum)
-        tooltip.innerHTML = overlappingComments.map(c => `• ${c}`).join('<br>')
+        // tooltip.innerHTML = overlappingComments.map(c => `• ${c}`).join('<br>')
+        tooltip.innerHTML = overlappingComments.map(c => `• ${c.userName}: ${c.comment}`).join('<br>')
 
         // **调整 tooltip 位置**
         tooltip.style.left = `${canvas.offsetLeft + x}px`
@@ -244,13 +291,6 @@ export default {
       container.appendChild(annotationBox)
       container.appendChild(tooltip)
     },
-    // findOverlappingComments (x, y, width, height, pageNum) {
-    //   return this.annotations
-    //     .filter(annotation => {
-    //       return annotation.pageNum === pageNum && this.isOverlapping(annotation, { x, y, width, height })
-    //     })
-    //     .map(annotation => annotation.comment)
-    // },
     findOverlappingComments (clientX, clientY, pageNum) {
       return this.annotations
         .filter(annotation => {
@@ -260,48 +300,166 @@ export default {
           const adjustY = clientY - canvasRect.top // + canvas.scrollTop // 修正 scrollTop
           return annotation.pageNum === pageNum && this.isInBox(adjustX, adjustY, annotation.x, annotation.y, annotation.width, annotation.height)
         })
-        .map(annotation => annotation.comment)
+        .map(annotation => ({
+          userName: annotation.userName, // 假设 annotation 对象中有一个 userName 属性
+          comment: annotation.comment
+        }))
     },
 
     isInBox (adjustX, adjustY, x, y, width, height) {
       return (adjustX >= x && adjustX <= x + width) && (adjustY >= y && adjustY <= y + height)
     },
-    // 保存一条评论到数据库，具体逻辑还没写，等前端显示好看了再说。，注意的是，这里除了xy等参数，传到后端时候还需要能标注是哪个pdf，比如，pdf的id，url之类的。在fetchPaperPDF函数里获取过了，也保存到data里了
+    // 保存一条评论到数据库.
     // 这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一个canvas）其中x，y是左上角坐标，width,height是宽高。并且这四个是相对于这一页的坐标。
     // 具体格式方面，x，y,width,height,都是小数，pageNum是整数（正整数，但不会很大，直接当整数就行）。comment是字符串。当然，小数那点误差不是很重要。
     // 强转整数也没太大事，但就小数表示吧。虽然是代表像素之类的 ，说是现在为了更精准显示，都是小数.
-    saveAnnotation (x, y, width, height, pageNum, comment) {
-      const annotation = { x, y, width, height, pageNum, comment }
+    saveAnnotation (x, y, width, height, pageNum, comment, isPublic) {
+      const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: Math.floor(Math.random() * 100) + 1 } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
       this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
+      this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
+      // TODO 等之后前后端连通，上面这两行就不需要了，因为下面会push进去。
       // 就按照这个数据格式传就行，这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一canvas）
+      axios.post(this.$BASE_API_URL + '/saveAnnotation', {
+        params: {
+          x, y, width, height, pageNum, comment, paper_id: this.paper_id, isPublic // 虽然没传username，但是后端要存
+          // 后端可以在session里取出username,暂时不管评论时间？
+        }
+      }).then(response => {
+        console.log('保存注释成功', response)
+        // window.location.reload()// 刷新页面，重新渲染所有注释，因为注释的id是后端生成的，只能重新从后端获取。
+        // 当前，也可以在这个response里，把新加的注释的id返回给前端，前端再把id存到本地，这样就不用重新刷新页面了。
+        const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: response.data.id } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
+        this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
+        this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
+      }).catch(error => {
+        console.error('保存注释失败', error)
+      })
     },
     // 重新渲染所有注释，也就是删除旧的注释框，重新渲染新的注释框。也就是对每个公开或自己的评论分别renderAnnotation。
     renderAnnotations () {
       const container = document.getElementById('pdf-viewer-container')
       container.querySelectorAll('.annotation-box, .annotation-tooltip').forEach(el => el.remove()) // 清除旧的注释框
       this.annotations.forEach(annotation => {
-        const { x, y, width, height, pageNum, comment } = annotation
-        this.renderAnnotation(x, y, width, height, pageNum, comment)
+        const { x, y, width, height, pageNum, comment, userName, isPublic, id } = annotation
+        console.log(comment, userName, isPublic, id)
+        this.renderAnnotation(x, y, width, height, pageNum)
       })
     },
     // 从数据库加载所有已有评论，并渲染到页面上，可以分别renderAnnotation,也可以直接renderAnnotations
     // 这个只在开始调用一次，避免和数据库交互太多，影响性能。
+    // 要求，后端需要返回一个数组，每个元素是一条注释，格式如下：
+    // {
+    //   x: 0.1, // 小数，相对于pageNum所在的canvas的坐标
+    //   y: 0.2, // 小数，相对于pageNum所在的canvas的坐标
+    //   width: 0.3, // 小数，相对于pageNum所在的canvas的坐标
+    //   height: 0.4, // 小数，相对于pageNum所在的canvas的坐标
+    //   pageNum: 1, // 整数，页码
+    //   comment: '这是一条评论', // 字符串
+    //   userName: '用户名', // 字符串
+    //   isPublic: true // 布尔值，是否公开true/false
+    // }
+    // 同时，后端可以根据session里的username来判断是否是自己的评论，只能返回自己的评论和他人的公开评论。
     loadAnnotations () {
-      // axios.get(this.$BASE_API_URL + '/getAnnotations', {
-      //   params: { fileReadingID: this.fileReadingID }
-      // }).then(response => {
-      //   this.annotations = response.data.annotations
-      //   this.annotations.forEach(annotation => {
-      //     this.renderAnnotation(annotation.x, annotation.y, annotation.pageNum, annotation.comment)
-      //   })
-      // }).catch(error => {
-      //   console.error('加载注释失败', error)
-      // })
+      axios.get(this.$BASE_API_URL + '/getAnnotations?document_id=' + this.paper_id)
+        .then(response => {
+          this.allAnnotations = response.data.annotations
+          this.annotations = this.allAnnotations
+          this.renderAnnotations() // 直接渲染所有注释，这里就不从数据库重新调了
+        }).catch(error => {
+          console.error('加载注释失败', error)
+        })
+    },
+    deleteAnnotation (annotationId) {
+      this.annotations = this.annotations.filter(annotation => annotation.id !== annotationId) // 从本地数组中删除注释
+      this.allAnnotations = this.allAnnotations.filter(annotation => annotation.id !== annotationId) // 从本地数组中删除注释
+      this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+      // TODO 可以把删除注释的放在post返回结果后再进行，但是我相信他会删成功，就直接这样了.
+      axios.post(this.$BASE_API_URL + '/deleteAnnotation', { 'annotation_id': annotationId })
+        .then(response => {
+          this.$message({
+            message: '删除批注成功',
+            type: 'success'
+          })
+          // this.loadAnnotations() // 重新加载注释
+        }).catch(error => {
+          console.error('删除批注失败', error)
+          this.$message({
+            message: '删除批注失败',
+            type: 'error'
+          })
+        })
+    },
+    reportAnnotation (annotationId) {
+      // TODO 这里应该弹出一个对话框，让用户输入举报理由，然后把举报信息发送给后端。
+      const reason = prompt('请输入举报理由:') // 弹出提示框，让用户输入举报理由
+      axios.post(this.$BASE_API_URL + '/reportAnnotation', { 'annotation_id': annotationId, 'reason': reason })
+        .then(response => {
+          this.$message({
+            message: '举报批注成功',
+            type: 'success'
+          })
+          // this.loadAnnotations() // 重新加载注释
+        }).catch(error => {
+          console.error('举报批注失败', error)
+          this.$message({
+            message: '举报批注失败',
+            type: 'error'
+          })
+        })
+    },
+    filterComments () {
+      this.annotations = this.allAnnotations.filter(annotation => {
+        // 根据筛选类型过滤
+        if (this.filterType === 'mine') {
+          return annotation.userName === this.currentUser
+        } else if (this.filterType === 'others') {
+          return annotation.userName !== this.currentUser
+        } else {
+          return true // 全部
+        }
+      }).filter(annotation => {
+        // 根据显示类型过滤
+        if (this.displayType !== 'all') {
+          return annotation.pageNum === this.displayType // 假设currentPage是当前显示的页码
+        } else {
+          return true // 全部显示
+        }
+      })
+      this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
     }
   }
 }
 </script>
 
 <style scoped>
+.annotation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
 
+.annotation-content {
+  flex-grow: 1;
+}
+
+.annotation-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.annotation-content p {
+  margin: 0;
+}
+.comment-container {
+  overflow-y: auto;
+  height: calc(100vh - 50px - 20px - 150px);
+  /* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间150px（可大可小,应该是前面漏减了，这里必须多减点) */
+  /* */
+  /* flex-grow: 1 */
+}
 </style>

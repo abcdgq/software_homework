@@ -15,6 +15,7 @@
                         </el-descriptions-item>
                     </el-descriptions>
                     <el-divider></el-divider>
+
                     <el-descriptions title="相关论文" :column="1" border>
                         <el-descriptions-item label="论文ID">
                             {{ reportData.comment.paper.paper_id }}
@@ -24,6 +25,7 @@
                         </el-descriptions-item>
                     </el-descriptions>
                     <el-divider></el-divider>
+
                     <el-descriptions title="举报信息" :column="1" border>
                         <el-descriptions-item label="举报用户">
                             {{ reportData.user.user_name }}
@@ -35,6 +37,7 @@
                     </el-descriptions>
                 </div>
             </el-card>
+
             <div class="report-judge">
                 <div class="report-judge-header">举报审核</div>
                 <div style="padding: 16px">

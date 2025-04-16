@@ -10,14 +10,14 @@ from .comment import FirstLevelComment, SecondLevelComment
 class CommentReport(models.Model):
     """
     Field:
-        - comment_id_1       一级评论ID
-        - comment_id_2       二级评论ID
-        - comment_level      评论级别
-        - user_id            用户ID
-        - date               举报时间
-        - content            举报内容
-        - judgment           处理意见
-        - processed          举报完成情况
+        - comment_1         一级评论
+        - comment_2         二级评论
+        - comment_level     评论级别
+        - user_id           用户ID
+        - date              举报时间
+        - content           举报内容
+        - judgment          处理意见
+        - processed         举报完成情况
     """
     comment_id_1 = models.ForeignKey(FirstLevelComment, on_delete=models.CASCADE, null=True, blank=True)
     comment_id_2 = models.ForeignKey(SecondLevelComment, on_delete=models.CASCADE, null=True, blank=True)

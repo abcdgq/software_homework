@@ -21,6 +21,7 @@ from pathlib import Path
 from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
     Subclass, UserVisit, SearchRecord
+from business.models.auto_check_risk import AutoRiskRecord
 from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
 
@@ -695,3 +696,91 @@ def hot_searchword_statistic(request):
 
     return reply.success(data=data, msg="获取高频检索词成功")
 
+
+@require_http_methods('GET')
+def auto_comment_report_list(request):
+
+    data = {
+        'total': 0,
+        'content': [
+            # {
+            #     'id': 9,
+            #     'comment': {
+            #         'date': '2024-04-29 22:58:41',
+            #         'content': '测试评论'
+            #     },
+            #     'user': {
+            #         'user_id': '063eccd4-76b3-4755-84c0-eef9baf16c04',
+            #         'user_name': 'Ank'
+            #     },
+            #     'date': '',         # 审核时间
+            #     'isPassed': True,   # 是否通过
+            #     'reason': {         # 原因
+            #         'riskTips': [],
+            #         'riskWords': []
+            #     }
+            # }
+        ]
+    }
+
+    auto_record_list = AutoRiskRecord.objects.values_list('check_record', flat=True)
+    for record in auto_record_list:
+        comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
+        date = comment.date
+        content = comment.text
+        user_id = comment.user_id
+        auto_check_record = {
+                                'id': record.check_record_id,
+                                'comment': {
+                                    'date': date.strftime("%Y-%m-%d %H:%M:%S"),
+                                    'content': content
+                                },
+                                'user': {
+                                    'user_id': user_id,
+                                    'user_name': User.objects.filter(user_id=user_id).first().username
+                                },
+                                'date': record.date.strftime("%Y-%m-%d %H:%M:%S"),  # 审核时间
+                                'isPassed': record.security,                        # 是否通过
+                                'reason': {                                         # 原因
+                                    'riskTips': record.reason['riskTips'],
+                                    'riskWords': record.reason['riskWords']
+                                }
+                            }
+        data['content'].append(auto_check_record)
+        data['total'] = data['total'] + 1
+
+    return reply.success(data=data, msg="成功获取自动审核中存在问题的评论")
+
+
+@require_http_methods('GET')
+def auto_comment_report_detail(request):
+    review_id = request.body.get('review_id')
+    report = auto_check_record.objects.filter(check_record_id=review_id).first()
+    comment = report.comment_id_1 if report.comment_level == 1 else report.comment_id_2
+
+    data = {
+        'id': review_id,
+        'comment': {
+            'comment_id': comment.comment_id,
+            'user': {
+                'user_id': comment.user_id,
+                'user_name': User.objects.filter(user_id=comment.user_id).first().username
+            },
+            'paper': {
+                'paper_id': comment.paper_id,
+                'title': Paper.objects.filter(paper_id=comment.paper_id).first().title
+            },
+            'date': comment.date,
+            'content': comment.text,
+            'visibility': comment.visibility
+        },
+        'comment_level': report.comment_level,
+        'date': report.date,
+        'isPassed': report.security,
+        'reason': {
+            'riskTips': record.reason['riskTips'],
+            'riskWords': record.reason['riskWords']
+        }
+    }
+
+    return reply.success(data=data, msg="成功获取自动审核详细信息")
