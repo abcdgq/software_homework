@@ -46,7 +46,7 @@ def queryGLM(msg: str, history=None) -> str:
     else:
         history.extend([{'role' : 'user', 'content': msg}])
     response = openai.ChatCompletion.create(
-        model="chatglm3-6b",
+        model="zhipu-api",
         messages=history,
         stream=False
     )
@@ -69,10 +69,10 @@ def search_papers_by_keywords(keywords):
     return filtered_paper_list
 
 
-def update_search_record_2_paper(search_record, filtered_papers):
-    search_record.related_papers.clear()
-    for paper in filtered_papers:
-        search_record.related_papers.add(paper)
+# def update_search_record_2_paper(search_record, filtered_papers):
+#     search_record.related_papers.clear()
+#     for paper in filtered_papers:
+#         search_record.related_papers.add(paper)
 
 
 # @require_http_methods(["POST"])
@@ -385,7 +385,10 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
-    kb_id = get_tmp_kb_id(search_record_id)
+
+    # kb_id = get_tmp_kb_id(search_record_id)
+    kb_id = 0
+
     user = User.objects.filter(username=username).first()
     if user is None:
         return JsonResponse({'error': '用户不存在'}, status=404)
@@ -453,20 +456,20 @@ def dialog_query(request):
     return reply.success(res, msg='成功返回对话')
 
 
-@require_http_methods(["POST"])
-def build_kb(request):
-    ''''
-    这个方法是论文循证
-    输入为paper_id_list，重新构建一个知识库
-    '''
-    data = json.loads(request.body)
-    paper_id_list = data.get('paper_id_list')
-    try:
-        tmp_kb_id = build_abs_kb_by_paper_ids(paper_id_list, 'tmp_kb')
-    except Exception as e:
-        print(e)
-        return reply.fail(msg="构建知识库失败")
-    return reply.success({'kb_id': tmp_kb_id})
+# @require_http_methods(["POST"])
+# def build_kb(request):
+#     ''''
+#     这个方法是论文循证
+#     输入为paper_id_list，重新构建一个知识库
+#     '''
+#     data = json.loads(request.body)
+#     paper_id_list = data.get('paper_id_list')
+#     try:
+#         tmp_kb_id = build_abs_kb_by_paper_ids(paper_id_list, 'tmp_kb')
+#     except Exception as e:
+#         print(e)
+#         return reply.fail(msg="构建知识库失败")
+#     return reply.success({'kb_id': tmp_kb_id})
 
 def change_record_papers(request):
     '''
@@ -568,7 +571,7 @@ def queryGLM(msg: str, history=None) -> str:
     对chatGLM3-6B发出一次单纯的询问
     '''
     print(msg)
-    chat_chat_url = 'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/chat'
+    chat_chat_url = 'http://115.190.109.233:7861/chat/chat'
     headers = {
         'Content-Type': 'application/json'
     }
@@ -590,7 +593,7 @@ def queryGLM(msg: str, history=None) -> str:
 
         # 确保正确处理分块响应
         decoded_line = next(response.iter_lines()).decode('utf-8')
-        print(decoded_line)
+        print("AI回答: ", decoded_line)
         if decoded_line.startswith('data'):
             data = json.loads(decoded_line.replace('data: ', ''))
         else:
@@ -750,6 +753,7 @@ def vector_query(request):
     if search_record_id is None:
         search_record = SearchRecord(user_id=user, keyword=search_content, conversation_path=None)
         search_record.save()
+        print("成功保存搜索记录")
         conversation_path = os.path.join(settings.USER_SEARCH_CONSERVATION_PATH,
                                          str(search_record.search_record_id) + '.json')
         if os.path.exists(conversation_path):
@@ -758,6 +762,7 @@ def vector_query(request):
             json.dump({"conversation": []}, f, indent=4)
         search_record.conversation_path = conversation_path
         search_record.save()
+        search_record_id = search_record.search_record_id
     else:
         search_record = SearchRecord.objects.get(search_record_id=search_record_id)
         conversation_path = search_record.conversation_path
@@ -820,6 +825,7 @@ def vector_query(request):
     # else:
     #     return reply.fail(msg='检索总结失败，请检查网络并重新尝试')
 
+    print("搜索记录id: ", search_record.search_record_id)
     update_search_record_2_paper(search_record, filtered_papers)
 
     # 处理历史记录部分, 无需向前端传递历史记录, 仅需对话文件中添加
@@ -843,16 +849,16 @@ def vector_query(request):
     for p in filtered_papers:
         filtered_papers_list.append(p.to_dict())
     
-    ### 构建知识库 ###
+    ### TODO 构建知识库 ###
     
     # try:
     #     tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
     #     insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
     # except Exception as e:
-    #     print("error1")
+    #     print("构建知识库失败")
     #     return reply.fail(msg="构建知识库失败")
 
-    print("success")
+    print("向量检索完成")
     # 'keywords': keywords
     return JsonResponse({"paper_infos": filtered_papers_list, 'ai_reply': ai_reply, 'search_record_id' : search_record.search_record_id}, status=200)
 
@@ -990,9 +996,10 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
-    #kb_id = get_tmp_kb_id(search_record_id) 
-    kb_id = 0 
-    #TODO:这里硬编码了kb_id，避免了get_tmp_kb_id找不到kb_id的问题，使得ai能跑起来，后续需要研究kb的实现，修改这个地方
+    # TODO 获取临时知识库id,debug
+    # kb_id = get_tmp_kb_id(search_record_id) 
+    kb_id = 0
+    
     user = User.objects.filter(username=username).first()
     if user is None:
         return JsonResponse({'error': '用户不存在'}, status=404)
@@ -1005,10 +1012,11 @@ def dialog_query(request):
     # 先判断下是不是要查询论文
     prompt = '想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + message + '\n'
     response_type = queryGLM(prompt)
+    print("是否为检索: ", response_type)
     papers = []
     dialog_type = ''
     content = ''
-    print(response_type)
+    # print(response_type)
     if 'yes' in response_type:  # 担心可能有句号等等
         # 查询论文，TODO:接入向量化检索
         # filtered_paper = query_with_vector(message) # 旧版的接口，换掉了 2024.4.28
@@ -1034,7 +1042,7 @@ def dialog_query(request):
         # 对话，保存3轮最多了，担心吃不下
 
         input_history = history['conversation'].copy()[-5:] if len(history['conversation']) > 5 else history['conversation'].copy()
-        print(input_history)
+        print("对话历史", input_history)
         print('kb_id:', kb_id)
         print('message:', message)
         payload = json.dumps({
@@ -1044,7 +1052,8 @@ def dialog_query(request):
             "prompt_name": "text"  # 使用历史记录对话模式
         })
         ai_reply, origin_docs = kb_ask_ai(payload)
-        print(ai_reply)
+        # ai_reply = queryGLM(message, input_history)
+        print("kb_ask_ai_reply: ", ai_reply)
         dialog_type = 'dialog'
         papers = []
         content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话：'+ai_reply, [])
