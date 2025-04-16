@@ -4,6 +4,20 @@
         <!-- <iframe :src="pdfUrl" style="width: 100%; height: 755px;" frameborder="0"> -->
         <!-- </iframe> -->
         <div id="pdf-viewer-container" style="width: 100%; height: 755px;"></div>
+        <!-- 下面加一个发表批注时候的框，来更美观 -->
+        <el-dialog title="发表批注" :visible.sync="showCommentModal" width="50%" @close="closeCommentModal">
+          <el-form>
+              <el-form-item>
+                  <el-input type="textarea" placeholder="添加批注..." v-model="newComment" autosize>
+                  </el-input>
+              </el-form-item>
+          </el-form>
+          <span slot="footer">
+              <el-button @click="showCommentModal = false">取 消</el-button>
+              <el-button type="primary" @click="submitComment('private')">私有批注</el-button>
+    <el-button type="primary" @click="submitComment('public')">共有批注</el-button>
+          </span>
+        </el-dialog>
       </el-col>
       <el-col :span="8" style="margin-top: 50px">
         <!-- <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" /> -->
@@ -31,6 +45,10 @@
           <div class="comment-container">
             <div v-for="annotation in annotations" :key="annotation.id">
               <div class="annotation">
+                <div class="annotation-User">
+                  <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p>
+                  <p>{{ annotation.userName }}</p>
+                </div>
                 <div class="annotation-content">
                   <p>{{ annotation.comment }}</p>
                 </div>
@@ -45,6 +63,36 @@
               </div>
             </div>
           </div>
+          <!-- <div class="comment-container">
+            <div v-for="annotation in annotations" :key="annotation.id" class="comment-item">
+              <el-row> -->
+                <!-- 用户名、时间 -->
+                <!-- <el-col :span="2">
+                  <div class="date">{{ annotation.createdAt || '刚刚' }}</div>
+                  <div style="font-weight: bold;">{{ annotation.userName || '匿名用户' }}</div>
+                </el-col> -->
+
+                <!-- 评论内容区域 -->
+                <!-- <el-col :span="22">
+                  <div class="comment-content"> -->
+                    <!-- 操作按钮 -->
+                    <!-- <div class="my-footer">
+                      <span class="actions">
+                        <el-button type="text" v-if="annotation.userName === currentUser" @click="deleteAnnotation(annotation.id)">
+                          删除
+                        </el-button>
+                        <el-button type="text" v-else @click="reportAnnotation(annotation.id)">
+                          举报
+                        </el-button>
+                      </span>
+                    </div> -->
+                    <!-- 评论内容 -->
+                    <!-- <div class="text">{{ annotation.comment }}</div>
+                  </div>
+                </el-col>
+              </el-row>
+            </div>
+          </div> -->
         </div>
       </el-col>
     </el-row>
@@ -79,7 +127,11 @@ export default {
       currentUser: localStorage.getItem('username'), // 当前用户
       filterType: 'all', // 筛选类型
       displayType: 'all', // 显示类型
-      allPageNumbers: [] // 所有页面的页码
+      allPageNumbers: [], // 所有页面的页码
+      showCommentModal: false, // 是否显示发表批注框
+      newComment: '', // 新批注内容
+      isPublicComment: false, // 是否为公共批注
+      pendingAnnotation: null // 正在发表的批注内容
     }
   },
   created () {
@@ -229,12 +281,33 @@ export default {
 
     // 下面的x,y,width,height,pageNum,comment都是相对于canvas的坐标。
     showCommentDialog (x, y, width, height, pageNum) {
-      const comment = prompt('请输入评论:')
-      if (comment) {
-        const isPublic = confirm('是否公开评论？')
-        this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
-        this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+      // const comment = prompt('请输入评论:')
+      // if (comment) {
+      //   const isPublic = confirm('是否公开评论？')
+      //   this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
+      //   this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+      // }
+      // 把参数临时保存起来，等待用户填写评论后再用
+      this.pendingAnnotation = { x, y, width, height, pageNum }
+      this.newComment = ''
+      this.isPublicComment = true // 默认是公开
+      this.showCommentModal = true
+    },
+    submitComment (type) {
+      if (!this.newComment.trim()) {
+        this.$message({
+          message: '请输入批注内容',
+          type: 'warning'
+        })
+        return
       }
+      console.log(`提交${type === 'private' ? '私有' : '共有'}批注：`, this.newComment)
+      const isPublic = type === 'public'
+      const comment = this.newComment
+      const { x, y, width, height, pageNum } = this.pendingAnnotation
+      this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
+      this.renderAnnotations()
+      this.closeCommentModal()
     },
     // 把一条注释渲染到页面上，这里的x,y,width,height,pageNum都是相对于canvas的坐标。
     // 具体来说，pageNum确定了页码。x,y是左上角坐标，width,height是宽高。并且这四个是相对于这一页的坐标。
@@ -282,6 +355,9 @@ export default {
         tooltip.style.left = `${canvas.offsetLeft + x}px`
         tooltip.style.top = `${canvas.offsetTop + y + height + 5}px`
         tooltip.style.display = 'block'
+        tooltip.style.textAlign = 'left'
+        tooltip.style.whiteSpace = 'normal' // 允许换行
+        tooltip.style.maxWidth = '400px' // 设置最大宽度
       })
 
       annotationBox.addEventListener('mouseleave', () => {
@@ -426,6 +502,10 @@ export default {
         }
       })
       this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+    },
+    closeCommentModal () {
+      this.showCommentModal = false
+      this.newComment = ''
     }
   }
 }
@@ -437,10 +517,24 @@ export default {
   justify-content: space-between;
   align-items: center;
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 8px 12px;
   margin-bottom: 10px;
   border-radius: 5px;
   background-color: #f9f9f9;
+}
+
+.annotation-User {
+  /* margin-bottom: 4px;              和评论内容之间留一点垂直间距 */
+  line-height: 1.4;/* 1.4倍的字体行高 */
+}
+.annotation-time {
+  font-size: 13px;                 /* 时间字体小一点，降低视觉优先级 */
+  color: #888;                     /* 灰色字体，不突兀 */
+  margin: 0;                       /* 去掉浏览器默认上下 margin */
+}
+.annotation-User p {
+  margin: 0;                       /* 去除默认 margin，防止上下挤开太远 */
+  font-weight: 500;               /* 让用户名略粗一点，看起来清晰 */
 }
 
 .annotation-content {
