@@ -14,6 +14,7 @@
                         <el-col :span="24">
                             <div style="width: 90%; margin: auto; text-align: left;">
                                 <p><strong>摘要:</strong> {{ paper.abstract }}</p>
+                                <p v-if="isSummaryVisible">{{ translatedSummary }}</p>
                             </div>
                         </el-col>
                     </el-row>
@@ -34,6 +35,10 @@
                         </router-link>
                         <el-link type="primary" :href="paper.original_url" icon="el-icon-link"
                             style="margin-left: 10px;">原文链接</el-link>
+                        <el-button type="text" @click="toggleTranslation" style="margin-left: 10px;">
+                            <i class="el-icon-notebook-1"></i>
+                            {{ isSummaryVisible ? '隐藏摘要' : '翻译摘要' }}
+                        </el-button>
                     </el-row>
                 </el-container>
 
@@ -176,6 +181,7 @@
 <script>
 import axios from 'axios'
 import ReportModal from './ReportModal.vue'
+import {translateAbstract} from '../../api/Paper'
 export default {
   props: {
     paper_id: {
@@ -204,7 +210,11 @@ export default {
       secondLevelComments: [],
       showReportModal: false,
       reportedCommentId: '',
-      reportedCommentLevel: 0
+      reportedCommentLevel: 0,
+
+      isTranslated: false, // 是否已经翻译过
+      translatedSummary: '', // 翻译后的摘要
+      isSummaryVisible: false
     }
   },
   created () {
@@ -474,6 +484,23 @@ export default {
       } else {
         this.showReplyInput = commentId
       }
+    },
+
+    async toggleTranslation () { // 显示隐藏翻译
+      if (!this.isSummaryVisible) {
+        if (!this.isTranslated) { // 还没有翻译过
+          await translateAbstract(this.paper_id)
+            .then((response) => {
+              this.translatedSummary = response.data
+              this.isTranslated = true
+            })
+            .catch((error) => {
+              console.error('翻译失败', error)
+            })
+        }
+      }
+
+      this.isSummaryVisible = !this.isSummaryVisible
     }
   }
 }
