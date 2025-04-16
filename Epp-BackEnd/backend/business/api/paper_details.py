@@ -170,6 +170,9 @@ def comment_paper(request):
                 comment.save()
                 # 启动自动审核程序
                 if_success, status_code, labels, reason = auto_comment_detection(text)
+                print("labels:")
+                print(labels)
+                print(type(labels))
                 if if_success:
                     auto_record = AutoCheckRecord(comment_id_1=comment, comment_level=1, labels=labels, reason=reason)
                     auto_record.save()
@@ -180,7 +183,7 @@ def comment_paper(request):
                         auto_record.save()
                     else:
                         # 将不安全审核记录到表中
-                        risk_record = AutoRiskRecord(auto_record)
+                        risk_record = AutoRiskRecord(check_record=auto_record)
                         risk_record.save()
                 else:
                     # 将未成功自动审核的评论记录
