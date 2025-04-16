@@ -433,24 +433,30 @@ def save_annotation(request):
     '''
     保存用户的笔记和批注
     '''
-    x = request.body.get('x')
-    y = request.body.get('y')
-    width = request.body.get('width')
-    height = request.body.get('height')
-    pageNum = request.body.get('pageNum')
-    comment = request.body.get('comment')
-    paper_id = request.body.get('paper_id')
-    isPublic = request.body.get('isPublic')
+    data = json.loads(request.body)
+    print("*******************************************************")
+    print(data)
+    params = data.get('params')
+    x = params.get('x')
+    y = params.get('y')
+    width = params.get('width')
+    height = params.get('height')
+    pageNum = params.get('pageNum')
+    comment = params.get('comment')
+    paper_id = params.get('paper_id')
+    isPublic = params.get('isPublic')
     username = request.session.get('username')
 
-    user = username.objects.filter(username=username).first()
+    user = User.objects.filter(username=username).first()
 
-    note = FileNote(user_id=user.user_id, paper_id=paper_id, x=x, y=y, width=width, height=height, pageNum=pageNum,
+    paper = Paper.objects.filter(paper_id=paper_id).first()
+
+    note = FileNote(user_id=user, paper_id=paper, x=x, y=y, width=width, height=height, pageNum=pageNum,
                     comment=comment, username=username, isPublic=isPublic)
     note.save()
     if isPublic:
         # 将笔记公开
-        annotation = FileAnnotation(note=note, user_id=user.user_id, paper_id=paper_id)
+        annotation = FileAnnotation(note=note, user_id=user, paper_id=paper)
         annotation.save()
 
     data = {
@@ -474,14 +480,18 @@ def get_annotation(request):
     获得公开批注
     '''
     paper_id = request.GET.get('document_id')
+    print("paper_id:" + paper_id)
 
     data = {
-        'annotaionList': []
+        'annotations': []
     }
 
-    note_list = FileAnnotation.objects.filter(paper_id=paper_id).value_list('note', flat=True)
+    paper = Paper.objects.filter(paper_id=paper_id).first()
 
-    for note in note_list:
+    note_list = FileAnnotation.objects.filter(paper_id=paper).values_list('note', flat=True)
+
+    for note_id in note_list:
+        note = FileNote.objects.filter(note_id=note_id).first()
         x = note.x
         y = note.y
         width = note.width
@@ -491,7 +501,7 @@ def get_annotation(request):
         username = note.username
         isPublic = note.isPublic
         id = note.note_id
-        data['annotaionList'].append({
+        data['annotations'].append({
             'x': x,
             'y': y,
             'width': width,
@@ -502,5 +512,8 @@ def get_annotation(request):
             'isPublic': isPublic,
             'id': id
         })
+
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(data)
 
     return reply.success(data=data, msg="成功获取公开批注")
