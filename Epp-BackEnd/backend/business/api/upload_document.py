@@ -119,3 +119,45 @@ def get_document_url(request):
             return JsonResponse({'error': '文件不存在', 'is_success': False}, status=400)
     else:
         return JsonResponse({'error': '请求方法错误', 'is_success': False}, status=400)
+
+
+@require_http_methods('GET')
+def get_document_translated_url(request):
+    '''
+    获取用户上传文档的翻译结果(pdf文件)
+    '''
+    document_id = request.GET.get('document_id')
+    document = UserDocument.objects.filter(document_id=document_id).first()
+    if document:
+        # 对该论文进行翻译
+        translated_filename = get_random_pdf('\\resource\\database\\papers')
+
+        data = {
+            'local_url': '/' + translated_filename,
+            'is_success': True
+        }
+
+        return reply.success(data=data, msg="成功翻译并获取翻译结果")
+
+    else:
+        data = {
+            'local_url': '/',
+            'is_success': False
+        }
+        return reply.fail(data=data , msg="找不到需要翻译的论文")
+
+
+def get_random_pdf(directory):
+    # 获取目录下所有条目
+    all_files = os.listdir(directory)
+
+    # 过滤出PDF文件（不区分大小写）
+    pdf_files = [
+        f for f in all_files
+        if os.path.isfile(os.path.join(directory, f)) and f.lower().endswith('.pdf')
+    ]
+
+    if not pdf_files:
+        raise FileNotFoundError(f"未找到PDF文件，目录：{directory}")
+
+    return random.choice(pdf_files)

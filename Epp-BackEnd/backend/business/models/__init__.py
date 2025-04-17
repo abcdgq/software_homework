@@ -14,3 +14,34 @@ from .notification import Notification
 from .statistic import UserDailyAddition
 from .statistic import UserVisit
 from .subclass import Subclass
+from .annotation import FileAnnotation
+from .auto_check_record import AutoCheckRecord
+from .auto_check_risk import AutoRiskRecord
+from .auto_check_undo import AutoUndoRecord
+from .note import FileNote
+from .recommended_papers import RecommendedPaper
+
+__all__ = [
+    'User',
+    'Paper',
+    'AbstractReport',
+    'Admin',
+    'FirstLevelComment',
+    'SecondLevelComment',
+    'CommentReport',
+    'FileReading',
+    'PaperScore',
+    'SummaryReport',
+    'UserDocument',
+    'SearchRecord',
+    'Notification',
+    'UserDailyAddition',
+    'UserVisit',
+    'Subclass',
+    'FileAnnotation',
+    'AutoCheckRecord',
+    'AutoRiskRecord',
+    'AutoUndoRecord',
+    'FileNote',
+    'RecommendedPaper'
+]

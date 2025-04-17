@@ -8,11 +8,11 @@ from business.models import Paper
 from business.utils import storage
 from .subclass import Subclass
 
-class recomended_paper(models.Model):
+class RecommendedPaper(models.Model):
     """
     Field:
         - paper             文献
         - recommend_score   推荐指数
     """
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
-    recommend_score = models.FloatField(default=0.0, sorted=True)
+    recommend_score = models.FloatField(default=0.0)
