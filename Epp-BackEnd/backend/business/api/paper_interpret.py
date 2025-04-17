@@ -57,6 +57,15 @@ def delete_tmp_kb(tmp_kb_id):
 
 # 建立file_reading和tmp_kb的映射
 def insert_file_2_kb(file_reading_id, tmp_kb_id):
+    # 调试：检查文件路径是否存在
+    print(f"检查文件路径：{settings.USER_READ_MAP_PATH}")
+    if not os.path.exists(settings.USER_READ_MAP_PATH):
+        print(f"文件 {settings.USER_READ_MAP_PATH} 不存在，正在创建新文件。")
+        # 创建新文件并写入空的 JSON 对象
+        with open(settings.USER_READ_MAP_PATH, "w") as f:
+            json.dump({}, f, indent=4)
+        print(f"已成功创建新文件：{settings.USER_READ_MAP_PATH}")
+        
     with open(settings.USER_READ_MAP_PATH, "r") as f:
         f_2_kb_map = json.load(f)
     if file_reading_id in f_2_kb_map:
