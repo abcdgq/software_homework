@@ -9,21 +9,79 @@ import re
 import Levenshtein
 from django.views.decorators.http import require_http_methods
 
+# def insert_search_record_2_kb(search_record_id, tmp_kb_id):
+#     search_record_id = str(search_record_id)
+#     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+#         s_2_kb_map = json.load(f)
+#     s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
+#     if search_record_id in s_2_kb_map.keys():
+#         if delete_tmp_kb(s_2_kb_map[search_record_id]):
+#             print("删除TmpKb成功")
+#         else:
+#             print("删除TmpKb失败")
+
+#     s_2_kb_map[search_record_id] = tmp_kb_id
+#     with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+#         json.dump(s_2_kb_map, f, indent=4)
+
+
 def insert_search_record_2_kb(search_record_id, tmp_kb_id):
+    # 调试：打印输入参数
+    print(f"函数 insert_search_record_2_kb 被调用，参数：search_record_id={search_record_id}, tmp_kb_id={tmp_kb_id}")
+
+    # 转换 search_record_id 为字符串
     search_record_id = str(search_record_id)
-    with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
-        s_2_kb_map = json.load(f)
-    s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
-    if search_record_id in s_2_kb_map.keys():
-        if delete_tmp_kb(s_2_kb_map[search_record_id]):
-            print("删除TmpKb成功")
+    print(f"已将 search_record_id 转换为字符串：{search_record_id}")
+
+        # 调试：检查文件路径是否存在
+    print(f"检查文件路径：{settings.USER_SEARCH_MAP_PATH}")
+    if not os.path.exists(settings.USER_SEARCH_MAP_PATH):
+        print(f"文件 {settings.USER_SEARCH_MAP_PATH} 不存在，正在创建新文件。")
+        # 创建新文件并写入空的 JSON 对象
+        with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+            json.dump({}, f, indent=4)
+        print(f"已成功创建新文件：{settings.USER_SEARCH_MAP_PATH}")
+
+    try:
+        # 读取 JSON 文件
+        with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+            s_2_kb_map = json.load(f)
+        print(f"从文件加载的 s_2_kb_map：{s_2_kb_map}")
+
+        # 调试：检查映射关系
+        print(f"当前的 s_2_kb_map：{s_2_kb_map}")
+
+        # 转换键为字符串
+        s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
+        print(f"已将 s_2_kb_map 的键转换为字符串：{s_2_kb_map}")
+
+        # 检查 search_record_id 是否已存在
+        if search_record_id in s_2_kb_map:
+            print(f"发现 search_record_id 已存在：{search_record_id}，当前对应的 tmp_kb_id：{s_2_kb_map[search_record_id]}")
+
+            # 调试：尝试删除旧的 tmp_kb
+            old_tmp_kb_id = s_2_kb_map[search_record_id]
+            print(f"尝试删除旧的 tmp_kb_id：{old_tmp_kb_id}")
+
+            if delete_tmp_kb(old_tmp_kb_id):
+                print("删除 TmpKb 成功")
+            else:
+                print("删除 TmpKb 失败")
         else:
-            print("删除TmpKb失败")
+            print(f"未找到 search_record_id：{search_record_id} 的现有记录")
 
-    s_2_kb_map[search_record_id] = tmp_kb_id
-    with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
-        json.dump(s_2_kb_map, f, indent=4)
+        # 更新映射关系
+        s_2_kb_map[search_record_id] = tmp_kb_id
+        print(f"已更新 s_2_kb_map：{s_2_kb_map}")
 
+        # 写入 JSON 文件
+        with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+            json.dump(s_2_kb_map, f, indent=4)
+        print(f"已成功将更新后的 s_2_kb_map 写入文件：{settings.USER_SEARCH_MAP_PATH}")
+
+    except Exception as e:
+        print(f"发生错误：{e}")
+        raise  # 如果需要，可以重新抛出异常以便进一步处理
 
 def get_tmp_kb_id(search_record_id):
     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
@@ -386,8 +444,8 @@ def dialog_query(request):
     message = data.get('message')
     search_record_id = data.get('search_record_id')
 
-    # kb_id = get_tmp_kb_id(search_record_id)
-    kb_id = 0
+    kb_id = get_tmp_kb_id(search_record_id)
+    # kb_id = 0
 
     user = User.objects.filter(username=username).first()
     if user is None:
@@ -538,20 +596,20 @@ from business.utils.knowledge_base import delete_tmp_kb, build_abs_kb_by_paper_i
 from business.utils.paper_vdb_init import get_filtered_paper
 
 
-def insert_search_record_2_kb(search_record_id, tmp_kb_id):
-    search_record_id = str(search_record_id)
-    with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
-        s_2_kb_map = json.load(f)
-    s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
-    if search_record_id in s_2_kb_map.keys():
-        if delete_tmp_kb(s_2_kb_map[search_record_id]):
-            print("删除TmpKb成功")
-        else:
-            print("删除TmpKb失败")
+# def insert_search_record_2_kb(search_record_id, tmp_kb_id):
+#     search_record_id = str(search_record_id)
+#     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+#         s_2_kb_map = json.load(f)
+#     s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
+#     if search_record_id in s_2_kb_map.keys():
+#         if delete_tmp_kb(s_2_kb_map[search_record_id]):
+#             print("删除TmpKb成功")
+#         else:
+#             print("删除TmpKb失败")
 
-    s_2_kb_map[search_record_id] = tmp_kb_id
-    with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
-        json.dump(s_2_kb_map, f, indent=4)
+#     s_2_kb_map[search_record_id] = tmp_kb_id
+#     with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+#         json.dump(s_2_kb_map, f, indent=4)
 
 
 def get_tmp_kb_id(search_record_id):
@@ -851,12 +909,12 @@ def vector_query(request):
     
     ### TODO 构建知识库 ###
     
-    # try:
-    #     tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
-    #     insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
-    # except Exception as e:
-    #     print("构建知识库失败")
-    #     return reply.fail(msg="构建知识库失败")
+    try:
+        tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
+        insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
+    except Exception as e:
+        print("构建知识库失败")
+        return reply.fail(msg="构建知识库失败")
 
     print("向量检索完成")
     # 'keywords': keywords
@@ -997,8 +1055,8 @@ def dialog_query(request):
     message = data.get('message')
     search_record_id = data.get('search_record_id')
     # TODO 获取临时知识库id,debug
-    # kb_id = get_tmp_kb_id(search_record_id) 
-    kb_id = 0
+    kb_id = get_tmp_kb_id(search_record_id) 
+    # kb_id = 0
     
     user = User.objects.filter(username=username).first()
     if user is None:
