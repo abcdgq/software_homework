@@ -24,9 +24,9 @@
         <div style="margin-bottom: 20px;">
           <el-button @click="showReadAssistant = true" :type="showReadAssistant ? 'primary' : ''">阅读助手</el-button>
           <el-button @click="showReadAssistant = false" :type="!showReadAssistant ? 'primary' : ''">评论管理</el-button>
-          <el-button @click="toggleTranslation" :type="isTranslated ? 'primary' : ''" class="special-button">
-          {{ isTranslated ? '取消翻译' : '翻译全文' }}
-        </el-button>
+          <!-- <el-button @click="toggleTranslation" :type="isTranslated ? 'primary' : ''" class="special-button">
+          {{ isTranslated ? '取消翻译' : '翻译全文' }}</el-button> -->
+          <el-button type="text" icon="el-icon-download" @click="downloadPaper">下载翻译PDF</el-button>
         </div>
         <div v-if="showReadAssistant">
           <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" />
@@ -423,19 +423,18 @@ export default {
         // window.location.reload()// 刷新页面，重新渲染所有注释，因为注释的id是后端生成的，只能重新从后端获取。
         // 当前，也可以在这个response里，把新加的注释的id返回给前端，前端再把id存到本地，这样就不用重新刷新页面了。
         const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: response.data.id } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
-        this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
         this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
+        // this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
         this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+        this.$message({
+          message: '添加批注成功',
+          type: 'success'
+        })
       }).catch(error => {
         console.error('保存注释失败', error)
-        const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: Math.floor(Math.random() * 100) + 1 } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
-        this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
-        this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
-        this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
-        // 保存失败不该保存，这里为了测试，TODO，之后删掉
         this.$message({
           message: '添加批注失败',
-          type: 'success'
+          type: 'error'
         })
       })
     },
@@ -467,7 +466,7 @@ export default {
       axios.get(this.$BASE_API_URL + '/getAnnotations?document_id=' + this.paper_id)
         .then(response => {
           this.allAnnotations = response.data.annotations
-          this.annotations = this.allAnnotations
+          this.annotations = this.allAnnotations// .filter()的话，这里两个数组引用就不是同一个地方，save的时候就要save两个地方
           this.renderAnnotations() // 直接渲染所有注释，这里就不从数据库重新调了
         }).catch(error => {
           console.error('加载注释失败', error)
@@ -574,6 +573,29 @@ export default {
         })
         .catch((error) => {
           console.log('请求论文PDF失败 ', error)
+        })
+    },
+    downloadPaper () {
+      // 实现下载功能
+      axios.post(this.$BASE_API_URL + '/batchDownloadTranslated', {'paper_id_list': [this.paper_id]})
+        .then((response) => {
+          if (response.data.is_success === true) {
+            this.$message({
+              message: '开始下载！',
+              type: 'success'
+            })
+            const zipUrl = this.$BASE_URL + response.data.zip_url
+            const link = document.createElement('a')
+            link.href = zipUrl
+            link.download = 'papers.zip'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            this.selectedPapers = []
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error)
         })
     },
     restoreOriginalText () {
