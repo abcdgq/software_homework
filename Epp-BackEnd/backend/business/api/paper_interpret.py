@@ -155,6 +155,7 @@ def create_paper_study(request):
     # 上传到远端服务器, 创建新的临时知识库
     upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
 
+    print("paper local path: ", local_path)
     print(open(local_path, 'rb'))
     files = [
         ('files', (title + content_type, open(local_path, 'rb'),
@@ -273,15 +274,28 @@ async def async_test(request):
 
 def get_paper_local_url(paper):
     local_path = paper.local_path
-    if not local_path:
-        original_url = paper.original_url
-        # 将路径中的abs修改为pdf
-        original_url = original_url.replace('abs', 'pdf')
-        # 访问url，下载文献到服务器
-        filename = str(paper.paper_id)
-        local_path = downloadPaper(original_url, filename)
-        paper.local_path = local_path
-        paper.save()
+    print("get url: ", local_path)
+    print("ori url: ", paper.original_url)
+
+    original_url = paper.original_url
+    # 将路径中的abs修改为pdf
+    original_url = original_url.replace('abs', 'pdf')
+    # 访问url，下载文献到服务器
+    filename = str(paper.paper_id)
+    local_path = downloadPaper(original_url, filename)
+    paper.local_path = local_path
+    paper.save()
+
+    # if not local_path:
+    #     print("local path is None")
+    #     original_url = paper.original_url
+    #     # 将路径中的abs修改为pdf
+    #     original_url = original_url.replace('abs', 'pdf')
+    #     # 访问url，下载文献到服务器
+    #     filename = str(paper.paper_id)
+    #     local_path = downloadPaper(original_url, filename)
+    #     paper.local_path = local_path
+    #     paper.save()
     return local_path
 
 
@@ -307,53 +321,144 @@ def get_paper_url(request):
     return reply.success({"local_url": "/" + paper_local_url}, msg="success")
 
 
+# def do_file_chat(conversation_history, query, tmp_kb_id):
+#     # 将历史记录与本次对话发送给服务器, 获取对话结果
+#     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
+#     headers = {
+#         'Content-Type': 'application/json'
+#     }
+#     if len(conversation_history) != 0:
+#         # 有问题
+#         payload = json.dumps({
+#             "query": query,
+#             "knowledge_id": tmp_kb_id,
+#             "history": conversation_history[-10:],  # 传10条历史记录
+#             "prompt_name": "text"  # 使用历史记录对话模式
+#         })
+
+#     else:
+#         payload = json.dumps({
+#             "query": query,
+#             "knowledge_id": tmp_kb_id,
+#             "prompt_name": "default"  # 使用普通对话模式
+#         })
+#         # print(payload)
+
+#     def _get_ai_reply(payload):
+#         response = requests.request("POST", file_chat_url, data=payload, headers=headers, stream=False)
+#         ai_reply = ""
+#         origin_docs = []
+#         # print(response)
+#         for line in response.iter_lines():
+#             if line:
+#                 decoded_line = line.decode('utf-8')
+#                 if decoded_line.startswith('data'):
+#                     data = decoded_line.replace('data: ', '')
+#                     data = json.loads(data)
+#                     ai_reply += data["answer"]
+#                     for doc in data["docs"]:
+#                         doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+#                         origin_docs.append(doc)
+#         return ai_reply, origin_docs
+
+#     # task = asyncio.create_task(_get_ai_reply())  # 创建任务
+#     ai_reply, origin_docs = _get_ai_reply(payload)
+
+#     # 给出用户仍可能存在的问题
+#     def _get_prob_paper_study_question():
+
+#         # empty模板不含任何知识库信息
+#         payload = json.dumps({
+#             "query": query,
+#             "knowledge_id": tmp_kb_id,
+#             "history": conversation_history[-4:],
+#             "prompt_name": "question",  # 使用问题模式
+#             "max_tokens": 50,
+#             "temperature": 0.4
+#         })
+#         question_reply, _ = _get_ai_reply(payload)
+#         question_reply = re.sub(r'\d. ', '', question_reply).split("\n")[:2]
+#         question_reply.append("告诉我更多")
+#         return question_reply
+
+#     question_reply = _get_prob_paper_study_question()
+#     return ai_reply, origin_docs, question_reply
+
+import json
+import requests
+import re
+
 def do_file_chat(conversation_history, query, tmp_kb_id):
-    # 将历史记录与本次对话发送给服务器, 获取对话结果
     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
     headers = {
         'Content-Type': 'application/json'
     }
+
+    # 构建请求 payload
     if len(conversation_history) != 0:
-        # 有问题
         payload = json.dumps({
             "query": query,
             "knowledge_id": tmp_kb_id,
             "history": conversation_history[-10:],  # 传10条历史记录
             "prompt_name": "text"  # 使用历史记录对话模式
         })
-
     else:
         payload = json.dumps({
             "query": query,
             "knowledge_id": tmp_kb_id,
             "prompt_name": "default"  # 使用普通对话模式
         })
-        # print(payload)
+
+    print(f"Sending payload to server: {payload}")
 
     def _get_ai_reply(payload):
-        response = requests.request("POST", file_chat_url, data=payload, headers=headers, stream=False)
-        ai_reply = ""
-        origin_docs = []
-        # print(response)
-        for line in response.iter_lines():
-            if line:
-                decoded_line = line.decode('utf-8')
-                if decoded_line.startswith('data'):
-                    data = decoded_line.replace('data: ', '')
-                    data = json.loads(data)
-                    ai_reply += data["answer"]
-                    for doc in data["docs"]:
-                        doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-                        origin_docs.append(doc)
-        return ai_reply, origin_docs
+        try:
+            # 发送请求
+            response = requests.post(file_chat_url, data=payload, headers=headers, stream=True)
+            # 检查 HTTP 请求是否成功
+            response.raise_for_status()
 
-    # task = asyncio.create_task(_get_ai_reply())  # 创建任务
-    ai_reply, origin_docs = _get_ai_reply(payload)
+            ai_reply = ""
+            origin_docs = []
 
-    # 给出用户仍可能存在的问题
+            # 处理流式响应
+            for line in response.iter_lines():
+                if line:
+                    decoded_line = line.decode('utf-8')
+                    print(f"Received line: {decoded_line}")
+
+                    if decoded_line.startswith('data'):
+                        data = decoded_line.replace('data: ', '')
+                        try:
+                            data = json.loads(data)
+                        except json.JSONDecodeError as e:
+                            print(f"Failed to parse JSON: {e}")
+                            print(f"Invalid JSON data: {data}")
+                            raise
+
+                        ai_reply += data.get("answer", "")
+                        for doc in data.get("docs", []):
+                            doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+                            origin_docs.append(doc)
+
+            return ai_reply, origin_docs
+
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+            print(f"Response status code: {response.status_code if 'response' in locals() else 'N/A'}")
+            print(f"Response content: {response.content if 'response' in locals() else 'N/A'}")
+            raise
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise
+
+    try:
+        ai_reply, origin_docs = _get_ai_reply(payload)
+    except Exception as e:
+        print(f"Failed to get AI reply: {e}")
+        raise
+
     def _get_prob_paper_study_question():
-
-        # empty模板不含任何知识库信息
         payload = json.dumps({
             "query": query,
             "knowledge_id": tmp_kb_id,
@@ -362,12 +467,24 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             "max_tokens": 50,
             "temperature": 0.4
         })
-        question_reply, _ = _get_ai_reply(payload)
-        question_reply = re.sub(r'\d. ', '', question_reply).split("\n")[:2]
-        question_reply.append("告诉我更多")
-        return question_reply
 
-    question_reply = _get_prob_paper_study_question()
+        print(f"Sending question payload to server: {payload}")
+
+        try:
+            question_reply, _ = _get_ai_reply(payload)
+            question_reply = re.sub(r'\d. ', '', question_reply).split("\n")[:2]
+            question_reply.append("告诉我更多")
+            return question_reply
+        except Exception as e:
+            print(f"Failed to get study question: {e}")
+            raise
+
+    try:
+        question_reply = _get_prob_paper_study_question()
+    except Exception as e:
+        print(f"Failed to generate study questions: {e}")
+        question_reply = ["发生错误，请稍后再试", "告诉我更多"]
+
     return ai_reply, origin_docs, question_reply
 
 
@@ -391,32 +508,106 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 
 
 @require_http_methods(["POST"])
+# def do_paper_study(request):
+#     # 鉴权
+#     username = request.session.get('username')
+#     if username is None:
+#         username = 'sanyuba'
+#     user = User.objects.filter(username=username).first()
+#     if user is None:
+#         return reply.fail(msg="请先正确登录")
+
+#     request_data = json.loads(request.body)
+#     query = request_data.get('query')  # 本次询问对话
+#     file_reading_id = request_data.get('file_reading_id')
+#     fr = FileReading.objects.get(id=file_reading_id)
+#     tmp_kb_id = get_tmp_kb_id(file_reading_id=file_reading_id)  # 临时知识库id
+#     if tmp_kb_id is None:
+#         return reply.fail(msg="请先创建研读会话")
+#     # 加载历史记录
+#     with open(fr.conversation_path, 'r') as f:
+#         conversation_history = json.load(f)
+
+#     print(tmp_kb_id)
+#     conversation_history = list(conversation_history.get('conversation'))  # List[Dict]
+#     # print(conversation_history, query, tmp_kb_id)
+#     ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
+#     add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
+#     return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
+
 def do_paper_study(request):
+    # 调试：打印请求信息
+    print(f"请求方法: {request.method}")
+    print(f"请求路径: {request.path}")
+    print(f"请求查询参数: {request.GET}")
+    print(f"请求体: {request.body}")
+
     # 鉴权
     username = request.session.get('username')
+    print(f"从会话获取的用户名: {username}")
     if username is None:
         username = 'sanyuba'
+        print(f"用户名未找到，使用默认用户名: {username}")
+
     user = User.objects.filter(username=username).first()
+    print(f"查询到的用户: {user}")
+
     if user is None:
+        print("用户未登录或不存在，返回失败响应")
         return reply.fail(msg="请先正确登录")
 
-    request_data = json.loads(request.body)
-    query = request_data.get('query')  # 本次询问对话
-    file_reading_id = request_data.get('file_reading_id')
-    fr = FileReading.objects.get(id=file_reading_id)
-    tmp_kb_id = get_tmp_kb_id(file_reading_id=file_reading_id)  # 临时知识库id
-    if tmp_kb_id is None:
-        return reply.fail(msg="请先创建研读会话")
-    # 加载历史记录
-    with open(fr.conversation_path, 'r') as f:
-        conversation_history = json.load(f)
+    try:
+        # 解析请求体
+        request_data = json.loads(request.body)
+        print(f"解析后的请求体: {request_data}")
 
-    print(tmp_kb_id)
-    conversation_history = list(conversation_history.get('conversation'))  # List[Dict]
-    # print(conversation_history, query, tmp_kb_id)
-    ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
-    add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
-    return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
+        query = request_data.get('query')  # 本次询问对话
+        print(f"获取的查询内容: {query}")
+
+        file_reading_id = request_data.get('file_reading_id')
+        print(f"获取的 file_reading_id: {file_reading_id}")
+
+        # 查询 FileReading 对象
+        fr = FileReading.objects.get(id=file_reading_id)
+        print(f"查询到的 FileReading 对象: {fr}")
+
+        # 获取临时知识库 ID
+        tmp_kb_id = get_tmp_kb_id(file_reading_id=file_reading_id)  # 临时知识库id
+        print(f"获取的临时知识库 ID: {tmp_kb_id}")
+
+        if tmp_kb_id is None:
+            print("未获取到临时知识库 ID，返回失败响应")
+            return reply.fail(msg="请先创建研读会话")
+
+        # 加载历史记录
+        print(f"加载对话历史文件路径: {fr.conversation_path}")
+        with open(fr.conversation_path, 'r') as f:
+            conversation_history = json.load(f)
+        print(f"加载的对话历史: {conversation_history}")
+
+        conversation_history = list(conversation_history.get('conversation'))  # List[Dict]
+        print(f"转换后的对话历史: {conversation_history}")
+
+        # 调用 AI 聊天函数
+        print(f"调用 do_file_chat，参数: conversation_history={conversation_history}, query={query}, tmp_kb_id={tmp_kb_id}")
+        ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
+        print(f"AI 回复: {ai_reply}")
+        print(f"原始文档: {origin_docs}")
+        print(f"问题回复: {question_reply}")
+
+        # 添加对话历史
+        print(f"添加对话历史，路径: {fr.conversation_path}")
+        add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
+        print("对话历史已添加")
+
+        # 返回成功响应
+        print("返回成功响应")
+        return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
+
+    except Exception as e:
+        print(f"发生错误: {e}")
+        # 可以选择记录错误日志或返回失败响应
+        return reply.fail(msg=f"服务器内部错误: {str(e)}")
 
 
 '''
