@@ -1,5 +1,7 @@
 
 # -*- coding: utf-8 -*-
+import json
+import os
 import sys
 import uuid
 import requests
@@ -10,13 +12,13 @@ import time
 from imp import reload
 reload(sys)
 
-sys.setdefaultencoding('utf-8')
+#sys.setdefaultencoding('utf-8')
 
 YOUDAO_URL_UPLOAD = 'https://openapi.youdao.com/file_trans/upload'
 YOUDAO_URL_QUERY = 'https://openapi.youdao.com/file_trans/query'
 YOUDAO_URL_DOWNLOAD = 'https://openapi.youdao.com/file_trans/download'
-APP_KEY = '您的应用ID'
-APP_SECRET = '您的应用密钥'
+APP_KEY = '3a32217d0a6b794e'
+APP_SECRET = 'q70jkzoHBKk5KXdqTq0K8Epr5uvMkwBC'
 
 
 def truncate(q):
@@ -38,8 +40,10 @@ def do_request(url, data):
     return requests.post(url, data=data, headers=headers)
 
 
-def upload():
-    f = open(r'文件的路径', 'rb')  # 二进制方式打开文件
+def upload(pdf_name):
+    route = os.path.join("D:\\software_homework\\Epp-BackEnd\\backend\scripts\\untranslated_pdf", pdf_name)
+    #route = os.path.join(".\\untranslated_pdf", pdf_name)
+    f = open(route, 'rb')  # 二进制方式打开文件
     q = base64.b64encode(f.read())  # 读取文件内容，转换为base64编码
     f.close()
     salt = str(uuid.uuid1())
@@ -49,10 +53,10 @@ def upload():
 
     data = {}
     data['q'] = q
-    data['fileName'] = '文件名称'
-    data['fileType'] = '文件类型'
-    data['langFrom'] = '源语言'
-    data['langTo'] = '目标语言'
+    data['fileName'] = pdf_name
+    data['fileType'] = 'pdf'
+    data['langFrom'] = 'en'
+    data['langTo'] = 'zh-CHS'
     data['appKey'] = APP_KEY
     data['salt'] = salt
     data['curtime'] = curtime
@@ -62,13 +66,14 @@ def upload():
 
     response = do_request(YOUDAO_URL_UPLOAD, data)
     print (response.content)
+    return json.loads(response.content.decode("utf-8"))["flownumber"]
 
 
-def query():
-    flownumber = '文件流水号'
+def query(q):
+    flownumber = q
     salt = str(uuid.uuid1())
     curtime = str(int(time.time()))
-    signStr = APP_KEY + truncate(flownumber) + salt + curtime + APP_SECRET
+    signStr = APP_KEY + truncate(flownumber.encode("utf-8")) + salt + curtime + APP_SECRET
     sign = encrypt(signStr)
 
     data = {}
@@ -82,18 +87,18 @@ def query():
 
     response = do_request(YOUDAO_URL_QUERY, data)
     print (response.content)
+    return json.loads(response.content.decode("utf-8"))["status"]
 
-
-def download():
-    flownumber = '文件流水号'
+def download(q, pdf_name):
+    flownumber = q
     salt = str(uuid.uuid1())
     curtime = str(int(time.time()))
-    signStr = APP_KEY + truncate(flownumber) + salt + curtime + APP_SECRET
+    signStr = APP_KEY + truncate(flownumber.encode("utf-8")) + salt + curtime + APP_SECRET
     sign = encrypt(signStr)
 
     data = {}
     data['flownumber'] = flownumber
-    data['downloadFileType'] = '文件下载类型'
+    data['downloadFileType'] = 'pdf'
     data['appKey'] = APP_KEY
     data['salt'] = salt
     data['curtime'] = curtime
@@ -102,10 +107,25 @@ def download():
     data['signType'] = 'v3'
 
     response = do_request(YOUDAO_URL_DOWNLOAD, data)
-    print (response.content)
+    #print (response.content)
+    # 定义PDF保存路径
+    route = os.path.join("D:\\software_homework\\Epp-BackEnd\\backend\scripts\\translated_pdf", "translated__"+pdf_name)
+    #route = os.path.join(".\\untranslated_pdf", "translated__"+pdf_name)
 
+    # 写入文件
+    with open(route, 'wb') as f:  # 'wb' 表示以二进制写入模式打开文件
+        f.write(response.content)
+
+def pdf_translate(pdf_name):
+    q = upload(pdf_name)
+    status = 0
+    while(True): 
+        status = query(q)
+        if(status == 4 or status < 0): break
+        else: time.sleep(3)
+    if status == 4:
+        download(q, pdf_name)
+    else: print("error:" + status)
 
 if __name__ == '__main__':
-    upload()
-    query()
-    download()
+    pdf_translate("sam.pdf")

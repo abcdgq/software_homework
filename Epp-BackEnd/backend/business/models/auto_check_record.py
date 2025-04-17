@@ -24,6 +24,6 @@ class AutoCheckRecord(models.Model):
     comment_id_2 = models.ForeignKey(SecondLevelComment, on_delete=models.CASCADE, null=True, blank=True)
     comment_level = models.IntegerField(default=1)  # 1代表一级评论，2代表二级评论
     security = models.BooleanField(default=False)
-    lables = models.TextField(default="", null=True, blank=True)
+    labels = models.TextField(default="", null=True, blank=True)
     reason = models.JSONField(default=dict, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)

@@ -1,7 +1,7 @@
 import openai
 
 # server_ip = '172.17.62.88'
-server_ip = '114.116.205.43'
+server_ip = '115.190.109.233'
 url = f'http://{server_ip}:20005'
 model = 'zhipu-api'
 

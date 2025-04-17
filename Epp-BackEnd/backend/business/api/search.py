@@ -568,7 +568,7 @@ def queryGLM(msg: str, history=None) -> str:
     对chatGLM3-6B发出一次单纯的询问
     '''
     print(msg)
-    chat_chat_url = 'http://172.17.62.88:7861/chat/chat'
+    chat_chat_url = 'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/chat'
     headers = {
         'Content-Type': 'application/json'
     }
@@ -990,7 +990,9 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
-    kb_id = get_tmp_kb_id(search_record_id)
+    #kb_id = get_tmp_kb_id(search_record_id) 
+    kb_id = 0 
+    #TODO:这里硬编码了kb_id，避免了get_tmp_kb_id找不到kb_id的问题，使得ai能跑起来，后续需要研究kb的实现，修改这个地方
     user = User.objects.filter(username=username).first()
     if user is None:
         return JsonResponse({'error': '用户不存在'}, status=404)
