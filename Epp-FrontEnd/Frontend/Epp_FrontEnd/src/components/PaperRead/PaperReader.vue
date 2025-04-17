@@ -49,7 +49,10 @@
           <div v-for="annotation in annotations" :key="annotation.id">
             <div class="annotation">
               <div class="annotation-User">
-                <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p>
+                <!-- <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p> -->
+                <p class="annotation-time" style="white-space: pre-line;">
+                    {{ formatDate(annotation.date) || '刚刚' }}
+                </p>
                 <p>{{ annotation.userName }}</p>
               </div>
               <div class="annotation-content">
@@ -594,6 +597,11 @@ export default {
     restoreOriginalText () {
       this.pdfUrl = this.originalUrl
       this.initPDFViewer()
+    },
+    formatDate (date) {
+      if (!date) return ''
+      const [d, t] = date.split('T')
+      return `${d}\n${t.slice(0, 8)}` // 只保留到秒
     }
   }
 }

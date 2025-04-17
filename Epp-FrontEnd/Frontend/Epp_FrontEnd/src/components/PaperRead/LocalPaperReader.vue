@@ -49,7 +49,10 @@
             <div v-for="annotation in annotations" :key="annotation.id">
               <div class="annotation">
                 <div class="annotation-User">
-                  <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p>
+                  <!-- <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p> -->
+                  <p class="annotation-time" style="white-space: pre-line;">
+                    {{ formatDate(annotation.date) || '刚刚' }}
+                  </p>
                   <p>{{ annotation.userName }}</p>
                 </div>
                 <div class="annotation-content">
@@ -601,6 +604,11 @@ export default {
     restoreOriginalText () {
       this.pdfUrl = this.originalUrl
       this.initPDFViewer()
+    },
+    formatDate (date) {
+      if (!date) return ''
+      const [d, t] = date.split('T')
+      return `${d}\n${t.slice(0, 8)}` // 只保留到秒
     }
   }
 }
@@ -620,7 +628,7 @@ export default {
 
 .annotation-User {
   /* margin-bottom: 4px;              和评论内容之间留一点垂直间距 */
-  line-height: 1.4;/* 1.4倍的字体行高 */
+  line-height: 1.2;/* 1.4倍的字体行高 */
 }
 .annotation-time {
   font-size: 13px;                 /* 时间字体小一点，降低视觉优先级 */
