@@ -19,7 +19,7 @@ from .auto_check_record import AutoCheckRecord
 from .auto_check_risk import AutoRiskRecord
 from .auto_check_undo import AutoUndoRecord
 from .note import FileNote
-from .recommended_papers import RecomendedPaper
+from .recommended_papers import RecommendedPaper
 
 __all__ = [
     'User',
@@ -43,5 +43,5 @@ __all__ = [
     'AutoRiskRecord',
     'AutoUndoRecord',
     'FileNote',
-    'RecomendedPaper'
+    'RecommendedPaper'
 ]

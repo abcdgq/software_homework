@@ -49,11 +49,13 @@ urlpatterns = [
                   path("api/saveAnnotation", paper_details.save_annotation),
                   path("api/getAnnotations", paper_details.get_annotation),
 
+
                   # 用户上传论文模块
                   path("api/uploadPaper", upload_document.upload_paper),
                   path("api/removeUploadedPaper", upload_document.remove_uploaded_paper),
                   path("api/userInfo/documents", upload_document.document_list),
                   path("api/getDocumentURL", upload_document.get_document_url),
+                  path("api/getDocumentTranslatedURL", upload_document.get_document_translated_url),
 
                   # 个人中心
                   path("api/userInfo/userInfo", user_info.user_info),
