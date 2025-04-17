@@ -504,6 +504,7 @@ def get_annotation(request):
         username = note.username
         isPublic = note.isPublic
         id = note.note_id
+        date = note.date
         data['annotations'].append({
             'x': x,
             'y': y,
@@ -513,7 +514,8 @@ def get_annotation(request):
             'comment': comment,
             'userName': username,
             'isPublic': isPublic,
-            'id': id
+            'id': id,
+            'date': date
         })
 
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
