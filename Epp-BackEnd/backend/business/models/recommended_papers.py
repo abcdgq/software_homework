@@ -8,7 +8,7 @@ from business.models import Paper
 from business.utils import storage
 from .subclass import Subclass
 
-class RecomendedPaper(models.Model):
+class RecommendedPaper(models.Model):
     """
     Field:
         - paper             文献
