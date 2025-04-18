@@ -109,7 +109,7 @@ def get_papers_exclude_author():
 def search_paper_with_query(text, limit=20):
     t, m = get_sci_bert()
     collection = init_milvus("SE2024")
-    text = translate_zh2en(text)  # 任意语言到英文翻译
+    text = translate_zh2en(text)  # 中文到英文翻译
     print(text)
     query_embedding = text_embedding(text, t, m).cpu().detach().numpy()
     search_results = milvus_search(collection, query_embedding, limit)

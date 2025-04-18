@@ -35,7 +35,7 @@ def init_milvus(COLLECTION_NAME):
         return collection
 
 # 创建新的收集
-def create_new_collection_or_get_collection(collection_name):
+def create_new_collection_or_get_collection(COLLECTION_NAME):
     fields = [
         FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
         FieldSchema(name="title", dtype=DataType.VARCHAR, max_length=512),
