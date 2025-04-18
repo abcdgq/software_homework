@@ -130,7 +130,7 @@ def get_document_translated_url(request):
     document = UserDocument.objects.filter(document_id=document_id).first()
     if document:
         # 对该论文进行翻译
-        translated_filename = get_random_pdf('\\resource\\database\\papers')
+        translated_filename = get_random_pdf('/resource/database/papers')
 
         data = {
             'local_url': '/' + translated_filename,
@@ -148,16 +148,23 @@ def get_document_translated_url(request):
 
 
 def get_random_pdf(directory):
+    # 获取当前脚本的绝对路径
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # 将用户提供的目录与脚本目录拼接，并解析为规范化的绝对路径
+    target_dir = os.path.abspath(os.path.join(script_dir, '../..' + directory))
+    print(target_dir)
+
     # 获取目录下所有条目
-    all_files = os.listdir(directory)
+    all_files = os.listdir(target_dir)
+    print(all_files)
 
     # 过滤出PDF文件（不区分大小写）
     pdf_files = [
         f for f in all_files
-        if os.path.isfile(os.path.join(directory, f)) and f.lower().endswith('.pdf')
+        if os.path.isfile(os.path.join(target_dir, f)) and f.lower().endswith('.pdf')
     ]
 
     if not pdf_files:
-        raise FileNotFoundError(f"未找到PDF文件，目录：{directory}")
+        raise FileNotFoundError(f"未找到PDF文件，目录：{target_dir}")
 
     return random.choice(pdf_files)
