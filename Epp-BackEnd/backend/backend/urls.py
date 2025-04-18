@@ -48,6 +48,7 @@ urlpatterns = [
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
                   path("api/saveAnnotation", paper_details.save_annotation),
                   path("api/getAnnotations", paper_details.get_annotation),
+                  path("api/deleteAnnotation", ),
 
 
                   # 用户上传论文模块
@@ -55,7 +56,7 @@ urlpatterns = [
                   path("api/removeUploadedPaper", upload_document.remove_uploaded_paper),
                   path("api/userInfo/documents", upload_document.document_list),
                   path("api/getDocumentURL", upload_document.get_document_url),
-                  path("api/getDocumentTranslatedURL", upload_document.get_document_translated_url),
+                  path("api/downloadTranslated", upload_document.download_document_translated_url),
 
                   # 个人中心
                   path("api/userInfo/userInfo", user_info.user_info),
