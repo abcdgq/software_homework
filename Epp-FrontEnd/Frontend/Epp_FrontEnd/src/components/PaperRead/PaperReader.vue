@@ -574,7 +574,7 @@ export default {
     downloadPaper () {
       // 实现下载功能
       // axios.post(this.$BASE_API_URL + '/study/batchDownloadTranslated', {'paper_id_list': [this.paper_id]})
-      axios.get(this.$BASE_API_URL + '/study/getDocumentTranslatedURL?document_id=' + this.paper_id)
+      axios.get(this.$BASE_API_URL + '/study/downloadTranslated?document_id=' + this.paper_id)
         .then((response) => {
           if (response.data.is_success === true) {
             this.$message({
@@ -588,7 +588,6 @@ export default {
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
-            this.selectedPapers = []
           }
         })
         .catch((error) => {
