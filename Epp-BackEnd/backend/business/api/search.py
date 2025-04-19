@@ -593,7 +593,7 @@ from django.conf import settings
 import requests
 from business.utils import reply
 from business.utils.knowledge_base import delete_tmp_kb, build_abs_kb_by_paper_ids
-from business.utils.paper_vdb_init import get_filtered_paper
+from business.utils.paper_vdb_init import get_filtered_paper, local_vdb_init
 
 
 # def insert_search_record_2_kb(search_record_id, tmp_kb_id):
@@ -624,45 +624,45 @@ def get_tmp_kb_id(search_record_id):
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-def queryGLM(msg: str, history=None) -> str:
-    '''
-    对chatGLM3-6B发出一次单纯的询问
-    '''
-    print(msg)
-    chat_chat_url = 'http://115.190.109.233:7861/chat/chat'
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    payload = json.dumps({
-        "query": msg,
-        "prompt_name": "default",
-        "temperature": 0.3
-    })
+# def queryGLM(msg: str, history=None) -> str:
+#     '''
+#     对chatGLM3-6B发出一次单纯的询问
+#     '''
+#     print(msg)
+#     chat_chat_url = 'http://115.190.109.233:7861/chat/chat'
+#     headers = {
+#         'Content-Type': 'application/json'
+#     }
+#     payload = json.dumps({
+#         "query": msg,
+#         "prompt_name": "default",
+#         "temperature": 0.3
+#     })
 
-    session = requests.Session()
-    retry = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
+#     session = requests.Session()
+#     retry = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
+#     adapter = HTTPAdapter(max_retries=retry)
+#     session.mount('http://', adapter)
+#     session.mount('https://', adapter)
 
-    try:
-        response = session.post(chat_chat_url, data=payload, headers=headers, stream=False)
-        response.raise_for_status()
+#     try:
+#         response = session.post(chat_chat_url, data=payload, headers=headers, stream=False)
+#         response.raise_for_status()
 
-        # 确保正确处理分块响应
-        decoded_line = next(response.iter_lines()).decode('utf-8')
-        print("AI回答: ", decoded_line)
-        if decoded_line.startswith('data'):
-            data = json.loads(decoded_line.replace('data: ', ''))
-        else:
-            data = decoded_line
-        return data['text']
-    except requests.exceptions.ChunkedEncodingError as e:
-        print(f"ChunkedEncodingError: {e}")
-        return "错误: 响应提前结束"
-    except requests.exceptions.RequestException as e:
-        print(f"RequestException: {e}")
-        return f"错误: {e}"
+#         # 确保正确处理分块响应
+#         decoded_line = next(response.iter_lines()).decode('utf-8')
+#         print("AI回答: ", decoded_line)
+#         if decoded_line.startswith('data'):
+#             data = json.loads(decoded_line.replace('data: ', ''))
+#         else:
+#             data = decoded_line
+#         return data['text']
+#     except requests.exceptions.ChunkedEncodingError as e:
+#         print(f"ChunkedEncodingError: {e}")
+#         return "错误: 响应提前结束"
+#     except requests.exceptions.RequestException as e:
+#         print(f"RequestException: {e}")
+#         return f"错误: {e}"
 
 
 from django.views.decorators.http import require_http_methods
@@ -740,7 +740,7 @@ def search_my_model(query_string):
 
     return results
 
-def do_string_search(search_content):
+def do_string_search(search_content, max_results=10):
     pattern = r'[,\s!?.]+'
     search_terms = re.split(pattern, search_content)
     search_terms = [token for token in search_terms if token]
@@ -762,7 +762,7 @@ def do_string_search(search_content):
 
     # 返回排序后的结果
     sorted_results = [result for distance, result in results_with_distance]
-    return sorted_results[:10]  # 返回前10篇相似度最高的文章
+    return sorted_results[:max_results]  # 返回前10篇相似度最高的文章
 
 @require_http_methods(["POST"])
 def vector_query(request):
@@ -830,10 +830,16 @@ def vector_query(request):
         'Content-Type': 'application/json'
     }
 
+    print("search_type: ", search_type)
+    
+    # TODO 不知道在哪里初始化vdb, do_dialogue_search方法跑不通
+    # local_vdb_init(None)
+
     if search_type == 'dialogue':
         filtered_papers = do_dialogue_search(search_content, chat_chat_url, headers)
     else:
         filtered_papers = do_string_search(search_content)
+        print("filtered_papers: ", filtered_papers)
         if len(filtered_papers) == 0:
             return JsonResponse({"paper_infos": [], 'ai_reply': "EPP助手哭哭惹，很遗憾未能检索出相关论文。",
                                  'search_record_id': search_record.search_record_id}, status=200)
@@ -1068,7 +1074,14 @@ def dialog_query(request):
         c = json.loads(open(conversation_path).read())
         history = c
     # 先判断下是不是要查询论文
-    prompt = '想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + message + '\n'
+    # prompt = f"想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + {message} + '\n"
+    prompt = f"""
+    你将收到一个查询请求，请判断这个请求是否要求检索相关论文。
+    如果是，请返回 "yes+关键词"，其中关键词是查询中提到的与论文相关的主题或关键词。
+    如果不是，请返回 "no"。
+
+    查询请求：{message}
+    """
     response_type = queryGLM(prompt)
     print("是否为检索: ", response_type)
     papers = []
@@ -1078,18 +1091,24 @@ def dialog_query(request):
     if 'yes' in response_type:  # 担心可能有句号等等
         # 查询论文，TODO:接入向量化检索
         # filtered_paper = query_with_vector(message) # 旧版的接口，换掉了 2024.4.28
+        search_content = response_type.split('+')[-1].strip()
+        print("search_content:", search_content)
+        # filtered_paper = do_string_search(search_content=search_content, max_results=5)   # 字符串匹配，检索效果较差
+        # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化
         filtered_paper = get_filtered_paper(text=message, k=5)
+        print("filtered_paper: ", filtered_paper)
         dialog_type = 'query'
         papers = []
         for paper in filtered_paper:
             papers.append(paper.to_dict())
-        print(papers)
+        # print(papers)
         content = '根据您的需求，我们检索到了一些论文信息'
-        # for i in range(len(papers)):
-        #     content + '\n' + f'第{i}篇：'
-        #     # TODO: 这里需要把papers的信息整理到content里面
-        #     content += f'标题为：{papers[i]["title"]}\n'
-        #     content += f'摘要为：{papers[i]["abstract"]}\n'
+        for i in range(len(papers)):
+            content += '\n' + f'第{i+1}篇：' + papers[i]['title']
+            # content += '\n' + f'第{i+1}篇：'
+            # content += f'标题为：{papers[i]["title"]}\n'
+            # content += f'摘要为：{papers[i]["abstract"]}\n'
+        content += '\n'
     else:
 
         ############################################################
