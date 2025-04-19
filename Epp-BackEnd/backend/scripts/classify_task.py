@@ -117,15 +117,16 @@ if __name__ == "__main__":
             print(f"\n正在处理: {task}")
 
             # 根据任务类型调用不同的处理逻辑
-            if task.type == "query":
+            if task.type == "query": #查询任务，使用RAG本地搜索和google_scholar api共同获得结果
                 print("→ 这是一个查询任务，将使用学术搜索引擎")
-                # 这里可以添加查询任务的处理代码
+                # TODO：这里添加查询任务的处理代码
                 from google_scholar_test import advanced_search
-                results = advanced_search(user_input)
+                #results = advanced_search(user_input)
+                results = "查询到的相关论文信息"
                 print("学术专家结果:", results)
-            elif task.type == "summarize":
+            elif task.type == "summarize": #总结任务，按照之前组的综述报告生成的逻辑，逐步生成综述报告
                 print("→ 这是一个总结任务，将逐步生成综述报告")
-                # 这里可以添加总结任务的处理代码
+                # TODO：这里添加总结任务的处理代码
                 history.append({"role": "user", "content": task.description})
                 try:
                     response = openai.ChatCompletion.create(
@@ -138,7 +139,10 @@ if __name__ == "__main__":
                         history.append({"role": "assistant", "content": response.choices[0].message.content})
                 except Exception as e:
                     print(f"summarize出错: {e}")
-
-            elif task.type == "study":
+                results = "生成的综述报告："
+            elif task.type == "study":# 研读任务，使用搜索引擎专家和原生llm专家（带知识库）共同生成结果（注意区分）
                 print("→ 这是一个研读任务，将结合搜索引擎和LLM专家共同处理")
-                # 这里可以添加研读任务的处理代码
+                # TODO：这里添加研读任务的处理代码
+                result_from_search = "以下是搜索引擎专家的回答：\n"
+                result_from_llm = "以下是llm专家的回答：\n"
+                results = result_from_search + result_from_llm
