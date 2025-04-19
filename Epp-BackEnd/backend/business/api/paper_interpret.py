@@ -173,6 +173,7 @@ def create_paper_study(request):
 
     if response.status_code == 200:
         tmp_kb_id = response.json()['data']['id']
+        print(f"create_tmp_kb_id: {tmp_kb_id}")
         insert_file_2_kb(str(file_reading.id), tmp_kb_id)
         return reply.success({'file_reading_id': file_reading.id, "conversation_history": history}, msg="开启文献研读对话成功")
     else:
@@ -400,13 +401,15 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             "query": query,
             "knowledge_id": tmp_kb_id,
             "history": conversation_history[-10:],  # 传10条历史记录
-            "prompt_name": "text"  # 使用历史记录对话模式
+            "prompt_name": "text",  # 使用历史记录对话模式
+            "max_tokens": 500,
         })
     else:
         payload = json.dumps({
             "query": query,
             "knowledge_id": tmp_kb_id,
-            "prompt_name": "default"  # 使用普通对话模式
+            "prompt_name": "default",  # 使用普通对话模式
+            "max_tokens": 500,
         })
 
     print(f"Sending payload to server: {payload}")
@@ -472,6 +475,7 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
 
         try:
             question_reply, _ = _get_ai_reply(payload)
+            # question_reply = question_reply.replace("\n\n", "\n")   # 避免两次换行
             question_reply = re.sub(r'\d. ', '', question_reply).split("\n")[:2]
             question_reply.append("告诉我更多")
             return question_reply
