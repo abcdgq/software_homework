@@ -144,8 +144,29 @@ if __name__ == "__main__":
                 task.result = results
             elif task.type == "study":# 研读任务，使用搜索引擎专家和原生llm专家（带知识库）共同生成结果（注意区分）
                 print("→ 这是一个研读任务，将结合搜索引擎和LLM专家共同处理")
-                # TODO：这里添加研读任务的处理代码
-                result_from_search = "以下是搜索引擎专家的回答：\n"
-                result_from_llm = "以下是llm专家的回答：\n"
+                # 研读任务的处理代码
+
+                from tavily_test import tavily_simple_search, tavily_advanced_search, tavily_domain_search
+                tavily_result = "\n".join([
+                    f"- [{qa['title']}] {qa['content']} score ：{qa['score']}"
+                    for qa in tavily_simple_search(task.description).get("results")
+                ])
+                result_from_search = "以下是搜索引擎专家的回答：\n"  + tavily_result
+                # result_from_search = "以下是搜索引擎专家的回答：\n"  + tavily_advanced_search(task.description)
+                # result_from_search = "以下是搜索引擎专家的回答：\n"  + tavily_domain_search(task.description)
+                
+                history_for_llm = []
+                history_for_llm.append({"role": "user", "content": task.description})
+                response = openai.ChatCompletion.create(
+                    model=model,
+                    messages=history_for_llm,
+                    stream=False
+                )
+                result = ""
+                if response.choices[0].message.role == "assistant":
+                    result = response.choices[0].message.content
+                result_from_llm = "\n以下是llm专家的回答：\n" + result
+                
                 results = result_from_search + result_from_llm
                 task.result = results
+                print(results)
