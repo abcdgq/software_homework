@@ -8,7 +8,7 @@ model = 'zhipu-api'
 openai.api_base = f'http://{server_ip}:20005/v1'
 openai.api_key = "adadd89573e44bbcab20a88177aef2af.rk3feklpIYygkLPZ"
 
-def aggregate_answers(main_question, child_qa_list):
+def aggregate_answers(main_question, child_qa_list):#TODO:微调prompt
     # 结构化子问题输入
     child_qa_str = "\n".join([
         f"- [{qa.type}] {qa.description}：{qa.result}"
@@ -38,16 +38,8 @@ def aggregate_answers(main_question, child_qa_list):
     - 核心问题表述
     - 证据链梳理（标注来源任务类型）
     - 遗留不确定性说明（来自低置信度内容）
-   - 若存在`总结任务`，则将总结任务的**综述报告**在最后输出
+   - 若存在`类型为summarize的总结任务`，则将总结任务的**综述报告**在最后输出
 4. **最终输出**：用简明学术语言回答大问题，引用子结论时标注类型。
-
-# 输出格式
-**综合结论**
-你的归纳总结（分段结构，必要时分点)
-{{if 存在总结任务}}
-**综述报告**
-输出总结任务回答的综述报告
-{{endif}}
     """
     
     try:
