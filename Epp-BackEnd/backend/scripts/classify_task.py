@@ -14,7 +14,7 @@ class Task:
     def __init__(self, description: str, task_type: str):
         self.description = description  # 任务描述
         self.type = task_type  # 任务类型: "query", "summarize", "study"
-
+        self.result = ""
     def __str__(self):
         return f"{self.type.upper()}任务: {self.description}"
 
@@ -123,6 +123,7 @@ if __name__ == "__main__":
                 from google_scholar_test import advanced_search
                 #results = advanced_search(user_input)
                 results = "查询到的相关论文信息"
+                task.result = results
                 print("学术专家结果:", results)
             elif task.type == "summarize": #总结任务，按照之前组的综述报告生成的逻辑，逐步生成综述报告
                 print("→ 这是一个总结任务，将逐步生成综述报告")
@@ -140,9 +141,11 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(f"summarize出错: {e}")
                 results = "生成的综述报告："
+                task.result = results
             elif task.type == "study":# 研读任务，使用搜索引擎专家和原生llm专家（带知识库）共同生成结果（注意区分）
                 print("→ 这是一个研读任务，将结合搜索引擎和LLM专家共同处理")
                 # TODO：这里添加研读任务的处理代码
                 result_from_search = "以下是搜索引擎专家的回答：\n"
                 result_from_llm = "以下是llm专家的回答：\n"
                 results = result_from_search + result_from_llm
+                task.result = results

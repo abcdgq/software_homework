@@ -1,6 +1,5 @@
 #对于归纳总结，我们首先需要 原问题， 拆解后的子问题， 对于每个子问题得到的回答
 #利用大模型进行格式化的输出和总结（设计prompt）
-import json
 import openai
 
 server_ip = '115.190.109.233'
@@ -12,7 +11,7 @@ openai.api_key = "adadd89573e44bbcab20a88177aef2af.rk3feklpIYygkLPZ"
 def aggregate_answers(main_question, child_qa_list):
     # 结构化子问题输入
     child_qa_str = "\n".join([
-        f"- [{qa['type']}] {qa['question']}：{qa['answer']}"
+        f"- [{qa.type}] {qa.description}：{qa.result}"
         for qa in child_qa_list
     ])
     
