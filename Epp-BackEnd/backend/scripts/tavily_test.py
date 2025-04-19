@@ -7,19 +7,15 @@ TAVILY_API_KEY = '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'
 tavily = TavilyClient(api_key=TAVILY_API_KEY)
 
 
-def tavily_simple_search():
-    query = "VQ-VAE介绍"
+def tavily_simple_search(query:str):
+    query = query
     response = tavily.search(query)
     return response
 
 
 # 高级搜索示例：限定arXiv并排除会议论文
-def tavily_advanced_search():
-    query = """
-        "transformer model" AND "natural language processing"
-        site:arxiv.org
-        -"conference proceedings"
-    """
+def tavily_advanced_search(query:str):
+    query = str
         
     response = tavily.search(
         query=query,
@@ -32,9 +28,9 @@ def tavily_advanced_search():
 
 
 # 利用 Tavily 高级搜索参数
-def tavily_domain_search():
+def tavily_domain_search(query:str):
     response = tavily.search(
-        query="quantum computing applications",
+        query=query,
         search_depth="advanced",
         max_results=50,
         include_domains=["sciencedirect.com", "nature.com"],    # 指定学术网站（如 ["arxiv.org", "springer.com", "ieee.org"]），缩小搜索范围。
