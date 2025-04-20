@@ -417,7 +417,7 @@ export default {
     // 强转整数也没太大事，但就小数表示吧。虽然是代表像素之类的 ，说是现在为了更精准显示，都是小数.
     saveAnnotation (x, y, width, height, pageNum, comment, isPublic) {
       // 就按照这个数据格式传就行，这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一canvas）
-      axios.post(this.$BASE_API_URL + '/study/saveAnnotation', {
+      axios.post(this.$BASE_API_URL + '/study/saveNote', {
         params: {
           x, y, width, height, pageNum, comment, paper_id: this.paper_id, isPublic // 虽然没传username，但是后端要存
           // 后端可以在session里取出username,暂时不管评论时间？
@@ -429,6 +429,7 @@ export default {
         const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: response.data.id } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
         // this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
         this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
+        this.annotations = this.allAnnotations
         this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
       }).catch(error => {
         console.error('保存注释失败', error)
@@ -473,7 +474,7 @@ export default {
       this.allAnnotations = this.allAnnotations.filter(annotation => annotation.id !== annotationId) // 从本地数组中删除注释
       this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
       // TODO 可以把删除注释的放在post返回结果后再进行，但是我相信他会删成功，就直接这样了.
-      axios.post(this.$BASE_API_URL + '/study/deleteAnnotation', { 'annotation_id': annotationId })
+      axios.post(this.$BASE_API_URL + '/study/deleteNote', { 'annotation_id': annotationId })
         .then(response => {
           this.$message({
             message: '删除批注成功',
@@ -573,7 +574,6 @@ export default {
     },
     downloadPaper () {
       // 实现下载功能
-      // axios.post(this.$BASE_API_URL + '/study/batchDownloadTranslated', {'paper_id_list': [this.paper_id]})
       axios.get(this.$BASE_API_URL + '/study/downloadTranslated?document_id=' + this.paper_id)
         .then((response) => {
           if (response.data.is_success === true) {
