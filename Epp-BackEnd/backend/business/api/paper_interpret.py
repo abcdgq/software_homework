@@ -273,7 +273,9 @@ async def async_test(request):
 
 def get_paper_local_url(paper):
     local_path = paper.local_path
-    if not local_path:
+    print('local_path:' + local_path)
+    if not local_path.endswith('.pdf'):
+        print('path is null')
         original_url = paper.original_url
         # 将路径中的abs修改为pdf
         original_url = original_url.replace('abs', 'pdf')
@@ -301,8 +303,10 @@ def get_paper_url(request):
 
     paper_id = request.GET.get('paper_id')
     paper = Paper.objects.get(paper_id=paper_id)
+    print('title:' + paper.title)
     paper_local_url = get_paper_local_url(paper)
     if paper_local_url is None:
+        print('文献下载失败，请检查网络或联系管理员')
         return reply.fail(msg="文献下载失败，请检查网络或联系管理员")
     return reply.success({"local_url": "/" + paper_local_url}, msg="success")
 
