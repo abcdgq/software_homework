@@ -502,8 +502,8 @@ export default {
         })
         return
       }
-      console.log(this.commentReason)
-      const reason = this.commentReason
+      console.log(this.reportReason)
+      const reason = this.reportReason
       const annotationId = this.pendingAnnotationId
       // alert('举报理由：' + reason + '，批注ID：' + annotationId)
       axios.post(this.$BASE_API_URL + '/study/reportAnnotation', { 'annotation_id': annotationId, 'reason': reason })
