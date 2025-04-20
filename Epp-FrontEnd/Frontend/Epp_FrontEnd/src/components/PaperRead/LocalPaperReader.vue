@@ -4,12 +4,29 @@
         <!-- <iframe :src="pdfUrl" style="width: 100%; height: 755px;" frameborder="0"> -->
         <!-- </iframe> -->
         <div id="pdf-viewer-container" style="width: 100%; height: 755px;"></div>
+        <!-- 下面加一个发表批注时候的框，来更美观 -->
+        <el-dialog title="发表批注" :visible.sync="showCommentModal" width="50%" @close="closeCommentModal">
+          <el-form>
+              <el-form-item>
+                  <el-input type="textarea" placeholder="添加批注..." v-model="newComment" autosize>
+                  </el-input>
+              </el-form-item>
+          </el-form>
+          <span slot="footer">
+              <el-button @click="showCommentModal = false">取 消</el-button>
+              <el-button type="primary" @click="submitComment('private')">私有批注</el-button>
+              <el-button type="primary" @click="submitComment('public')">共有批注</el-button>
+          </span>
+        </el-dialog>
       </el-col>
       <el-col :span="8" style="margin-top: 50px">
         <!-- <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" /> -->
         <div style="margin-bottom: 20px;">
           <el-button @click="showReadAssistant = true" :type="showReadAssistant ? 'primary' : ''">阅读助手</el-button>
           <el-button @click="showReadAssistant = false" :type="!showReadAssistant ? 'primary' : ''">评论管理</el-button>
+          <!-- <el-button @click="toggleTranslation" :type="isTranslated ? 'primary' : ''" class="special-button">
+          {{ isTranslated ? '取消翻译' : '翻译全文' }}</el-button> -->
+          <el-button type="text" icon="el-icon-download" @click="downloadPaper">下载翻译PDF</el-button>
         </div>
         <div v-if="showReadAssistant">
           <read-assistant :paperID="paper_id" :fileReadingId="fileReadingID" />
@@ -31,6 +48,13 @@
           <div class="comment-container">
             <div v-for="annotation in annotations" :key="annotation.id">
               <div class="annotation">
+                <div class="annotation-User">
+                  <!-- <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p> -->
+                  <p class="annotation-time" style="white-space: pre-line;">
+                    {{ formatDate(annotation.date) || '刚刚' }}
+                  </p>
+                  <p>{{ annotation.userName }}</p>
+                </div>
                 <div class="annotation-content">
                   <p>{{ annotation.comment }}</p>
                 </div>
@@ -41,10 +65,52 @@
                   <div v-else>
                     <el-button type="text" @click="reportAnnotation(annotation.id)">举报</el-button>
                   </div>
+                  <el-dialog title="举报批注" :visible.sync="showReport" width="50%" @close="closeReport">
+                    <el-form>
+                        <el-form-item>
+                            <el-input type="textarea" placeholder="添加举报理由..." v-model="reportReason" autosize>
+                            </el-input>
+                        </el-form-item>
+                    </el-form>
+                    <span slot="footer">
+                        <el-button @click="showReport = false">取 消</el-button>
+                        <el-button type="primary" @click="reportComment()">确认</el-button>
+                    </span>
+                  </el-dialog>
                 </div>
               </div>
             </div>
           </div>
+          <!-- <div class="comment-container">
+            <div v-for="annotation in annotations" :key="annotation.id" class="comment-item">
+              <el-row> -->
+                <!-- 用户名、时间 -->
+                <!-- <el-col :span="2">
+                  <div class="date">{{ annotation.createdAt || '刚刚' }}</div>
+                  <div style="font-weight: bold;">{{ annotation.userName || '匿名用户' }}</div>
+                </el-col> -->
+
+                <!-- 评论内容区域 -->
+                <!-- <el-col :span="22">
+                  <div class="comment-content"> -->
+                    <!-- 操作按钮 -->
+                    <!-- <div class="my-footer">
+                      <span class="actions">
+                        <el-button type="text" v-if="annotation.userName === currentUser" @click="deleteAnnotation(annotation.id)">
+                          删除
+                        </el-button>
+                        <el-button type="text" v-else @click="reportAnnotation(annotation.id)">
+                          举报
+                        </el-button>
+                      </span>
+                    </div> -->
+                    <!-- 评论内容 -->
+                    <!-- <div class="text">{{ annotation.comment }}</div>
+                  </div>
+                </el-col>
+              </el-row>
+            </div>
+          </div> -->
         </div>
       </el-col>
     </el-row>
@@ -65,7 +131,9 @@ export default {
   },
   data () {
     return {
-      pdfUrl: '',
+      pdfUrl: '', // 用来显示的url
+      originalUrl: '', // 用来保存原始PDF的URL
+      translatedUrl: '', // 用来保存翻译后的PDF的URL
       fileReadingID: '',
       isSelecting: false, // 是否正在框选
       startX: 0, // 框选起始点的X坐标
@@ -79,19 +147,28 @@ export default {
       currentUser: localStorage.getItem('username'), // 当前用户
       filterType: 'all', // 筛选类型
       displayType: 'all', // 显示类型
-      allPageNumbers: [] // 所有页面的页码
+      allPageNumbers: [], // 所有页面的页码
+      showCommentModal: false, // 是否显示发表批注框
+      newComment: '', // 新批注内容
+      isPublicComment: false, // 是否为公共批注
+      pendingAnnotation: null, // 正在发表的批注内容
+      isTranslated: false, // 是否翻译过
+      showReport: false, // 是否显示举报框
+      pendingAnnotationId: null, // 正在举报的批注ID
+      reportReason: '' // 新举报理由
     }
   },
   created () {
+    this.loadPDFJS() // 动态加载PDF.js库，即使pdfurl修改，也不需要重新加载
     this.fetchPaperPDF()
     this.fileReadingID = this.$route.query.fileReadingID
-    this.loadPDFJS()
   },
   methods: {
     fetchPaperPDF () {
       axios.get(this.$BASE_API_URL + '/getDocumentURL?document_id=' + this.paper_id)
         .then((response) => {
-          this.pdfUrl = this.$BASE_URL + response.data.local_url
+          this.originalUrl = this.$BASE_URL + response.data.local_url
+          this.pdfUrl = this.originalUrl
           //   this.pdfUrl = '../../../static/Res3ATN -- Deep 3D Residual Attention Network for Hand Gesture  Recognition in Videos.pdf'
           console.log('论文PDF为', this.pdfUrl)
           this.initPDFViewer()
@@ -229,12 +306,32 @@ export default {
 
     // 下面的x,y,width,height,pageNum,comment都是相对于canvas的坐标。
     showCommentDialog (x, y, width, height, pageNum) {
-      const comment = prompt('请输入评论:')
-      if (comment) {
-        const isPublic = confirm('是否公开评论？')
-        this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
-        this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+      // const comment = prompt('请输入评论:')
+      // if (comment) {
+      //   const isPublic = confirm('是否公开评论？')
+      //   this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
+      //   this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+      // }
+      // 把参数临时保存起来，等待用户填写评论后再用
+      this.pendingAnnotation = { x, y, width, height, pageNum }
+      this.newComment = ''
+      this.isPublicComment = true // 默认是公开
+      this.showCommentModal = true
+    },
+    submitComment (type) {
+      if (!this.newComment.trim()) {
+        this.$message({
+          message: '请输入批注内容',
+          type: 'warning'
+        })
+        return
       }
+      console.log(`提交${type === 'private' ? '私有' : '共有'}批注：`, this.newComment)
+      const isPublic = type === 'public'
+      const comment = this.newComment
+      const { x, y, width, height, pageNum } = this.pendingAnnotation
+      this.saveAnnotation(x, y, width, height, pageNum, comment, isPublic)
+      this.closeCommentModal()
     },
     // 把一条注释渲染到页面上，这里的x,y,width,height,pageNum都是相对于canvas的坐标。
     // 具体来说，pageNum确定了页码。x,y是左上角坐标，width,height是宽高。并且这四个是相对于这一页的坐标。
@@ -282,6 +379,9 @@ export default {
         tooltip.style.left = `${canvas.offsetLeft + x}px`
         tooltip.style.top = `${canvas.offsetTop + y + height + 5}px`
         tooltip.style.display = 'block'
+        tooltip.style.textAlign = 'left'
+        tooltip.style.whiteSpace = 'normal' // 允许换行
+        tooltip.style.maxWidth = '400px' // 设置最大宽度
       })
 
       annotationBox.addEventListener('mouseleave', () => {
@@ -314,10 +414,7 @@ export default {
     // 具体格式方面，x，y,width,height,都是小数，pageNum是整数（正整数，但不会很大，直接当整数就行）。comment是字符串。当然，小数那点误差不是很重要。
     // 强转整数也没太大事，但就小数表示吧。虽然是代表像素之类的 ，说是现在为了更精准显示，都是小数.
     saveAnnotation (x, y, width, height, pageNum, comment, isPublic) {
-      const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: Math.floor(Math.random() * 100) + 1 } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
-      this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
-      this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
-      // TODO 等之后前后端连通，上面这两行就不需要了，因为下面会push进去。
+      // const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: Math.floor(Math.random() * 100) + 1 } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
       // 就按照这个数据格式传就行，这里的x,y,height,width都是相对于pageNum所在的canvas的坐标。（一页一canvas）
       axios.post(this.$BASE_API_URL + '/saveAnnotation', {
         params: {
@@ -329,10 +426,19 @@ export default {
         // window.location.reload()// 刷新页面，重新渲染所有注释，因为注释的id是后端生成的，只能重新从后端获取。
         // 当前，也可以在这个response里，把新加的注释的id返回给前端，前端再把id存到本地，这样就不用重新刷新页面了。
         const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: response.data.id } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
-        this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
         this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
+        // this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
+        this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+        this.$message({
+          message: '添加批注成功',
+          type: 'success'
+        })
       }).catch(error => {
         console.error('保存注释失败', error)
+        this.$message({
+          message: '添加批注失败',
+          type: 'error'
+        })
       })
     },
     // 重新渲染所有注释，也就是删除旧的注释框，重新渲染新的注释框。也就是对每个公开或自己的评论分别renderAnnotation。
@@ -363,7 +469,7 @@ export default {
       axios.get(this.$BASE_API_URL + '/getAnnotations?document_id=' + this.paper_id)
         .then(response => {
           this.allAnnotations = response.data.annotations
-          this.annotations = this.allAnnotations
+          this.annotations = this.allAnnotations// .filter()的话，这里两个数组引用就不是同一个地方，save的时候就要save两个地方
           this.renderAnnotations() // 直接渲染所有注释，这里就不从数据库重新调了
         }).catch(error => {
           console.error('加载注释失败', error)
@@ -390,12 +496,26 @@ export default {
         })
     },
     reportAnnotation (annotationId) {
-      // TODO 这里应该弹出一个对话框，让用户输入举报理由，然后把举报信息发送给后端。
-      const reason = prompt('请输入举报理由:') // 弹出提示框，让用户输入举报理由
+      // const reason = prompt('请输入举报理由:') // 弹出提示框，让用户输入举报理由
+      this.pendingAnnotationId = annotationId
+      this.showReport = true
+    },
+    reportComment () {
+      if (!this.reportReason.trim()) {
+        this.$message({
+          message: '请输入举报理由',
+          type: 'warning'
+        })
+        return
+      }
+      console.log(this.commentReason)
+      const reason = this.commentReason
+      const annotationId = this.pendingAnnotationId
+      // alert('举报理由：' + reason + '，批注ID：' + annotationId)
       axios.post(this.$BASE_API_URL + '/reportAnnotation', { 'annotation_id': annotationId, 'reason': reason })
         .then(response => {
           this.$message({
-            message: '举报批注成功',
+            message: '举报批注成功,请等管理员处理',
             type: 'success'
           })
           // this.loadAnnotations() // 重新加载注释
@@ -406,6 +526,12 @@ export default {
             type: 'error'
           })
         })
+      this.closeReport()
+    },
+    closeReport () {
+      this.showReport = false
+      this.pendingAnnotationId = null
+      this.reportReason = ''
     },
     filterComments () {
       this.annotations = this.allAnnotations.filter(annotation => {
@@ -426,6 +552,63 @@ export default {
         }
       })
       this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+    },
+    closeCommentModal () {
+      this.showCommentModal = false
+      this.newComment = ''
+    },
+    toggleTranslation () {
+      this.isTranslated = !this.isTranslated
+      if (this.isTranslated) {
+        this.translateAllText()
+      } else {
+        this.restoreOriginalText()
+      }
+    },
+    translateAllText () {
+      axios.get(this.$BASE_API_URL + '/getDocumentTranslatedURL?document_id=' + this.paper_id)// 这里的路径和下面的冲了，但是这个方法不会调用，所以没问题
+        .then((response) => {
+          this.translatedUrl = this.$BASE_URL + response.data.local_url
+          this.pdfUrl = this.translatedUrl
+          //   this.pdfUrl = '../../../static/Res3ATN -- Deep 3D Residual Attention Network for Hand Gesture  Recognition in Videos.pdf'
+          console.log('论文PDF为', this.pdfUrl)
+          this.initPDFViewer()
+        })
+        .catch((error) => {
+          console.log('请求论文PDF失败 ', error)
+        })
+    },
+    downloadPaper () {
+      // 实现下载功能
+      // axios.post(this.$BASE_API_URL + '/batchDownloadTranslated', {'paper_id_list': [this.paper_id]})
+      axios.get(this.$BASE_API_URL + '/downloadTranslated?document_id=' + this.paper_id)
+        .then((response) => {
+          if (response.data.is_success === true) {
+            this.$message({
+              message: '开始下载！',
+              type: 'success'
+            })
+            const zipUrl = this.$BASE_URL + response.data.zip_url
+            const link = document.createElement('a')
+            link.href = zipUrl
+            link.download = 'papers.zip'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error)
+        })
+    },
+    restoreOriginalText () {
+      this.pdfUrl = this.originalUrl
+      this.initPDFViewer()
+    },
+    formatDate (date) {
+      if (!date) return ''
+      const [d, t] = date.split('T')
+      return `${d}\n${t.slice(0, 8)}` // 只保留到秒
     }
   }
 }
@@ -437,10 +620,24 @@ export default {
   justify-content: space-between;
   align-items: center;
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 8px 12px;
   margin-bottom: 10px;
   border-radius: 5px;
   background-color: #f9f9f9;
+}
+
+.annotation-User {
+  /* margin-bottom: 4px;              和评论内容之间留一点垂直间距 */
+  line-height: 1.2;/* 1.4倍的字体行高 */
+}
+.annotation-time {
+  font-size: 13px;                 /* 时间字体小一点，降低视觉优先级 */
+  color: #888;                     /* 灰色字体，不突兀 */
+  margin: 0;                       /* 去掉浏览器默认上下 margin */
+}
+.annotation-User p {
+  margin: 0;                       /* 去除默认 margin，防止上下挤开太远 */
+  font-weight: 500;               /* 让用户名略粗一点，看起来清晰 */
 }
 
 .annotation-content {
@@ -461,5 +658,21 @@ export default {
   /* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间150px（可大可小,应该是前面漏减了，这里必须多减点) */
   /* */
   /* flex-grow: 1 */
+}
+
+.special-button {
+  background-color: #ff9900; /* 自定义背景颜色 */
+  border-color: #ff9900; /* 自定义边框颜色 */
+  color: white; /* 自定义文字颜色 */
+}
+
+.special-button:hover {
+  background-color: #ff7f00; /* 自定义悬停背景颜色 */
+  border-color: #ff7f00; /* 自定义悬停边框颜色 */
+}
+
+.special-button:focus {
+  border-color: #ff7f00; /* 自定义聚焦边框颜色 */
+  box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.3); /* 自定义聚焦阴影 */
 }
 </style>

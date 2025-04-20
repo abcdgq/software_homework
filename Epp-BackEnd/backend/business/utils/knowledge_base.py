@@ -56,13 +56,16 @@ def build_abs_kb_by_paper_ids(paper_id_list, file_name):
     '''
     files = []
     file_name = str(file_name)
+    print("摘要知识库文件名: ", file_name)
     # 至多5个论文
     paper_id_list = paper_id_list[:5] if len(paper_id_list) > 5 else paper_id_list
     content = ''
     for id in paper_id_list:
         p = Paper.objects.get(paper_id=id)
         content += p.title + '\n' + p.abstract + '\n'
+        print("构建知识库相关论文: ", p.title)
     local_path = os.path.join(settings.PAPERS_ABS_PATH, file_name + '.txt')
+    print("构建知识库文件路径: ", local_path)
     # 不存在则创建
     if not os.path.exists(settings.PAPERS_ABS_PATH):
         os.makedirs(settings.PAPERS_ABS_PATH)
@@ -70,17 +73,30 @@ def build_abs_kb_by_paper_ids(paper_id_list, file_name):
         f.write(content.encode())  # 将字符串转换为字节串并写入文件
     with open(local_path, 'rb') as f:
         file_content = f.read()  # 读取文件内容为字节串
+        # files.append(('files', (open(local_path, 'rb'))))
+    # files.append(
+    #     ('files', (file_name + '.txt', file_content,
+    #                'application/vnd.openxmlformats-officedocument.presentationml.presentation')))
     files.append(
-        ('files', (file_name + '.txt', file_content,
-                   'application/vnd.openxmlformats-officedocument.presentationml.presentation')))
+        ('files', (file_name + '.txt', open(local_path, 'rb'),
+                   'text/plain')))
     print('下载完毕')
     upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
     try:
         response = requests.post(upload_temp_docs_url, files=files)
+        # 处理响应
+        if response.status_code == 200:
+            print("上传成功！")
+            print("响应内容:", response.json())
+        else:
+            print(f"请求失败，状态码: {response.status_code}")
+            print("错误详情:", response.text)
     except Exception as e:
+        print("发生错误:", e)
         raise e
     # 关闭文件，防止内存泄露
     if response.status_code != 200:
+        print("连接模型服务器失败")
         raise Exception("连接模型服务器失败")
     tmp_kb_id = response.json()['data']['id']
     return tmp_kb_id
