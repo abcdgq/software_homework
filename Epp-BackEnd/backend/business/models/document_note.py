@@ -1,22 +1,19 @@
 """
-私有笔记表
+上传文献私有笔记表
 """
-from email.policy import default
 
 from django.db import models
 import uuid
 
 from .user import User
-from .paper import Paper
 from .user_document import UserDocument
 
-class FileNote(models.Model):
+class DocumentNote(models.Model):
     """
     Field:
         - note_id               笔记ID
-        - user_id               用户ID
-        # - document_id           用户文件ID
-        - paper_id              论文ID
+        - user                  用户
+        - document              用户文件
         - date                  笔记创建时间
 
         - x                     x坐标
@@ -26,12 +23,10 @@ class FileNote(models.Model):
         - pageNum               笔记所在页数
         - comment               笔记内容
         - username              用户名
-        - isPublic              是否公开
     """
     note_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    # document_id = models.ForeignKey(UserDocument, on_delete=models.CASCADE, null=True, blank=True)
-    paper_id = models.ForeignKey(Paper, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    document = models.ForeignKey(UserDocument, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateTimeField(auto_now=True)
 
     x = models.FloatField(default=0.0)
@@ -41,5 +36,4 @@ class FileNote(models.Model):
     pageNum = models.IntegerField(default=1)
     comment = models.TextField(default="")
     username = models.CharField(max_length=255)
-    isPublic = models.BooleanField(default=False)
 
