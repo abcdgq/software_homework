@@ -47,6 +47,10 @@ urlpatterns = [
                   path("api/likeComment", paper_details.like_comment),
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
 
+                  path("api/saveNote", paper_details.save_paper_note),
+                  path("api/getNotes", paper_details.get_paper_annotation),
+                  path("api/deleteNote", paper_details.delete_paper_note),
+
                   path("api/study/saveNote", paper_details.save_paper_note),
                   path("api/study/getAnnotations", paper_details.get_paper_annotation),
                   path("api/study/deleteNote", paper_details.delete_paper_note),
@@ -103,7 +107,7 @@ urlpatterns = [
                   path("api/search/dialogQuery", search.dialog_query),
                   path("api/search/flush", search.flush),
                   path("api/search/restoreSearchRecord", search.restore_search_record),
-                  path("api/study/getUserSearchHistory", search.get_user_search_history),
+                  path("api/search/getUserSearchHistory", search.get_user_search_history),
                   path('api/search/rebuildKB', search.build_kb),
                   # path('api/search/getSearchRecord', get_search_record),
                   path('api/search/changeRecordPapers', search.change_record_papers),
