@@ -483,6 +483,7 @@ def get_paper_annotation(request):
     获得公开批注
     '''
     paper_id = request.GET.get('paper_id')
+    print(paper_id)
 
     data = {
         'annotations': []
@@ -490,7 +491,11 @@ def get_paper_annotation(request):
 
     paper = Paper.objects.filter(paper_id=paper_id).first()
 
+    print(paper)
+
     annotation_list = FileAnnotation.objects.filter(paper_id=paper)
+
+    print(annotation_list)
 
     for annotation in annotation_list:
         note = annotation.note
@@ -553,9 +558,11 @@ def report_paper_annotation(request):
     举报批注
     '''
     data = json.loads(request.body)
+    print(data)
     username = request.session.get('username')
     note_id = data.get('annotation_id')
     reason = data.get('reason')
+    print(reason)
     user = User.objects.filter(username=username).first()
 
     note = FileNote.objects.filter(note_id=note_id).first()
