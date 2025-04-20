@@ -142,7 +142,7 @@ def download_document_translated_url(request):
         zip_file_path = os.path.join(BATCH_DOWNLOAD_PATH, zip_name)
         print(zip_file_path)
         with zipfile.ZipFile(zip_file_path, 'w') as z:
-            z.write(translated_filename)
+            z.write(translated_filename, arcname=os.path.basename(translated_filename))
 
         zip_url = BATCH_DOWNLOAD_URL + zip_name
 
@@ -182,6 +182,7 @@ def get_random_pdf(directory):
         raise FileNotFoundError(f"未找到PDF文件，目录：{target_dir}")
 
     return target_dir + '\\' + random.choice(pdf_files)
+    # return random.choice(pdf_files)
 
 # translated_filename = get_random_pdf('/resource/database/papers')
 # print(translated_filename)

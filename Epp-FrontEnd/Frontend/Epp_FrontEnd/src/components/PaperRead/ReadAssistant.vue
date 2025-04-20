@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height: calc(100vh - 60px);" class="read-assistant">
+  <el-container style="height: calc(100vh - 110px);" class="read-assistant">
     <el-header class="my-header">
       <h3>调研助手</h3>
       <div>
