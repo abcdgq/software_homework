@@ -490,7 +490,8 @@ def get_paper_annotation(request):
 
     paper = Paper.objects.filter(paper_id=paper_id).first()
 
-    annotation_list = PaperAnnotation.objects.filter(paper_id=paper)
+    annotation_list = FileAnnotation.objects.filter(paper_id=paper)
+        # annotation_list = PaperAnnotation.objects.filter(paper_id=paper)
 
     for annotation in annotation_list:
         note = annotation.note
@@ -528,7 +529,7 @@ def delete_paper_note(request):
     data = json.loads(request.body)
     note_id = data.get('annotation_id') # 由于后端提供的是note_id，前端返回的也是note_id
 
-    note = FileNote.objects.filter(node_id=note_id).first()
+    note = FileNote.objects.filter(note_id=note_id).first()
 
     if not note:
         return reply.fail(
