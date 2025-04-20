@@ -23,5 +23,5 @@ class AnnotationReport(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     content = models.TextField(null=True, blank=True)
-    judgment = models.TextField(deafult='', null=True, blank=True)
+    judgment = models.TextField(default='', null=True, blank=True)
     processed = models.BooleanField(default=False)
