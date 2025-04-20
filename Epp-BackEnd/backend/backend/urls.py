@@ -47,10 +47,10 @@ urlpatterns = [
                   path("api/likeComment", paper_details.like_comment),
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
 
-                  path("api/saveNote", paper_details.save_paper_note),
-                  path("api/getAnnotations", paper_details.get_paper_annotation),
-                  path("api/deleteNote", paper_details.delete_paper_note),
-                  path("api/reportAnnotation", paper_details.report_paper_annotation),
+                  path("api/study/saveNote", paper_details.save_paper_note),
+                  path("api/study/getAnnotations", paper_details.get_paper_annotation),
+                  path("api/study/deleteNote", paper_details.delete_paper_note),
+                  path("api/study/reportAnnotation", paper_details.report_paper_annotation),
 
 
                   # 用户上传论文模块
