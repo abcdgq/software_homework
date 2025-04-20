@@ -467,7 +467,7 @@ export default {
     // }
     // 同时，后端可以根据session里的username来判断是否是自己的评论，只能返回自己的评论和他人的公开评论。
     loadAnnotations () {
-      axios.get(this.$BASE_API_URL + '/getAnnotations?paper_id=' + this.paper_id)
+      axios.get(this.$BASE_API_URL + '/getAnnotations?document_id=' + this.paper_id)
         .then(response => {
           this.allAnnotations = response.data.annotations
           this.annotations = this.allAnnotations// .filter()的话，这里两个数组引用就不是同一个地方，save的时候就要save两个地方
