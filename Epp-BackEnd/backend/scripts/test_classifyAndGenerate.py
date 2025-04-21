@@ -22,8 +22,8 @@ if __name__ == '__main__':
         if len(uselist) >= 3:
             break
         else: #数量不够就重新问，重新筛
-            qa_list = tavily_simple_search(task.description).get("results")
-            selist = []
+            qa_list = tavily_simple_search(task.description + "len < 600").get("results")
+            uselist = []
 
     
     tavily_result = "\n".join([
