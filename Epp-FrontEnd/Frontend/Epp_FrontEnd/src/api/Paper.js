@@ -6,7 +6,7 @@ const instance = axios.create({baseURL: serverUrl})
 export const translateAbstract = (paperId) => {
   return instance({
     method: 'get',
-    url: '',
+    url: 'api/paper/translate_abstract',
     params: {
       paper_id: paperId
     }
