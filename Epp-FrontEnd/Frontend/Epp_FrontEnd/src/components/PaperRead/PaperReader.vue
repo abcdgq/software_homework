@@ -49,7 +49,9 @@
           <div v-for="annotation in annotations" :key="annotation.id">
             <div class="annotation">
               <div class="annotation-User">
-                <!-- <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p> -->
+                <div class="annotation-avatar">
+                  {{ annotation.userName.charAt(0).toUpperCase() }}
+                </div>
                 <p class="annotation-time" style="white-space: pre-line;">
                     {{ formatDate(annotation.date) || '刚刚' }}
                 </p>
@@ -83,18 +85,15 @@
         </div>
         <!-- <div class="comment-container">
           <div v-for="annotation in annotations" :key="annotation.id" class="comment-item">
-            <el-row> -->
-              <!-- 用户名、时间 -->
-              <!-- <el-col :span="2">
+            <el-row>
+              <el-col :span="2">
                 <div class="date">{{ annotation.createdAt || '刚刚' }}</div>
                 <div style="font-weight: bold;">{{ annotation.userName || '匿名用户' }}</div>
-              </el-col> -->
+              </el-col>
 
-              <!-- 评论内容区域 -->
-              <!-- <el-col :span="22">
-                <div class="comment-content"> -->
-                  <!-- 操作按钮 -->
-                  <!-- <div class="my-footer">
+              <el-col :span="22">
+                <div class="comment-content">
+                  <div class="my-footer">
                     <span class="actions">
                       <el-button type="text" v-if="annotation.userName === currentUser" @click="deleteAnnotation(annotation.id)">
                         删除
@@ -103,9 +102,8 @@
                         举报
                       </el-button>
                     </span>
-                  </div> -->
-                  <!-- 评论内容 -->
-                  <!-- <div class="text">{{ annotation.comment }}</div>
+                  </div>
+                  <div class="text">{{ annotation.comment }}</div>
                 </div>
               </el-col>
             </el-row>
@@ -608,7 +606,97 @@ export default {
 </script>
 
 <style scoped>
+
+.comment-container {
+  overflow-y: auto;
+  height: calc(100vh - 220px);
+  padding: 10px;
+  background-color: #f4f4f5;
+}
+
+/* 评论卡片 */
 .annotation {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  word-break: break-word;
+  position: relative;
+}
+
+/* 头像 + 用户信息布局 */
+.annotation-User {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.annotation-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #409eff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.annotation-userinfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.annotation-userinfo p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 时间在右上角 */
+.annotation-time {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* 评论内容 */
+.annotation-content {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  margin-top: 4px;
+}
+
+/* 操作按钮 */
+.annotation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.annotation-actions .el-button {
+  font-size: 13px;
+  color: #409EFF;
+  padding: 2px 6px;
+}
+
+/* .annotation {
 display: flex;
 justify-content: space-between;
 align-items: center;
@@ -620,17 +708,16 @@ background-color: #f9f9f9;
 }
 
 .annotation-User {
-/* margin-bottom: 4px;              和评论内容之间留一点垂直间距 */
-line-height: 1.4;/* 1.4倍的字体行高 */
+line-height: 1.4;
 }
 .annotation-time {
-font-size: 13px;                 /* 时间字体小一点，降低视觉优先级 */
-color: #888;                     /* 灰色字体，不突兀 */
-margin: 0;                       /* 去掉浏览器默认上下 margin */
+font-size: 13px;
+color: #888;
+margin: 0;
 }
 .annotation-User p {
-margin: 0;                       /* 去除默认 margin，防止上下挤开太远 */
-font-weight: 500;               /* 让用户名略粗一点，看起来清晰 */
+margin: 0;
+font-weight: 500;
 }
 
 .annotation-content {
@@ -648,15 +735,12 @@ margin: 0;
 .comment-container {
 overflow-y: auto;
 height: calc(100vh - 50px - 20px - 150px);
-/* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间150px（可大可小,应该是前面漏减了，这里必须多减点) */
-/* */
-/* flex-grow: 1 */
-}
+} */
 
 .special-button {
-background-color: #ff9900; /* 自定义背景颜色 */
-border-color: #ff9900; /* 自定义边框颜色 */
-color: white; /* 自定义文字颜色 */
+background-color: #ff9900;
+border-color: #ff9900;
+color: white;
 }
 
 .special-button:hover {

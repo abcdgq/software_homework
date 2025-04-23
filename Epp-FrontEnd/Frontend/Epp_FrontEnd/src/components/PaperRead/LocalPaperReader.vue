@@ -49,6 +49,9 @@
             <div v-for="annotation in annotations" :key="annotation.id">
               <div class="annotation">
                 <div class="annotation-User">
+                  <div class="annotation-avatar">
+                    {{ annotation.userName.charAt(0).toUpperCase() }}
+                  </div>
                   <!-- <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p> -->
                   <p class="annotation-time" style="white-space: pre-line;">
                     {{ formatDate(annotation.date) || '刚刚' }}
@@ -615,49 +618,93 @@ export default {
 </script>
 
 <style scoped>
-.annotation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-}
-
-.annotation-User {
-  /* margin-bottom: 4px;              和评论内容之间留一点垂直间距 */
-  line-height: 1.2;/* 1.4倍的字体行高 */
-}
-.annotation-time {
-  font-size: 13px;                 /* 时间字体小一点，降低视觉优先级 */
-  color: #888;                     /* 灰色字体，不突兀 */
-  margin: 0;                       /* 去掉浏览器默认上下 margin */
-}
-.annotation-User p {
-  margin: 0;                       /* 去除默认 margin，防止上下挤开太远 */
-  font-weight: 500;               /* 让用户名略粗一点，看起来清晰 */
-}
-
-.annotation-content {
-  flex-grow: 1;
-}
-
-.annotation-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.annotation-content p {
-  margin: 0;
-}
 .comment-container {
   overflow-y: auto;
-  height: calc(100vh - 50px - 20px - 150px);
-  /* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间150px（可大可小,应该是前面漏减了，这里必须多减点) */
-  /* */
-  /* flex-grow: 1 */
+  height: calc(100vh - 220px);
+  padding: 10px;
+  background-color: #f4f4f5;
+}
+
+/* 评论卡片 */
+.annotation {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  word-break: break-word;
+  position: relative;
+}
+
+/* 头像 + 用户信息布局 */
+.annotation-User {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.annotation-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #409eff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.annotation-userinfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.annotation-userinfo p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 时间在右上角 */
+.annotation-time {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* 评论内容 */
+.annotation-content {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  margin-top: 4px;
+}
+
+/* 操作按钮 */
+.annotation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.annotation-actions .el-button {
+  font-size: 13px;
+  color: #409EFF;
+  padding: 2px 6px;
 }
 
 .special-button {
