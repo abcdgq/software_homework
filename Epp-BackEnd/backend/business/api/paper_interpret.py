@@ -246,7 +246,7 @@ def restore_paper_study(request):
         with open(fr.conversation_path, 'r') as f:
             conversation_history = json.load(f)  # 使用 json.load() 方法将 JSON 数据转换为字典
 
-        print("error1")
+        # print("error1")
 
         return reply.success(
             {'file_reading_id': file_reading_id, 'conversation_history': conversation_history},
