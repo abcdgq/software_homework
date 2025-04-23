@@ -384,14 +384,22 @@ class abs_gen_thread(threading.Thread):
             return
         #### 解决方法
 
-        query_solution = '请讲讲这篇论文提出的解决方法\n'
+        query_solution = '请说明这篇论文中提出的解决方法\n'
         payload_solution = json.dumps({
-            "query": query_problem,
+            "query": query_solution,
             "knowledge_id": self.tmp_kb_id,
             "prompt_name": "default"  # 使用普通对话模式
         })
         response_solution, _ = ask_ai_single_paper(payload=payload_solution)
         print(_)
+        # query_solution1 = response_solution
+        # payload_solution1 = json.dumps({
+        #     "query": query_solution1,
+        #     "knowledge_id": self.tmp_kb_id,
+        #     "prompt_name": "default"  # 使用普通对话模式
+        # })
+        # response_solution1, _ = ask_ai_single_paper(payload=payload_solution1)
+        # print(_)
         summary += '## 解决方法\n' + response_solution + '\n'
         if self.isend:
             ar.status = AbstractReport.STATUS_TIMEOUT
