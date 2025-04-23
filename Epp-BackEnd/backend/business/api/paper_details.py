@@ -9,7 +9,8 @@ import os
 
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
-from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification, AnnotationReport
+from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification, \
+    AnnotationReport, UserDocument, DocumentNote
 from business.models.paper_annotation import FileAnnotation
 from business.models.auto_check_record import AutoCheckRecord
 from business.models.auto_check_risk import AutoRiskRecord
@@ -483,6 +484,7 @@ def get_paper_annotation(request):
     获得公开批注
     '''
     paper_id = request.GET.get('paper_id')
+    print(paper_id)
 
     data = {
         'annotations': []
@@ -490,7 +492,11 @@ def get_paper_annotation(request):
 
     paper = Paper.objects.filter(paper_id=paper_id).first()
 
+    print(paper)
+
     annotation_list = FileAnnotation.objects.filter(paper_id=paper)
+
+    print(annotation_list)
 
     for annotation in annotation_list:
         note = annotation.note
@@ -553,9 +559,11 @@ def report_paper_annotation(request):
     举报批注
     '''
     data = json.loads(request.body)
+    print(data)
     username = request.session.get('username')
     note_id = data.get('annotation_id')
     reason = data.get('reason')
+    print(reason)
     user = User.objects.filter(username=username).first()
 
     note = FileNote.objects.filter(note_id=note_id).first()
@@ -589,9 +597,9 @@ def save_document_note(request):
 
     user = User.objects.filter(username=username).first()
 
-    paper = Paper.objects.filter(paper_id=paper_id).first()
+    document = UserDocument.objects.filter(document_id=paper_id).first()
 
-    note = FileNote(user_id=user, paper_id=paper, x=x, y=y, width=width, height=height, pageNum=pageNum,
+    note = DocumentNote(user=user, document=document, x=x, y=y, width=width, height=height, pageNum=pageNum,
                     comment=comment, username=username)
     note.save()
 
@@ -603,10 +611,11 @@ def save_document_note(request):
         'pageNum': pageNum,
         'comment': comment,
         'userName': username,
+        'isPublic': True,
         'id': note.note_id
     }
 
-    return reply.success(data=data, msg="成功保存笔记或批注")
+    return reply.success(data=data, msg="成功保存笔记")
 
 
 @require_http_methods("GET")
@@ -614,15 +623,15 @@ def get_document_note(request):
     '''
     获得笔记
     '''
-    paper_id = request.GET.get('paper_id')
+    document_id = request.GET.get('paper_id')
 
     data = {
         'notes': []
     }
 
-    paper = Paper.objects.filter(paper_id=paper_id).first()
+    document = UserDocument.objects.filter(document_id=document_id).first()
 
-    note_list = FileNote.objects.filter(paper_id=paper)
+    note_list = DocumentNote.objects.filter(document=document)
 
     for note in note_list:
         x = note.x
@@ -632,7 +641,6 @@ def get_document_note(request):
         pageNum = note.pageNum
         comment = note.comment
         username = note.username
-        isPublic = note.isPublic
         id = note.note_id
         date = note.date
         data['annotations'].append({
@@ -643,7 +651,7 @@ def get_document_note(request):
             'pageNum': pageNum,
             'comment': comment,
             'userName': username,
-            'isPublic': isPublic,
+            'isPublic': True,
             'id': id,
             'date': date
         })
@@ -659,7 +667,7 @@ def delete_document_note(request):
     data = json.loads(request.body)
     note_id = data.get('note_id')
 
-    note = FileNote.objects.filter(node_id=note_id).first()
+    note = DocumentNote.objects.filter(node_id=note_id).first()
 
     if not note:
         return reply.fail(
