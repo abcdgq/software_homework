@@ -428,6 +428,7 @@ export default {
         const annotation = { x, y, width, height, pageNum, comment, userName: this.currentUser, isPublic, id: response.data.id } // 假设 annotation 对象中有一个 id 属性,也就是主键，1,2,3，自增。
         this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
         // this.annotations.push(annotation)// 新加的注释已经保存到前端本地。
+        this.annotations = this.allAnnotations
         this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
         this.$message({
           message: '添加批注成功',
@@ -508,8 +509,8 @@ export default {
         })
         return
       }
-      console.log(this.commentReason)
-      const reason = this.commentReason
+      console.log(this.reportReason)
+      const reason = this.reportReason
       const annotationId = this.pendingAnnotationId
       // alert('举报理由：' + reason + '，批注ID：' + annotationId)
       axios.post(this.$BASE_API_URL + '/reportAnnotation', { 'annotation_id': annotationId, 'reason': reason })
@@ -580,7 +581,6 @@ export default {
     },
     downloadPaper () {
       // 实现下载功能
-      // axios.post(this.$BASE_API_URL + '/batchDownloadTranslated', {'paper_id_list': [this.paper_id]})
       axios.get(this.$BASE_API_URL + '/downloadTranslated?document_id=' + this.paper_id)
         .then((response) => {
           if (response.data.is_success === true) {
