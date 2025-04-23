@@ -47,9 +47,13 @@ urlpatterns = [
                   path("api/likeComment", paper_details.like_comment),
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
 
-                  path("api/saveNote", paper_details.save_paper_note),
-                  path("api/getNotes", paper_details.get_paper_annotation),
-                  path("api/deleteNote", paper_details.delete_paper_note),
+                  path("api/saveAnnotation", paper_details.save_document_note),
+                  path("api/getAnnotations", paper_details.get_document_note),
+                  path("api/deleteAnnotation", paper_details.delete_document_note),
+
+                  path("api/saveNote", paper_details.save_document_note),
+                  path("api/getNotes", paper_details.get_document_note),
+                  path("api/deleteNote", paper_details.delete_document_note),
 
                   path("api/study/saveNote", paper_details.save_paper_note),
                   path("api/study/getAnnotations", paper_details.get_paper_annotation),
