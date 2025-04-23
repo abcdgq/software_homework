@@ -566,7 +566,7 @@ export default {
       }
     },
     translateAllText () {
-      axios.get(this.$BASE_API_URL + '/getDocumentTranslatedURL?document_id=' + this.paper_id)
+      axios.get(this.$BASE_API_URL + '/getDocumentTranslatedURL?document_id=' + this.paper_id)// 这里的路径和下面的冲了，但是这个方法不会调用，所以没问题
         .then((response) => {
           this.translatedUrl = this.$BASE_URL + response.data.local_url
           this.pdfUrl = this.translatedUrl
@@ -580,7 +580,8 @@ export default {
     },
     downloadPaper () {
       // 实现下载功能
-      axios.post(this.$BASE_API_URL + '/batchDownloadTranslated', {'paper_id_list': [this.paper_id]})
+      // axios.post(this.$BASE_API_URL + '/batchDownloadTranslated', {'paper_id_list': [this.paper_id]})
+      axios.get(this.$BASE_API_URL + '/downloadTranslated?document_id=' + this.paper_id)
         .then((response) => {
           if (response.data.is_success === true) {
             this.$message({
@@ -594,7 +595,6 @@ export default {
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
-            this.selectedPapers = []
           }
         })
         .catch((error) => {

@@ -522,3 +522,11 @@ def get_annotation(request):
     print(data)
 
     return reply.success(data=data, msg="成功获取公开批注")
+
+
+# @require_http_methods('POST')
+# def delete_annotation(request):
+#     '''
+#     删除笔记（对应的批注也被删除）
+#     '''
+#     note_id =
