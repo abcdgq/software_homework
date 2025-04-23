@@ -38,6 +38,8 @@
         <el-select v-model="filterType" placeholder="筛选批注" @change="filterComments">
           <el-option label="全部" value="all"></el-option>
           <el-option label="我的批注" value="mine"></el-option>
+          <el-option label="我的私有批注" value="minePrivate"></el-option>
+          <el-option label="我的共有批注" value="minePublic"></el-option>
           <el-option label="他人批注" value="others"></el-option>
         </el-select>
         <el-select v-model="displayType" placeholder="显示类型" @change="filterComments">
@@ -48,17 +50,19 @@
         <div class="comment-container">
           <div v-for="annotation in annotations" :key="annotation.id">
             <div class="annotation">
-              <div class="annotation-User">
+              <div class="annotation-main">
                 <div class="annotation-avatar">
                   {{ annotation.userName.charAt(0).toUpperCase() }}
                 </div>
-                <p class="annotation-time" style="white-space: pre-line;">
-                    {{ formatDate(annotation.date) || '刚刚' }}
-                </p>
-                <p>{{ annotation.userName }}</p>
-              </div>
-              <div class="annotation-content">
-                <p>{{ annotation.comment }}</p>
+                <div class="annotation-body">
+                  <div class="annotation-header">
+                    <p class="annotation-username">{{ annotation.userName }}</p>
+                    <p class="annotation-time">{{ formatDate(annotation.date) || '刚刚' }}</p>
+                  </div>
+                  <div class="annotation-content">
+                    <p>{{ annotation.comment }}</p>
+                  </div>
+                </div>
               </div>
               <div class="annotation-actions">
                 <div v-if="annotation.userName === currentUser">
@@ -532,6 +536,12 @@ export default {
           return annotation.userName === this.currentUser
         } else if (this.filterType === 'others') {
           return annotation.userName !== this.currentUser
+        } else if (this.filterType === 'minePrivate') {
+          return annotation.userName === this.currentUser && !annotation.isPublic // 只显示私有批注
+        } else if (this.filterType === 'minePublic') {
+          return annotation.userName === this.currentUser && annotation.isPublic // 只显示公开批注
+        } else if (this.filterType === 'all') {
+          return true // 全部
         } else {
           return true // 全部
         }
@@ -614,80 +624,78 @@ export default {
   background-color: #f4f4f5;
 }
 
-/* 评论卡片 */
 .annotation {
-  display: flex;
-  flex-direction: column;
+  background-color: #fff;
+  padding: 14px;
   border-radius: 10px;
-  padding: 12px 16px;
-  margin-bottom: 14px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  word-break: break-word;
-  position: relative;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
 }
 
-/* 头像 + 用户信息布局 */
-.annotation-User {
+/* 主体部分：头像 + 内容 */
+.annotation-main {
   display: flex;
-  align-items: center;
-  margin-bottom: 6px;
+  gap: 14px;
 }
 
+/* 左侧头像 */
 .annotation-avatar {
-  width: 36px;
-  height: 36px;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
   border-radius: 50%;
-  background-color: #409eff;
+  background-color: #409EFF;
   color: #fff;
-  font-size: 16px;
+  font-size: 24px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
-  flex-shrink: 0;
 }
 
-.annotation-userinfo {
+/* 中间部分：用户名 + 时间 + 评论内容 */
+.annotation-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
-.annotation-userinfo p {
+/* 顶部信息栏：用户名和时间 */
+.annotation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.annotation-username {
   margin: 0;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   color: #333;
 }
 
-/* 时间在右上角 */
 .annotation-time {
-  position: absolute;
-  top: 12px;
-  right: 16px;
   font-size: 12px;
-  color: #aaa;
+  color: #999;
+  margin: 0;
 }
 
 /* 评论内容 */
-.annotation-content {
+.annotation-content p {
   font-size: 14px;
   color: #444;
-  line-height: 1.6;
+  margin: 6px 0 0 0;
   white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  margin-top: 4px;
+  word-break: break-word;
 }
 
-/* 操作按钮 */
+/* 操作按钮区域 */
 .annotation-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .annotation-actions .el-button {
