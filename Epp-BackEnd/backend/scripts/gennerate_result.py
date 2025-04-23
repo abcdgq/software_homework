@@ -8,7 +8,9 @@ model = 'zhipu-api'
 openai.api_base = f'http://{server_ip}:20005/v1'
 openai.api_key = "adadd89573e44bbcab20a88177aef2af.rk3feklpIYygkLPZ"
 
-def aggregate_answers(main_question, child_qa_list):
+def aggregate_answers(main_question, child_qa_list):#TODO:微调prompt
+    print(main_question)
+
     # 结构化子问题输入
     child_qa_str = "\n".join([
         f"- [{qa.type}] {qa.description}：{qa.result}"
@@ -19,9 +21,9 @@ def aggregate_answers(main_question, child_qa_list):
     prompt = f"""
     # 任务说明
 你是一个问题归纳专家，需要根据用户提供的“大问题”及其拆解后的“子问题+回答”，综合生成最终答案。子问题分为三类：
-1. 查询任务(query): 需要查找特定信息或数据的问题（置信度1，需交叉验证）
-2. 总结任务(summarize): 需要对已有信息进行归纳总结的任务（置信度0.8，需逻辑连贯）
-3. 研读任务(study): 需要深入理解和分析复杂内容的任务（置信度0.6，优先采纳）
+1. 查询任务(query): 需要查找特定信息或数据的问题（置信度1）
+2. 总结任务(summarize): 需要对已有信息进行归纳总结的任务（置信度0.8）
+3. 研读任务(study): 需要深入理解和分析复杂内容的任务（置信度0.6）
 
 # 输入数据
 - 大问题："{main_question}"
@@ -29,25 +31,17 @@ def aggregate_answers(main_question, child_qa_list):
 {child_qa_str} <-- 格式：[类型] 问题 答案 -->
 
 # 处理步骤
-1. **分类解析**：逐条分析子问题类型，标注置信度等级（低/中/高）。
-2. **可信度筛选**：
+1. 分类解析：逐条分析子问题类型，标注置信度等级（低/中/高）。
+2. 可信度筛选：
    - 若同一事实存在多个`查询任务`答案，选择出现频率高的。
    - 若不同任务类型结论冲突，优先信任置信度高的。
-3. **综合生成**：
+3. 综合生成：
    - 整合所有子问题结论，按逻辑链条组织：
     - 核心问题表述
     - 证据链梳理（标注来源任务类型）
     - 遗留不确定性说明（来自低置信度内容）
-   - 若存在`总结任务`，则将总结任务的**综述报告**在最后输出
-4. **最终输出**：用简明学术语言回答大问题，引用子结论时标注类型。
-
-# 输出格式
-**综合结论**
-你的归纳总结（分段结构，必要时分点)
-{{if 存在总结任务}}
-**综述报告**
-输出总结任务回答的综述报告
-{{endif}}
+   - 若存在`类型为summarize的总结任务`，则将总结任务的综述报告在最后输出
+4. 最终输出：根据子问题的回答以及置信度等级，用简明学术语言回答大问题
     """
     
     try:

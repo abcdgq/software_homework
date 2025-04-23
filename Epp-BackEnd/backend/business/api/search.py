@@ -832,7 +832,6 @@ def vector_query(request):
 
     print("search_type: ", search_type)
     
-    # TODO 不知道在哪里初始化vdb, do_dialogue_search方法跑不通
     # local_vdb_init(None)
 
     if search_type == 'dialogue':
@@ -1094,7 +1093,8 @@ def dialog_query(request):
         search_content = response_type.split('+')[-1].strip()
         print("search_content:", search_content)
         # filtered_paper = do_string_search(search_content=search_content, max_results=5)   # 字符串匹配，检索效果较差
-        # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化
+        # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化,初始化之后注掉这个方法即可
+        #local_vdb_init(None)
         filtered_paper = get_filtered_paper(text=message, k=5)
         print("filtered_paper: ", filtered_paper)
         dialog_type = 'query'

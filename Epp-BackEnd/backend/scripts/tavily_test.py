@@ -20,7 +20,7 @@ def tavily_advanced_search(query:str):
     response = tavily.search(
         query=query,
         search_depth="advanced",    # 深度搜索模式（覆盖更多数据库和PDF文献）
-        max_results=50,             # 最大结果数量
+        max_results=5,             # 最大结果数量
         include_answer=True,        # 包含摘要
         include_images=False        # 关闭无关图像
     )
@@ -32,7 +32,7 @@ def tavily_domain_search(query:str):
     response = tavily.search(
         query=query,
         search_depth="advanced",
-        max_results=50,
+        max_results=5,
         include_domains=["sciencedirect.com", "nature.com"],    # 指定学术网站（如 ["arxiv.org", "springer.com", "ieee.org"]），缩小搜索范围。
         exclude_domains=["youtube.com"],                        # 排除低质量来源（如 ["wikipedia.org", "blogspot.com"]）。
         include_answer=True,
