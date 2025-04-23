@@ -9,12 +9,12 @@ import os
 
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
-from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification
-from business.models.annotation import FileAnnotation
+from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification, AnnotationReport
+from business.models.paper_annotation import FileAnnotation
 from business.models.auto_check_record import AutoCheckRecord
 from business.models.auto_check_risk import AutoRiskRecord
 from business.models.auto_check_undo import AutoUndoRecord
-from business.models.note import FileNote
+from business.models.paper_note import FileNote
 from business.utils import reply
 from business.utils.download_paper import downloadPaper
 from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL, USER_DOCUMENTS_PATH, USER_DOCUMENTS_URL
@@ -432,7 +432,7 @@ def get_user_paper_info(request):
 
 
 @require_http_methods('POST')
-def save_annotation(request):
+def save_paper_note(request):
     '''
     保存用户的笔记和批注
     '''
@@ -478,12 +478,11 @@ def save_annotation(request):
 
 
 @require_http_methods("GET")
-def get_annotation(request):
+def get_paper_annotation(request):
     '''
     获得公开批注
     '''
-    paper_id = request.GET.get('document_id')
-    print("paper_id:" + paper_id)
+    paper_id = request.GET.get('paper_id')
 
     data = {
         'annotations': []
@@ -491,10 +490,141 @@ def get_annotation(request):
 
     paper = Paper.objects.filter(paper_id=paper_id).first()
 
-    note_list = FileAnnotation.objects.filter(paper_id=paper).values_list('note', flat=True)
+    annotation_list = FileAnnotation.objects.filter(paper_id=paper)
 
-    for note_id in note_list:
-        note = FileNote.objects.filter(note_id=note_id).first()
+    for annotation in annotation_list:
+        note = annotation.note
+        x = note.x
+        y = note.y
+        width = note.width
+        height = note.height
+        pageNum = note.pageNum
+        comment = note.comment
+        username = note.username
+        isPublic = note.isPublic
+        id = note.note_id
+        date = note.date
+        data['annotations'].append({
+            'x': x,
+            'y': y,
+            'width': width,
+            'height': height,
+            'pageNum': pageNum,
+            'comment': comment,
+            'userName': username,
+            'isPublic': isPublic,
+            'id': id,               # id为note_id
+            'date': date
+        })
+
+    return reply.success(data=data, msg="成功获取公开批注")
+
+
+@require_http_methods('POST')
+def delete_paper_note(request):
+    '''
+    删除笔记（对应的批注也被删除）
+    '''
+    data = json.loads(request.body)
+    note_id = data.get('annotation_id') # 由于后端提供的是note_id，前端返回的也是note_id
+
+    note = FileNote.objects.filter(note_id=note_id).first()
+
+    if not note:
+        return reply.fail(
+            data={
+                'type': "fail"
+            },
+            msg="未查询到该笔记记录"
+        )
+
+    note.delete()
+    return reply.success(
+        data={
+            'type': "success"
+        },
+        msg="删除笔记成功"
+    )
+
+
+@require_http_methods('POST')
+def report_paper_annotation(request):
+    '''
+    举报批注
+    '''
+    data = json.loads(request.body)
+    username = request.session.get('username')
+    note_id = data.get('annotation_id')
+    reason = data.get('reason')
+    user = User.objects.filter(username=username).first()
+
+    note = FileNote.objects.filter(note_id=note_id).first()
+    annotation = FileAnnotation.objects.filter(note=note).first()
+
+    report = AnnotationReport(annotation=annotation, user=user, content=reason)
+    report.save()
+
+    data = {
+        'type': 'success'
+    }
+
+    return reply.success(data=data, msg="举报成功，请等待人工审核结果")
+
+
+@require_http_methods('POST')
+def save_document_note(request):
+    '''
+    保存用户的笔记
+    '''
+    data = json.loads(request.body)
+    params = data.get('params')
+    x = params.get('x')
+    y = params.get('y')
+    width = params.get('width')
+    height = params.get('height')
+    pageNum = params.get('pageNum')
+    comment = params.get('comment')
+    paper_id = params.get('paper_id')
+    username = request.session.get('username')
+
+    user = User.objects.filter(username=username).first()
+
+    paper = Paper.objects.filter(paper_id=paper_id).first()
+
+    note = FileNote(user_id=user, paper_id=paper, x=x, y=y, width=width, height=height, pageNum=pageNum,
+                    comment=comment, username=username)
+    note.save()
+
+    data = {
+        'x': x,
+        'y': y,
+        'width': width,
+        'height': height,
+        'pageNum': pageNum,
+        'comment': comment,
+        'userName': username,
+        'id': note.note_id
+    }
+
+    return reply.success(data=data, msg="成功保存笔记或批注")
+
+
+@require_http_methods("GET")
+def get_document_note(request):
+    '''
+    获得笔记
+    '''
+    paper_id = request.GET.get('paper_id')
+
+    data = {
+        'notes': []
+    }
+
+    paper = Paper.objects.filter(paper_id=paper_id).first()
+
+    note_list = FileNote.objects.filter(paper_id=paper)
+
+    for note in note_list:
         x = note.x
         y = note.y
         width = note.width
@@ -518,15 +648,31 @@ def get_annotation(request):
             'date': date
         })
 
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(data)
-
-    return reply.success(data=data, msg="成功获取公开批注")
+    return reply.success(data=data, msg="成功获取笔记")
 
 
-# @require_http_methods('POST')
-# def delete_annotation(request):
-#     '''
-#     删除笔记（对应的批注也被删除）
-#     '''
-#     note_id =
+@require_http_methods('POST')
+def delete_document_note(request):
+    '''
+    删除笔记
+    '''
+    data = json.loads(request.body)
+    note_id = data.get('note_id')
+
+    note = FileNote.objects.filter(node_id=note_id).first()
+
+    if not note:
+        return reply.fail(
+            data={
+                'type': "fail"
+            },
+            msg="未查询到该笔记记录"
+        )
+
+    note.delete()
+    return reply.success(
+        data={
+            'type': "success"
+        },
+        msg="删除笔记成功"
+    )

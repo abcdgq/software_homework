@@ -1,5 +1,5 @@
 <template>
-  <el-col style="overflow: hidden; height: 100vh">
+  <el-col style=" height: 100vh">
     <el-col :span="16" style="margin-top: 80px;" type="flex">
       <el-row>
         <el-col :span="22" :offset="1" style="display: flex; align-items: center;">
@@ -80,7 +80,8 @@
                   </el-button>
                 </div>
               </div>
-              <div class="papers-container" v-if="papers && papers.length > 0">
+              <!-- <div class="papers-container" v-if="papers && papers.length > 0"> -->
+                <div class="papers-container" v-if="papers && papers.length > 0" style="flex: 1; height: calc(100vh - 240px);">
                 <div v-for="paper in filteredPapers" :key="paper.paper_id" style="margin-top: 30px;">
                   <div class="columns is-mobile">
                     <div class="column is-narrow checkbox">

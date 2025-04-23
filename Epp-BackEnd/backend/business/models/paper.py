@@ -43,7 +43,7 @@ class Paper(models.Model):
     download_count = models.IntegerField(default=0)
     score = models.FloatField(default=0.0)
     score_count = models.IntegerField(default=0)
-    local_path = models.CharField(max_length=255)  # 本地地址，允许为空
+    local_path = models.CharField(max_length=255, null=True, blank=True)  # 本地地址，允许为空
     sub_classes = models.ManyToManyField(Subclass, related_name='papers')
 
     def __str__(self):
@@ -75,6 +75,7 @@ class Paper(models.Model):
             'download_count': self.download_count,
             'score': self.score,
             'score_count': self.score_count,
+            'local_path': self.local_path,
             'sub_classes': list(self.sub_classes.values_list('name', flat=True))
         }
 

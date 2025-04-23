@@ -14,12 +14,14 @@ from .notification import Notification
 from .statistic import UserDailyAddition
 from .statistic import UserVisit
 from .subclass import Subclass
-from .annotation import FileAnnotation
+from .paper_annotation import FileAnnotation
 from .auto_check_record import AutoCheckRecord
 from .auto_check_risk import AutoRiskRecord
 from .auto_check_undo import AutoUndoRecord
-from .note import FileNote
+from .paper_note import FileNote
 from .recommended_papers import RecommendedPaper
+from .document_note import DocumentNote
+from .annotation_report import AnnotationReport
 
 __all__ = [
     'User',
@@ -43,5 +45,7 @@ __all__ = [
     'AutoRiskRecord',
     'AutoUndoRecord',
     'FileNote',
-    'RecommendedPaper'
+    'RecommendedPaper',
+    'DocumentNote',
+    'AnnotationReport'
 ]

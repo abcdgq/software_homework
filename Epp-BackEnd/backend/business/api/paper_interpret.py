@@ -246,7 +246,7 @@ def restore_paper_study(request):
         with open(fr.conversation_path, 'r') as f:
             conversation_history = json.load(f)  # 使用 json.load() 方法将 JSON 数据转换为字典
 
-        print("error1")
+        # print("error1")
 
         return reply.success(
             {'file_reading_id': file_reading_id, 'conversation_history': conversation_history},
@@ -316,8 +316,10 @@ def get_paper_url(request):
 
     paper_id = request.GET.get('paper_id')
     paper = Paper.objects.get(paper_id=paper_id)
+    print('title:' + paper.title)
     paper_local_url = get_paper_local_url(paper)
     if paper_local_url is None:
+        print('文献下载失败，请检查网络或联系管理员')
         return reply.fail(msg="文献下载失败，请检查网络或联系管理员")
     return reply.success({"local_url": "/" + paper_local_url}, msg="success")
 
