@@ -356,162 +356,162 @@ def get_user_search_history(request):
 
     return reply.success({"keywords": list(set(keywords))[:10]})
 
-def kb_ask_ai(payload):
-    ''''
-    payload = json.dumps({
-        "query": query,
-        "knowledge_id": tmp_kb_id,
-        "history": conversation_history[-10:],
-        "prompt_name": "text"  # 使用历史记录对话模式
-    })
-    payload = json.dumps({
-        "query": query,
-        "knowledge_id": tmp_kb_id,
-        "prompt_name": "default"  # 使用普通对话模式
-    })
-    '''
-    file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    response = requests.request("POST", file_chat_url, data=payload, headers=headers, stream=False)
-    ai_reply = ""
-    origin_docs = []
-    print(response)
-    for line in response.iter_lines():
-        if line:
-            decoded_line = line.decode('utf-8')
-            if decoded_line.startswith('data'):
-                data = decoded_line.replace('data: ', '')
-                data = json.loads(data)
-                ai_reply += data["answer"]
-                for doc in data["docs"]:
-                    doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-                    origin_docs.append(doc)
-    return ai_reply, origin_docs
+# def kb_ask_ai(payload):
+#     ''''
+#     payload = json.dumps({
+#         "query": query,
+#         "knowledge_id": tmp_kb_id,
+#         "history": conversation_history[-10:],
+#         "prompt_name": "text"  # 使用历史记录对话模式
+#     })
+#     payload = json.dumps({
+#         "query": query,
+#         "knowledge_id": tmp_kb_id,
+#         "prompt_name": "default"  # 使用普通对话模式
+#     })
+#     '''
+#     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
+#     headers = {
+#         'Content-Type': 'application/json'
+#     }
+#     response = requests.request("POST", file_chat_url, data=payload, headers=headers, stream=False)
+#     ai_reply = ""
+#     origin_docs = []
+#     print(response)
+#     for line in response.iter_lines():
+#         if line:
+#             decoded_line = line.decode('utf-8')
+#             if decoded_line.startswith('data'):
+#                 data = decoded_line.replace('data: ', '')
+#                 data = json.loads(data)
+#                 ai_reply += data["answer"]
+#                 for doc in data["docs"]:
+#                     doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+#                     origin_docs.append(doc)
+#     return ai_reply, origin_docs
 
-@require_http_methods(["POST"])
-def dialog_query(request):
-    """
-    本函数用于处理对话检索的请求
-    :param Request: 请求，类型为POST
-        内容包含：{
-            message: string
-            ,
-            paper_ids:[
-                string, //很多个paper_id
-            ]
-            ,
-            tmp_kb_id : string // 临时知识库id
-        }
+# @require_http_methods(["POST"])
+# def dialog_query(request):
+#     """
+#     本函数用于处理对话检索的请求
+#     :param Request: 请求，类型为POST
+#         内容包含：{
+#             message: string
+#             ,
+#             paper_ids:[
+#                 string, //很多个paper_id
+#             ]
+#             ,
+#             tmp_kb_id : string // 临时知识库id
+#         }
         
-    :return: 返回一个json对象，格式为：
-    {
-        dialog_type: 'dialog' or 'query',
-        papers:[
-            {//只有在dialog_type为'query'时才有，这时需要前端对文献卡片进行渲染。
-                "paper_id": 文献id,
-                "title": 文献标题,
-                "authors": 作者,
-                "abstract": 摘要,
-                "publication_date": 发布时间,
-                "journal": 期刊,
-                "citation_count": 引用次数,
-                "original_url": 原文地址,
-                "read_count": 阅读次数
-            },
-        ],
-        content: '回复内容'
-    }
+#     :return: 返回一个json对象，格式为：
+#     {
+#         dialog_type: 'dialog' or 'query',
+#         papers:[
+#             {//只有在dialog_type为'query'时才有，这时需要前端对文献卡片进行渲染。
+#                 "paper_id": 文献id,
+#                 "title": 文献标题,
+#                 "authors": 作者,
+#                 "abstract": 摘要,
+#                 "publication_date": 发布时间,
+#                 "journal": 期刊,
+#                 "citation_count": 引用次数,
+#                 "original_url": 原文地址,
+#                 "read_count": 阅读次数
+#             },
+#         ],
+#         content: '回复内容'
+#     }
     
-    TODO:
-        1. 从Request中获取对话内容
-        2. 根据最后一条user的对话回答进行关键词触发，分析属于哪种对话类型
-            - 如果对话类型为'query'
-                1. 使用向量检索从数据库中获取文献信息 5篇
-                2. 将文献信息整理为json，作为papers属性
-                3. 将文献信息进行整理作为content属性
-            - 如果对话类型为'dialog'
-                1. 大模型正常推理就可以了
-        3. 把聊天记录存在本地
-        4. 返回json对象,存入到数据库，见backend/business/models/search_record.py
-    """
-    import os
-    username = request.session.get('username')
-    if username is None:
-        username = 'sanyuba'
-    data = json.loads(request.body)
-    message = data.get('message')
-    search_record_id = data.get('search_record_id')
+#     TODO:
+#         1. 从Request中获取对话内容
+#         2. 根据最后一条user的对话回答进行关键词触发，分析属于哪种对话类型
+#             - 如果对话类型为'query'
+#                 1. 使用向量检索从数据库中获取文献信息 5篇
+#                 2. 将文献信息整理为json，作为papers属性
+#                 3. 将文献信息进行整理作为content属性
+#             - 如果对话类型为'dialog'
+#                 1. 大模型正常推理就可以了
+#         3. 把聊天记录存在本地
+#         4. 返回json对象,存入到数据库，见backend/business/models/search_record.py
+#     """
+#     import os
+#     username = request.session.get('username')
+#     if username is None:
+#         username = 'sanyuba'
+#     data = json.loads(request.body)
+#     message = data.get('message')
+#     search_record_id = data.get('search_record_id')
 
-    kb_id = get_tmp_kb_id(search_record_id)
-    # kb_id = 0
+#     kb_id = get_tmp_kb_id(search_record_id)
+#     # kb_id = 0
 
-    user = User.objects.filter(username=username).first()
-    if user is None:
-        return JsonResponse({'error': '用户不存在'}, status=404)
-    search_record = SearchRecord.objects.filter(search_record_id=search_record_id).first()
-    conversation_path = settings.USER_SEARCH_CONSERVATION_PATH + '/' + str(search_record.search_record_id) + '.json'
-    history = []
-    if os.path.exists(conversation_path):
-        c = json.loads(open(conversation_path).read())
-        history = c
-    # 先判断下是不是要查询论文
-    prompt = '想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + message + '\n'
-    response_type = queryGLM(prompt)
-    papers = []
-    dialog_type = ''
-    content = ''
-    print(response_type)
-    if 'yes' in response_type:  # 担心可能有句号等等
-        # 查询论文，TODO:接入向量化检索
-        # filtered_paper = query_with_vector(message) # 旧版的接口，换掉了 2024.4.28
-        filtered_paper = get_filtered_paper(text=message, k=5)
-        dialog_type = 'query'
-        papers = []
-        for paper in filtered_paper:
-            papers.append(paper.to_dict())
-        print(papers)
-        content = '根据您的需求，我们检索到了一些论文信息'
-        # for i in range(len(papers)):
-        #     content + '\n' + f'第{i}篇：'
-        #     # TODO: 这里需要把papers的信息整理到content里面
-        #     content += f'标题为：{papers[i]["title"]}\n'
-        #     content += f'摘要为：{papers[i]["abstract"]}\n'
-    else:
+#     user = User.objects.filter(username=username).first()
+#     if user is None:
+#         return JsonResponse({'error': '用户不存在'}, status=404)
+#     search_record = SearchRecord.objects.filter(search_record_id=search_record_id).first()
+#     conversation_path = settings.USER_SEARCH_CONSERVATION_PATH + '/' + str(search_record.search_record_id) + '.json'
+#     history = []
+#     if os.path.exists(conversation_path):
+#         c = json.loads(open(conversation_path).read())
+#         history = c
+#     # 先判断下是不是要查询论文
+#     prompt = '想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + message + '\n'
+#     response_type = queryGLM(prompt)
+#     papers = []
+#     dialog_type = ''
+#     content = ''
+#     print(response_type)
+#     if 'yes' in response_type:  # 担心可能有句号等等
+#         # 查询论文，TODO:接入向量化检索
+#         # filtered_paper = query_with_vector(message) # 旧版的接口，换掉了 2024.4.28
+#         filtered_paper = get_filtered_paper(text=message, k=5)
+#         dialog_type = 'query'
+#         papers = []
+#         for paper in filtered_paper:
+#             papers.append(paper.to_dict())
+#         print(papers)
+#         content = '根据您的需求，我们检索到了一些论文信息'
+#         # for i in range(len(papers)):
+#         #     content + '\n' + f'第{i}篇：'
+#         #     # TODO: 这里需要把papers的信息整理到content里面
+#         #     content += f'标题为：{papers[i]["title"]}\n'
+#         #     content += f'摘要为：{papers[i]["abstract"]}\n'
+#     else:
 
-        ############################################################
+#         ############################################################
 
-        ## 这部分重新重构了，按照方法是通过将左侧的文章重构成为一个知识库进行检索
+#         ## 这部分重新重构了，按照方法是通过将左侧的文章重构成为一个知识库进行检索
 
-        ###########################################################
-        # 对话，保存3轮最多了，担心吃不下
+#         ###########################################################
+#         # 对话，保存3轮最多了，担心吃不下
 
-        input_history = history['conversation'].copy()[-5:] if len(history['conversation']) > 5 else history['conversation'].copy()
-        print(input_history)
-        print('kb_id:', kb_id)
-        print('message:', message)
-        payload = json.dumps({
-            "query": message,
-            "knowledge_id": kb_id,
-            "history": list(input_history),
-            "prompt_name": "text"  # 使用历史记录对话模式
-        })
-        ai_reply, origin_docs = kb_ask_ai(payload)
-        print(ai_reply)
-        dialog_type = 'dialog'
-        papers = []
-        content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话：'+ai_reply, [])
-        history['conversation'].extend([{'role': 'user', 'content': message}])
-        history['conversation'].extend([{'role': 'assistant', 'content': content}])
-    with open(conversation_path, 'w', encoding='utf-8') as f:
-        f.write(json.dumps(history))
-    res = {
-        'dialog_type': dialog_type,
-        'papers': papers,
-        'content': content
-    }
-    return reply.success(res, msg='成功返回对话')
+#         input_history = history['conversation'].copy()[-5:] if len(history['conversation']) > 5 else history['conversation'].copy()
+#         print(input_history)
+#         print('kb_id:', kb_id)
+#         print('message:', message)
+#         payload = json.dumps({
+#             "query": message,
+#             "knowledge_id": kb_id,
+#             "history": list(input_history),
+#             "prompt_name": "text"  # 使用历史记录对话模式
+#         })
+#         ai_reply, origin_docs = kb_ask_ai(payload)
+#         print(ai_reply)
+#         dialog_type = 'dialog'
+#         papers = []
+#         content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话：'+ai_reply, [])
+#         history['conversation'].extend([{'role': 'user', 'content': message}])
+#         history['conversation'].extend([{'role': 'assistant', 'content': content}])
+#     with open(conversation_path, 'w', encoding='utf-8') as f:
+#         f.write(json.dumps(history))
+#     res = {
+#         'dialog_type': dialog_type,
+#         'papers': papers,
+#         'content': content
+#     }
+#     return reply.success(res, msg='成功返回对话')
 
 
 # @require_http_methods(["POST"])
@@ -972,7 +972,7 @@ def get_user_search_history(request):
 
     return reply.success({"keywords": list(set(keywords))[:10]})
 
-def kb_ask_ai(payload):
+def kb_ask_ai(conversation_history, query, tmp_kb_id):
     ''''
     payload = json.dumps({
         "query": query,
@@ -986,6 +986,14 @@ def kb_ask_ai(payload):
         "prompt_name": "default"  # 使用普通对话模式
     })
     '''
+
+    payload = json.dumps({
+        "query": query,
+        "knowledge_id": tmp_kb_id,
+        "history": conversation_history[-10:],
+        "prompt_name": "text"  # 使用历史记录对话模式
+    })
+
     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
     headers = {
         'Content-Type': 'application/json'
@@ -1005,6 +1013,38 @@ def kb_ask_ai(payload):
                     doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
                     origin_docs.append(doc)
     return ai_reply, origin_docs
+
+def get_final_answer(conversation_history, query, tmp_kb_id):
+    # 分发
+    from scripts.routing_agent import generate_subtasks
+    q_type, subtasks = generate_subtasks(query)
+    print(q_type, subtasks)
+
+    if q_type == "other":
+        # llm
+        return kb_ask_ai(conversation_history, query, tmp_kb_id)
+    else:
+        # api
+        api_query = subtasks.get("api")
+        api_reply = ''
+
+        # search
+        search_query = subtasks.get("search")
+        search_reply = ''
+
+        # llm
+        llm_query = subtasks.get("llm")
+        llm_reply, llm_docs = kb_ask_ai(conversation_history, llm_query, tmp_kb_id)
+
+    # 整合
+    ai_reply = llm_reply    # 整合多专家回答
+
+
+    docs = llm_docs  # 整合docs
+    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+    # docs.append(doc)
+    
+    return ai_reply, docs
 
 @require_http_methods(["POST"])
 def dialog_query(request):
@@ -1075,7 +1115,7 @@ def dialog_query(request):
     # 先判断下是不是要查询论文
     # prompt = f"想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + {message} + '\n"
     prompt = f"""
-    你将收到一个查询请求，请判断这个请求是否要求检索相关论文。
+    你将收到一个查询请求，请判断这个请求是否要求检索相关论文。要求准确判断，关于定义等非检索类的问题不要错判为检索。
     如果是，请返回 "yes+关键词"，其中关键词是查询中提到的与论文相关的主题或关键词。例如"yes+Deeplearning"，不要返回多余的信息。
     如果不是，请返回 "no"。
 
@@ -1119,21 +1159,23 @@ def dialog_query(request):
         # 对话，保存3轮最多了，担心吃不下
 
         input_history = history['conversation'].copy()[-5:] if len(history['conversation']) > 5 else history['conversation'].copy()
-        print("对话历史", input_history)
+        # print("对话历史", input_history)
         print('kb_id:', kb_id)
         print('message:', message)
-        payload = json.dumps({
-            "query": message,
-            "knowledge_id": kb_id,
-            "history": list(input_history),
-            "prompt_name": "text"  # 使用历史记录对话模式
-        })
-        ai_reply, origin_docs = kb_ask_ai(payload)
+        # payload = json.dumps({
+        #     "query": message,
+        #     "knowledge_id": kb_id,
+        #     "history": list(input_history),
+        #     "prompt_name": "text"  # 使用历史记录对话模式
+        # })
+        # TODO 分发与整合
+        ai_reply, origin_docs = get_final_answer(input_history, message, kb_id)
+        # ai_reply, origin_docs = kb_ask_ai(payload)
         # ai_reply = queryGLM(message, input_history)
-        print("kb_ask_ai_reply: ", ai_reply)
+        # print("ai_reply: ", ai_reply)
         dialog_type = 'dialog'
         papers = []
-        content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话：'+ai_reply, [])
+        content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话（注意不要出现作为EPP论文助手等语句，直接给出转述后的内容）：' + ai_reply, [])
         history['conversation'].extend([{'role': 'user', 'content': message}])
         history['conversation'].extend([{'role': 'assistant', 'content': content}])
     with open(conversation_path, 'w', encoding='utf-8') as f:

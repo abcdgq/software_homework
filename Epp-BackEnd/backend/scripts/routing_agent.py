@@ -30,14 +30,38 @@ def queryGLM(msg: str, history=None) -> str:
 
 def extract_keywords(query: str) -> list:
         """提取问题关键词"""
+        # prompt = f"""
+        # 请从以下问题中提取最多3个技术关键词，按重要性排序：
+        # 问题：{query}
+        # 要求：只返回用空格分隔的词语，不要任何解释
+        # 注意：如果没有提取到关键字，请直接返回，不要返回多余内容
+        # 当问题为类似"?"等与科研内容无关内容时，视为无关键字处理
+        # 示例：如果问题是"什么是VQ-VAE"，应返回"VQ-VAE 定义 生成模型"
+        # """
         prompt = f"""
-        请从以下问题中提取最多3个技术关键词，按重要性排序：
-        问题：{query}
-        要求：只返回用空格分隔的词语，不要任何解释
-        示例：如果问题是"什么是VQ-VAE"，应返回"VQ-VAE 定义 生成模型"
+        请从以下问题中提取技术相关关键词，遵循规则：
+        1. 最多返回3个关键词，按重要性排序
+        2. 若无合适关键词，返回空列表
+        3. 必须使用严格JSON格式：{{"keywords": [...]}}
+
+        示例1：
+        输入："什么是VQ-VAE？"
+        输出：{{"keywords": ["VQ-VAE", "生成模型", "向量量化"]}}
+
+        示例2：
+        输入："请解释这篇论文的主要贡献"
+        输出：{{"keywords": []}}
+
+        当前问题：{query}
         """
-        response = queryGLM(prompt)
-        return response.strip().split()[:3]  # 最多取前3个关键词
+        try:
+            response = queryGLM(prompt)
+            result = json.loads(response)
+            if isinstance(result.get("keywords"), list):
+                # 过滤空字符串和非字符串项
+                return [str(kw) for kw in result["keywords"] if kw and isinstance(kw, (str, int, float))][:3]
+        except Exception as e:
+            return []
 
 
 def classify_question_type(query: str) -> str:
@@ -46,7 +70,8 @@ def classify_question_type(query: str) -> str:
         判断以下问题的类型（单选）：
         [选项] {" / ".join(Q_TYPE)}
         问题：{query}
-        要求：只需返回单个类型标签，无需额外内容。只有在该问题与科研完全无关时，返回"other"
+        要求：只需返回单个类型标签，无需额外内容。
+        注意：若问题中没有包含任何与学术科研相关的词，可认为该问题与科研无关，此时返回"other"
         示例：若问题是"什么是VQ-VAE"，应返回"definition"
         """
         q_type = queryGLM(prompt).strip()
@@ -68,33 +93,24 @@ def get_llm_expert_weight(q_type: str) -> float:
 
 def generate_subtasks(query: str) -> dict:
         """手动生成专家子任务"""
-        keywords = extract_keywords(query)
         q_type = classify_question_type(query)
         
         if q_type == "other":
             return q_type, {
                 "llm": query
             }
-            return {
-                "problem_type": q_type,
-                "subtasks": {
-                    "llm": query
-                }
-            }
         else:
-            return q_type, {
-                "api": ' '.join(keywords),
-                "search": query,
-                "llm": query
-            }
-            return {
-                "problem_type": q_type,
-                "subtasks": {
+            keywords = extract_keywords(query)
+            if len(keywords) > 0:
+                return q_type, {
                     "api": ' '.join(keywords),
                     "search": query,
                     "llm": query
                 }
-            }
+            else:
+                return q_type, {
+                    "llm": query
+                }
         
 def generate_subtasks_2(paper_title: str, query: str) -> dict:
         """AI生成专家子任务"""
