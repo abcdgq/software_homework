@@ -79,6 +79,17 @@ class Paper(models.Model):
             'sub_classes': list(self.sub_classes.values_list('name', flat=True))
         }
 
+    def to_use(self):
+        return {'paper':{
+            'title': self.title,
+            'authors': self.authors,
+            'abstract': self.abstract,
+            'publication_date': self.publication_date,
+            'journal': self.journal,
+            'citation_count': self.citation_count,
+            'original_url': self.original_url
+            }}
+
     def __eq__(self, other):
         return self.paper_id == other.paper_id if isinstance(other, Paper) else False
 
