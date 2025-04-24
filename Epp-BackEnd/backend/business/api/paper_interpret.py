@@ -114,6 +114,7 @@ def create_paper_study(request):
         local_path = document.local_path
         content_type = document.format
         title = document.title
+        print("doc title: ", title)
         # 先查找数据库是否有对应的Filereading
         file_readings = FileReading.objects.filter(document_id=document_id)
         if file_readings.count() == 0:
@@ -392,6 +393,7 @@ import requests
 import re
 
 def do_file_chat(conversation_history, query, tmp_kb_id):
+    print("do_file_chat")
     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
     headers = {
         'Content-Type': 'application/json'
@@ -414,7 +416,7 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             "max_tokens": 500,
         })
 
-    print(f"Sending payload to server: {payload}")
+    # print(f"Sending payload to server: {payload}")
 
     def _get_ai_reply(payload):
         try:
@@ -430,7 +432,7 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             for line in response.iter_lines():
                 if line:
                     decoded_line = line.decode('utf-8')
-                    print(f"Received line: {decoded_line}")
+                    # print(f"Received line: {decoded_line}")
 
                     if decoded_line.startswith('data'):
                         data = decoded_line.replace('data: ', '')
@@ -473,7 +475,7 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             "temperature": 0.4
         })
 
-        print(f"Sending question payload to server: {payload}")
+        # print(f"Sending question payload to server: {payload}")
 
         try:
             question_reply, _ = _get_ai_reply(payload)
@@ -513,7 +515,7 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 '''
 
 
-@require_http_methods(["POST"])
+# @require_http_methods(["POST"])
 # def do_paper_study(request):
 #     # 鉴权
 #     username = request.session.get('username')
@@ -541,25 +543,54 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 #     add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
 #     return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
 
+def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
+    # 分发
+    from scripts.routing_agent import generate_subtasks
+    q_type, subtasks = generate_subtasks(query)
+    print(q_type, subtasks)
+
+    if q_type == "other":
+        # llm
+        return do_file_chat(conversation_history, query, tmp_kb_id)
+    else:
+        # api
+        api_query = subtasks.get("api")
+        api_reply = ''
+
+        # search
+        search_query = subtasks.get("search")
+        search_reply = ''
+
+        # llm
+        llm_query = subtasks.get("llm")
+        llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
+
+    # 整合
+    ai_reply = llm_reply    # 整合多专家回答
+
+
+    docs = origin_docs  # 整合docs
+    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+    # docs.append(doc)
+    
+    return ai_reply, docs, question_reply
+
+
+@require_http_methods(["POST"])
 def do_paper_study(request):
     # 调试：打印请求信息
-    print(f"请求方法: {request.method}")
-    print(f"请求路径: {request.path}")
-    print(f"请求查询参数: {request.GET}")
-    print(f"请求体: {request.body}")
+    # print(f"请求方法: {request.method}")
+    # print(f"请求路径: {request.path}")
+    # print(f"请求查询参数: {request.GET}")
+    # print(f"请求体: {request.body}")
 
     # 鉴权
     username = request.session.get('username')
-    print(f"从会话获取的用户名: {username}")
     if username is None:
         username = 'sanyuba'
-        print(f"用户名未找到，使用默认用户名: {username}")
-
     user = User.objects.filter(username=username).first()
-    print(f"查询到的用户: {user}")
 
     if user is None:
-        print("用户未登录或不存在，返回失败响应")
         return reply.fail(msg="请先正确登录")
 
     try:
@@ -576,6 +607,8 @@ def do_paper_study(request):
         # 查询 FileReading 对象
         fr = FileReading.objects.get(id=file_reading_id)
         print(f"查询到的 FileReading 对象: {fr}")
+        # print("doc id: ", fr.document_id)
+        # print("paper id: ",fr.paper_id)
 
         # 获取临时知识库 ID
         tmp_kb_id = get_tmp_kb_id(file_reading_id=file_reading_id)  # 临时知识库id
@@ -589,14 +622,20 @@ def do_paper_study(request):
         print(f"加载对话历史文件路径: {fr.conversation_path}")
         with open(fr.conversation_path, 'r') as f:
             conversation_history = json.load(f)
-        print(f"加载的对话历史: {conversation_history}")
+        # print(f"加载的对话历史: {conversation_history}")
 
         conversation_history = list(conversation_history.get('conversation'))  # List[Dict]
-        print(f"转换后的对话历史: {conversation_history}")
+        # print(f"转换后的对话历史: {conversation_history}")
 
         # 调用 AI 聊天函数
-        print(f"调用 do_file_chat，参数: conversation_history={conversation_history}, query={query}, tmp_kb_id={tmp_kb_id}")
-        ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
+        # print(f"调用 do_file_chat，参数: conversation_history={conversation_history}, query={query}, tmp_kb_id={tmp_kb_id}")
+        # ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
+        
+        # 获取title
+        title = fr.document_id if fr.document_id else fr.paper_id
+        print("paper title: ", title)
+        ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id, title)
+
         print(f"AI 回复: {ai_reply}")
         print(f"原始文档: {origin_docs}")
         print(f"问题回复: {question_reply}")
