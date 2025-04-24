@@ -14,13 +14,11 @@ def tavily_simple_search(query:str):
 
 
 # 高级搜索示例：限定arXiv并排除会议论文
-def tavily_advanced_search(query:str):
-    query = str
-        
+def tavily_advanced_search(query:str):       
     response = tavily.search(
         query=query,
         search_depth="advanced",    # 深度搜索模式（覆盖更多数据库和PDF文献）
-        max_results=50,             # 最大结果数量
+        max_results=5,             # 最大结果数量
         include_answer=True,        # 包含摘要
         include_raw_content=True,   # 获取原始网页内容
         include_images=False,       # 关闭无关图像
@@ -42,16 +40,19 @@ def tavily_domain_search(query:str):
     return response
 
 
-# if __name__ == "__main__":
-#     # 调用 Tavily 搜索
-#     response = tavily_simple_search()
-#     response = tavily_advanced_search()
-#     response = tavily_domain_search()
+if __name__ == "__main__":
+    query = "解释VQ-VAE"
 
-#     # 格式化输出到终端
-#     formatted_response = json.dumps(response, indent=4)
-#     print(formatted_response) # 返回包含标题、URL、摘要的JSON结果
+    # 调用 Tavily 搜索
+    # response = tavily_simple_search()
+    response = tavily_advanced_search(query)
+    # response = tavily_domain_search()
+    print(response)
 
-#     # 输出到 JSON 文件
-#     with open("response.json", "w", encoding="utf-8") as file:
-#         json.dump(response, file, indent=4, ensure_ascii=False)
+    # 格式化输出到终端
+    formatted_response = json.dumps(response, indent=4)
+    print(formatted_response) # 返回包含标题、URL、摘要的JSON结果
+
+    # 输出到 JSON 文件
+    with open("response.json", "w", encoding="utf-8") as file:
+        json.dump(response, file, indent=4, ensure_ascii=False)
