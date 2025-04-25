@@ -138,6 +138,7 @@ urlpatterns = [
 
                   # 热门文献推荐
                   path("api/paperRecommend", paper_recommend.get_recommendation),
-                  path("api/refresh", paper_recommend.get_recommendation)
+                  path("api/refresh", paper_recommend.get_recommendation),
+                  path("api/paperPrivateRecommend", paper_recommend.get_unique_recommendation)
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -750,7 +750,7 @@ def do_string_search(search_content, max_results=10):
         query |= Q(title__icontains=term)
     # 执行查询，获取字符串检索的并集结果
     results = Paper.objects.filter(query)
-    print(results)
+    # print(results)
     # 计算编辑距离并排序
     results_with_distance = []
     for result in results:
