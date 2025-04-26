@@ -1015,36 +1015,98 @@ def kb_ask_ai(conversation_history, query, tmp_kb_id):
     return ai_reply, origin_docs
 
 def get_final_answer(conversation_history, query, tmp_kb_id):
-    # 分发
-    from scripts.routing_agent import generate_subtasks
+    from scripts.routing_agent import generate_subtasks,get_expert_weights
     q_type, subtasks = generate_subtasks(query)
+    print("多智能体：完成子问题生成")
     print(q_type, subtasks)
 
+    print("多智能体：开始问题分发")
     if q_type == "other":
+        print("other type")
         # llm
         return kb_ask_ai(conversation_history, query, tmp_kb_id)
     else:
         # api
         api_query = subtasks.get("api")
         api_reply = ''
+        api_reply, docs_from_api = get_api_reply(api_query)
+        print(api_reply)
+        print("多智能体：已获取api专家回答")
 
         # search
         search_query = subtasks.get("search")
         search_reply = ''
+        search_reply, docs_from_search = get_search_reply(search_query)
+        print(search_reply)
+        print("多智能体：已获取搜索引擎专家回答")
 
         # llm
         llm_query = subtasks.get("llm")
-        llm_reply, llm_docs = kb_ask_ai(conversation_history, llm_query, tmp_kb_id)
+        print(conversation_history)
+        llm_reply, origin_docs = kb_ask_ai(conversation_history, llm_query, tmp_kb_id)
+        print(llm_reply)
+        print("多智能体：已获取原生LLM专家回答")
 
     # 整合
-    ai_reply = llm_reply    # 整合多专家回答
+    from scripts.gennerate_result import aggregate_answers
+    weight = get_expert_weights(q_type)
+    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
+    print("多智能体：已完成问题整合")
 
-
-    docs = llm_docs  # 整合docs
+    # 整合docs  
+    for doc in docs_from_api: #规范docs格式
+        origin_docs.append(" " + doc)
+    for doc in docs_from_search: #规范docs格式
+        origin_docs.append(" " + doc)
+    docs = origin_docs
+    print(origin_docs)
     # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
     # docs.append(doc)
+    print("多智能体：已完成来源整合")
     
     return ai_reply, docs
+
+def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
+    from scripts.test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
+    return test_localvdb_and_scholarapi(api_auery)
+
+def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
+    from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
+    qa_list = tavily_advanced_search(search_query).get("results")
+    uselist = []
+    times = 0
+    while True: #防止产生的结果过长，导致后边没法喂给大模型进行整合，进行一下筛选
+        if times > 5: #防止问太多遍
+            break
+        for qa in qa_list:
+            if qa['raw_content']:
+                if(len(qa['raw_content']) < 2000):
+                    uselist.append(qa)
+            else:
+                if(len(qa['content']) < 2000):
+                    uselist.append(qa)
+        if len(uselist) >= 2:
+            break
+        else: #数量不够就重新问，重新筛
+            qa_list = tavily_advanced_search(search_query + "len < 2000").get("results")
+            uselist = []
+
+    search_reply = "\n".join([
+        f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_content'])} score ：{qa['score']}"
+        for qa in uselist
+        ])
+    
+    from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+    summarized_search_reply = text_summarizer(search_reply)
+
+    docs = []
+    for qa in uselist:
+        docs.append(qa['title'] + "   "+ qa['url'])
+    #返回示例  ['VQ-VAE Explained - Papers With Code   https://paperswithcode.com/method/vq-vae', 
+    # 'PDF   https://xnought.github.io/files/vq_vae_explainer.pdf']
+
+    return summarized_search_reply, docs
+
 
 @require_http_methods(["POST"])
 def dialog_query(request):
