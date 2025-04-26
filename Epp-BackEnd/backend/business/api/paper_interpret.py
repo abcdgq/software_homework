@@ -547,34 +547,77 @@ def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
     # 分发
     from scripts.routing_agent import generate_subtasks
     q_type, subtasks = generate_subtasks(query)
+    print("多智能体：完成子问题生成")
     print(q_type, subtasks)
 
+    print("多智能体：开始问题分发")
     if q_type == "other":
+        print("other type")
         # llm
         return do_file_chat(conversation_history, query, tmp_kb_id)
     else:
         # api
         api_query = subtasks.get("api")
         api_reply = ''
+        api_reply = get_api_reply(api_query)
+        print(api_reply)
+        print("多智能体：已获取api专家回答")
 
         # search
         search_query = subtasks.get("search")
         search_reply = ''
+        search_reply = get_search_reply(search_query)
+        print(search_reply)
+        print("多智能体：已获取搜索引擎专家回答")
 
         # llm
         llm_query = subtasks.get("llm")
         llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
+        print(llm_reply)
+        print("多智能体：已获取原生LLM专家回答")
 
     # 整合
-    ai_reply = llm_reply    # 整合多专家回答
+    from scripts.gennerate_result import aggregate_answers
+    ai_reply = aggregate_answers(query, api_reply, search_reply, llm_reply)    # 整合多专家回答
+    print("多智能体：已完成问题整合")
 
-
-    docs = origin_docs  # 整合docs
+    docs = origin_docs  # 整合docs   #TODO：获取api的来源和搜索引擎结果的来源
     # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
     # docs.append(doc)
-    
+    print("多智能体：已完成来源整合")
+
     return ai_reply, docs, question_reply
 
+def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
+    from scripts.test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
+    return test_localvdb_and_scholarapi(api_auery)
+
+def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
+    from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
+    qa_list = tavily_advanced_search(search_query).get("results")
+    uselist = []
+    times = 0
+    while True: #防止产生的结果过长，导致后边没法喂给大模型进行整合，进行一下筛选
+        if times > 5: #防止问太多遍
+            break
+        for qa in qa_list:
+            if qa['raw_content']:
+                if(len(qa['raw_content']) < 700):
+                    uselist.append(qa)
+            else:
+                if(len(qa['content']) < 700):
+                    uselist.append(qa)
+        if len(uselist) >= 2:
+            break
+        else: #数量不够就重新问，重新筛
+            qa_list = tavily_advanced_search(search_query + "len < 600").get("results")
+            uselist = []
+
+    search_reply = "\n".join([
+        f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_content'])} score ：{qa['score']}"
+        for qa in uselist
+        ])
+    return search_reply
 
 @require_http_methods(["POST"])
 def do_paper_study(request):
