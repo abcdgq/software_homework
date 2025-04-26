@@ -545,7 +545,7 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 
 def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
     # 分发
-    from scripts.routing_agent import generate_subtasks
+    from scripts.routing_agent import generate_subtasks,get_expert_weights
     q_type, subtasks = generate_subtasks(query)
     print("多智能体：完成子问题生成")
     print(q_type, subtasks)
@@ -579,7 +579,8 @@ def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
 
     # 整合
     from scripts.gennerate_result import aggregate_answers
-    ai_reply = aggregate_answers(query, api_reply, search_reply, llm_reply)    # 整合多专家回答
+    weight = get_expert_weights(q_type)
+    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
     print("多智能体：已完成问题整合")
 
     # 整合docs  

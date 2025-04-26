@@ -8,11 +8,12 @@ model = 'zhipu-api'
 openai.api_base = f'http://{server_ip}:20005/v1'
 openai.api_key = "adadd89573e44bbcab20a88177aef2af.rk3feklpIYygkLPZ"
 
-def aggregate_answers(main_question, api_reply=None, search_reply=None, llm_reply=None):
+def aggregate_answers(main_question, weight, api_reply=None, search_reply=None, llm_reply=None):
     print("开始生成关于这个问题的回答：" + main_question)
-    api_confidence = 1
-    search_confidence = 0.8
-    llm_confidence = 0.6
+    api_confidence = weight.get("api")
+    search_confidence = weight.get("search")
+    llm_confidence = weight.get("llm")
+    print(weight)
     # 构建完整Prompt,
     prompt = f"""
     # **整合任务说明**
