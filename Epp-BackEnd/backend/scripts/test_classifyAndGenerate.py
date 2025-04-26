@@ -40,7 +40,16 @@ f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_co
         for qa in uselist
     ])
     result_from_search = "以下是搜索引擎专家的回答：\n"  + tavily_result
-                
+
+    docs = []
+    for qa in uselist:
+        docs.append(qa['title'] + "   "+ qa['url'])
+    #返回示例  ['VQ-VAE Explained - Papers With Code   https://paperswithcode.com/method/vq-vae', 
+    # 'PDF   https://xnought.github.io/files/vq_vae_explainer.pdf', 
+    # 'How Foundation Models Perceive the World with VQ-VAEs   https://adityang5.medium.com/how-foundation-models-perceive-the-world-with-vq-vaes-0f86115c38fa', 'Comprehensive Guide to Vector Quantized Variational Autoencoder ...   https://kshitijkutumbe.medium.com/understanding-multimodal-ai-comprehensive-guide-to-vector-quantized-variational-autoencoder-dbe7ee464cd6']
+    print("以下是搜索引擎专家的来源：：：")
+    print(docs)
+
     history_for_llm = []
     history_for_llm.append({"role": "user", "content": task.description + "\n生成结果的字符长度小于等于2000，且避免使用**加粗符号"})
     response = openai.ChatCompletion.create(

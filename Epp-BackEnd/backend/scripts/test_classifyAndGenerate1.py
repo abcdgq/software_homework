@@ -55,10 +55,20 @@ def test_localvdb_and_scholarapi(text):
     from business.utils.paper_vdb_init import get_filtered_paper
     result_from_localvdb = get_filtered_paper(text, 2)
 
+    from .text_summary import text_summarizer #对查找的结果进行summarize，减少字节数，避免后续喂给ai时产生字符过多的错误
     for a in result_from_localvdb:
-        standardized_result.append(a.to_use())
+        pa = a.to_use()
+        summary_pa = text_summarizer(str(pa))
+        standardized_result.append(summary_pa)
 
-    return standardized_result
+    docs = []  #来源总结
+    for r in result_from_localvdb:
+        attr = r.to_use().get('paper')
+        docs.append(attr.get('title') + "  " + attr.get('original_url')) #返回题目和文献下载地址
+
+    #返回示例 ['StarVQA: Space-Time Attention for Video Quality Assessment  http://arxiv.org/abs/2108.09635v1', 
+    # 'VAQF: Fully Automatic Software-Hardware Co-Design Framework for Low-Bit  Vision Transformer  http://arxiv.org/abs/2201.06618v2']
+    return standardized_result, docs
 
 if __name__ == '__main__':
     # 设置环境变量指向你的 Django settings 模块

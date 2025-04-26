@@ -559,19 +559,20 @@ def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
         # api
         api_query = subtasks.get("api")
         api_reply = ''
-        api_reply = get_api_reply(api_query)
+        api_reply, docs_from_api = get_api_reply(api_query)
         print(api_reply)
         print("多智能体：已获取api专家回答")
 
         # search
         search_query = subtasks.get("search")
         search_reply = ''
-        search_reply = get_search_reply(search_query)
+        search_reply, docs_from_search = get_search_reply(search_query)
         print(search_reply)
         print("多智能体：已获取搜索引擎专家回答")
 
         # llm
         llm_query = subtasks.get("llm")
+        print(conversation_history)
         llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
         print(llm_reply)
         print("多智能体：已获取原生LLM专家回答")
@@ -581,7 +582,13 @@ def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
     ai_reply = aggregate_answers(query, api_reply, search_reply, llm_reply)    # 整合多专家回答
     print("多智能体：已完成问题整合")
 
-    docs = origin_docs  # 整合docs   #TODO：获取api的来源和搜索引擎结果的来源
+    # 整合docs  
+    for doc in docs_from_api: #规范docs格式
+        origin_docs.append(" " + doc)
+    for doc in docs_from_search: #规范docs格式
+        origin_docs.append(" " + doc)
+    docs = origin_docs
+    print(origin_docs)
     # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
     # docs.append(doc)
     print("多智能体：已完成来源整合")
@@ -602,22 +609,32 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
             break
         for qa in qa_list:
             if qa['raw_content']:
-                if(len(qa['raw_content']) < 700):
+                if(len(qa['raw_content']) < 2000):
                     uselist.append(qa)
             else:
-                if(len(qa['content']) < 700):
+                if(len(qa['content']) < 2000):
                     uselist.append(qa)
         if len(uselist) >= 2:
             break
         else: #数量不够就重新问，重新筛
-            qa_list = tavily_advanced_search(search_query + "len < 600").get("results")
+            qa_list = tavily_advanced_search(search_query + "len < 2000").get("results")
             uselist = []
 
     search_reply = "\n".join([
         f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_content'])} score ：{qa['score']}"
         for qa in uselist
         ])
-    return search_reply
+    
+    from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+    summarized_search_reply = text_summarizer(search_reply)
+
+    docs = []
+    for qa in uselist:
+        docs.append(qa['title'] + "   "+ qa['url'])
+    #返回示例  ['VQ-VAE Explained - Papers With Code   https://paperswithcode.com/method/vq-vae', 
+    # 'PDF   https://xnought.github.io/files/vq_vae_explainer.pdf']
+
+    return summarized_search_reply, docs
 
 @require_http_methods(["POST"])
 def do_paper_study(request):
