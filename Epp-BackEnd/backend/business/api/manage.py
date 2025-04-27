@@ -20,7 +20,7 @@ import datetime
 from pathlib import Path
 from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
-    Subclass, UserVisit, SearchRecord
+    Subclass, UserVisit, SearchRecord, AnnotationReport, FileNote
 from business.models.auto_check_risk import AutoRiskRecord
 from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
@@ -784,3 +784,146 @@ def auto_comment_report_detail(request):
     }
 
     return reply.success(data=data, msg="成功获取自动审核详细信息")
+
+def delete_annotation(annotation_id):
+    note_id = annotation_id  # 由于后端提供的是note_id，前端返回的也是note_id
+
+    note = FileNote.objects.filter(note_id=note_id).first()
+
+    if not note:
+        return
+    note.delete()
+
+@require_http_methods('POST')
+def judge_annotation_report(request):
+    """ 批注举报审核意见 """
+    report_id = request.body.get('report_id')
+    text = request.body.get('text')
+    acceptReport = request.body.get('acceptReport')
+
+    # 获取对应批注举报和评论
+    annotation_report = AnnotationReport.objects.filter(report_id=report_id).first()
+    if not annotation_report:
+        return reply.fail(msg="批注举报信息不存在")
+    annotation = annotation_report.annotation
+    # 校对审核信息
+    if text == annotation_report.judgment:
+        return reply.fail(msg="请输入有效的审核信息")
+
+    # 保存审核信息，通知被举报批注所有者
+    if acceptReport:
+        # 经核实，批注违规,删除
+        Notification(user_id=annotation.user_id, title="您的批注被举报了！",
+                     content=f"您在 {annotation.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 被其他用户举报，根据EPP平台管理规定，检测到您的批注确为不合规，该批注现已删除。\n请注意遵守平台批注规范！"
+                     ).save()
+        delete_annotation(annotation.note.note_id)
+    else:
+        # 经核实，批注不违规
+        Notification(user_id=annotation.user_id, title="您的批注已恢复正常！",
+                     content=f"您在 {annotation.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 被平台重新审核后判定合规，因此已恢复正常。\n对您带来的不便，我们表示万分抱歉！"
+                     ).save()
+    # 通知举报者
+    if annotation_report.judgment != text:
+        annotation_report.judgment = text
+        if annotation_report.processed:
+            # 重新审核
+            if acceptReport:
+                Notification(user_id=annotation_report.user_id, title="您的举报已被重新审核",
+                         content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台重新审核。\n以下是新的审核意见：举报成功！{text}").save()
+            else:
+                Notification(user_id=annotation_report.user_id, title="您的举报已被重新审核",
+                             content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台重新审核。\n以下是新的审核意见：举报失败！{text}").save()
+        else:
+            # 首次审核
+            if acceptReport:
+                Notification(user_id=annotation_report.user_id, title="您的举报已被审核",
+                         content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台审核。\n以下是审核意见：举报成功！{text}").save()
+            else:
+                Notification(user_id=annotation_report.user_id, title="您的举报已被审核",
+                             content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台审核。\n以下是审核意见：举报失败！{text}").save()
+    annotation_report.processed = True
+    annotation_report.save()
+    return reply.success(msg="批注举报审核成功")
+
+
+def annotation_report_list(request):
+    """ 批注举报列表 """
+    mode = int(request.GET.get('mode'))
+    date = request.GET.get('date', default=None)
+    page_num = int(request.GET.get('page_num', default=1))
+    page_size = int(request.GET.get('page_size', default=15))
+
+    if mode == 1:
+        reports = AnnotationReport.objects.filter(processed=False, date__date=date) if date else \
+            AnnotationReport.objects.filter(processed=False)
+    elif mode == 2:
+        reports = AnnotationReport.objects.filter(processed=True, date__date=date) if date else \
+            AnnotationReport.objects.filter(processed=True)
+    else:
+        return reply.fail(msg="mode参数有误")
+
+    reports = reports.order_by('-date')
+    paginator = Paginator(reports, page_size)
+
+    try:
+        contacts = paginator.page(page_num)
+    except PageNotAnInteger:
+        contacts = paginator.page(1)
+    except EmptyPage:
+        contacts = paginator.page(paginator.num_pages)
+
+    # 返回数据：包含序号和UUID
+    data = {
+        "total": len(reports),
+        "reports": [
+            {
+                'serial_number': (page_num - 1) * page_size + idx + 1,  # 全局连续序号
+                'report_id': str(report.report_id),  # 实际主键
+                'annotation': {
+                    "date": report.annotation.date,
+                    "content": report.annotation.note.comment
+                },
+                'user': report.user.simply_desc(),
+                'date': report.date.strftime("%Y-%m-%d %H:%M:%S"),
+                'content': report.content
+            }
+            for idx, report in enumerate(contacts)
+        ]
+    }
+    return reply.success(data=data, msg="举报信息获取成功")
+
+
+@require_http_methods('GET')
+def annotation_report_detail(request):
+    """ 批注举报信息详情 """
+    report_id = request.GET.get('report_id')
+    report = AnnotationReport.objects.filter(report_id=report_id).first()
+    if report:
+        data = {
+            'annotation': {
+                "annotation_id": report.annotation.annotation_id,
+                "user": report.annotation.user_id.simply_desc(),
+                "paper": report.annotation.paper_id.simply_desc(),
+                "date": report.annotation.date.strftime(
+                    "%Y-%m-%d %H:%M:%S"),
+                "note": {
+                    "note_id": report.annotation.note.note_id,
+                    "x": report.annotation.note.x,
+                    "y": report.annotation.note.y,
+                    "width": report.annotation.note.width,
+                    "height": report.annotation.note.height,
+                    "pageNum": report.annotation.note.pageNum,
+                    "comment": report.annotation.note.comment,
+                    "username": report.annotation.note.username,
+                    "isPublic": report.annotation.note.isPublic
+                }
+            },
+            'user': report.user_id.simply_desc(),
+            'date': report.date.strftime("%Y-%m-%d %H:%M:%S"),
+            'content': report.content,
+            'judgment': report.judgment,
+            'processed': report.processed,
+        }
+        return reply.success(data=data, msg="举报详情信息获取成功")
+    else:
+        return reply.fail(msg="举报信息不存在")
