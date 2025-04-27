@@ -103,6 +103,9 @@ urlpatterns = [
                   path("api/manage/searchWordStatistic", manage.hot_searchword_statistic),
                   path("api/manage/autoCommentReports", manage.auto_comment_report_list),
                   path("api/manage/autoCommentReportDetail", manage.auto_comment_report_detail),
+                  path("api/manage/annotationReports", manage.annotation_report_list),
+                  path("api/manage/annotationReportDetail", manage.annotation_report_detail),
+                  path("api/manage/judgeAnnotationReport", manage.judge_annotation_report),
 
 
                   # 信息检索模块
