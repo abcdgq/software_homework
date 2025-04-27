@@ -20,7 +20,7 @@ import datetime
 from pathlib import Path
 from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
-    Subclass, UserVisit, SearchRecord, AnnotationReport, FileNote
+    Subclass, UserVisit, SearchRecord, AnnotationReport, FileNote, auto_check_record
 from business.models.auto_check_risk import AutoRiskRecord
 from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
@@ -755,8 +755,8 @@ def auto_comment_report_list(request):
 @require_http_methods('GET')
 def auto_comment_report_detail(request):
     review_id = request.body.get('review_id')
-    report = auto_check_record.objects.filter(check_record_id=review_id).first()
-    comment = report.comment_id_1 if report.comment_level == 1 else report.comment_id_2
+    record = auto_check_record.objects.filter(check_record_id=review_id).first()
+    comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
 
     data = {
         'id': review_id,
@@ -774,9 +774,9 @@ def auto_comment_report_detail(request):
             'content': comment.text,
             'visibility': comment.visibility
         },
-        'comment_level': report.comment_level,
-        'date': report.date,
-        'isPassed': report.security,
+        'comment_level': record.comment_level,
+        'date': record.date,
+        'isPassed': record.security,
         'reason': {
             'riskTips': record.reason['riskTips'],
             'riskWords': record.reason['riskWords']
