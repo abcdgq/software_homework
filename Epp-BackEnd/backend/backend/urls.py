@@ -48,7 +48,7 @@ urlpatterns = [
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
                   path("api/saveAnnotation", paper_details.save_annotation),
                   path("api/getAnnotations", paper_details.get_annotation),
-                  path("api/deleteAnnotation", ),
+                  # path("api/deleteAnnotation", ),
 
 
                   # 用户上传论文模块
