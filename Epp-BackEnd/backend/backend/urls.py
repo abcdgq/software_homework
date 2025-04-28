@@ -46,9 +46,19 @@ urlpatterns = [
                   path("api/getComment2", paper_details.get_second_comment),
                   path("api/likeComment", paper_details.like_comment),
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
-                  path("api/saveAnnotation", paper_details.save_annotation),
-                  path("api/getAnnotations", paper_details.get_annotation),
-                  # path("api/deleteAnnotation", ),
+
+                  path("api/saveAnnotation", paper_details.save_document_note),
+                  path("api/getAnnotations", paper_details.get_document_note),
+                  path("api/deleteAnnotation", paper_details.delete_document_note),
+
+                  path("api/saveNote", paper_details.save_document_note),
+                  path("api/getNotes", paper_details.get_document_note),
+                  path("api/deleteNote", paper_details.delete_document_note),
+
+                  path("api/study/saveNote", paper_details.save_paper_note),
+                  path("api/study/getAnnotations", paper_details.get_paper_annotation),
+                  path("api/study/deleteNote", paper_details.delete_paper_note),
+                  path("api/study/reportAnnotation", paper_details.report_paper_annotation),
 
 
                   # 用户上传论文模块
@@ -93,6 +103,9 @@ urlpatterns = [
                   path("api/manage/searchWordStatistic", manage.hot_searchword_statistic),
                   path("api/manage/autoCommentReports", manage.auto_comment_report_list),
                   path("api/manage/autoCommentReportDetail", manage.auto_comment_report_detail),
+                  path("api/manage/annotationReports", manage.annotation_report_list),
+                  path("api/manage/annotationReportDetail", manage.annotation_report_detail),
+                  path("api/manage/judgeAnnotationReport", manage.judge_annotation_report),
 
 
                   # 信息检索模块
@@ -101,7 +114,7 @@ urlpatterns = [
                   path("api/search/dialogQuery", search.dialog_query),
                   path("api/search/flush", search.flush),
                   path("api/search/restoreSearchRecord", search.restore_search_record),
-                  path("api/study/getUserSearchHistory", search.get_user_search_history),
+                  path("api/search/getUserSearchHistory", search.get_user_search_history),
                   path('api/search/rebuildKB', search.build_kb),
                   # path('api/search/getSearchRecord', get_search_record),
                   path('api/search/changeRecordPapers', search.change_record_papers),
@@ -128,6 +141,7 @@ urlpatterns = [
 
                   # 热门文献推荐
                   path("api/paperRecommend", paper_recommend.get_recommendation),
-                  path("api/refresh", paper_recommend.get_recommendation)
+                  path("api/refresh", paper_recommend.get_recommendation),
+                  path("api/paperPrivateRecommend", paper_recommend.get_unique_recommendation)
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -30,23 +30,50 @@ def embed(texts):
     headers = {
         'Content-Type': 'application/json'
     }
+    
     response = requests.request("POST", url, headers=headers, data=payload)
+    # print("embed_texts response: ", response.json())
     return response.json()['data']
 
 
 def local_vdb_init(request):
+    print("开始初始化本地向量库")
     d = settings.VECTOR_DIM
 
     # db_vectors = np.random.random((nb, d)).astype('float32')
+
     texts = []
     metadata = []
     for keyword, paper_id in get_all_paper():
         texts.append(keyword)
         metadata.append(paper_id)
 
-    embed_texts = embed(texts)
+    # 分组处理论文
+    batch_size = 64  # 每组的大小
+    num_batches = (len(texts) + batch_size - 1) // batch_size  # 总组数
 
-    db_vectors = np.array(embed_texts).astype(np.float32)
+    all_embed_texts = []
+    for i in range(num_batches):
+        print(f"Processing batch {i + 1}/{num_batches}")
+        start = i * batch_size
+        end = (i + 1) * batch_size
+        batch_texts = texts[start:end]
+        batch_metadata = metadata[start:end]
+
+        # 嵌入当前批次的论文
+        embed_batch_texts = embed(batch_texts)
+        all_embed_texts.extend(embed_batch_texts)
+
+    db_vectors = np.array(all_embed_texts).astype(np.float32)
+    print("db_vectors: ", db_vectors)
+
+
+    # print("texts: ", texts)
+    # embed_texts = embed(texts)
+    # print("embed_texts: ", embed_texts)
+
+    # db_vectors = np.array(embed_texts).astype(np.float32)
+
 
     # 创建索引
     index = faiss.IndexFlatL2(d)  # 使用 L2 距离
@@ -62,10 +89,15 @@ def local_vdb_init(request):
     #         print(f"  Neighbor {j}: ID = {indices[i, j]}, Distance = {distances[i, j]}, Metadata = {metadata[indices[i, j]]}")
 
     # 保存索引和元数据
+    if not os.path.exists(settings.LOCAL_VECTOR_DATABASE_PATH):
+        os.makedirs(settings.LOCAL_VECTOR_DATABASE_PATH)
+        print("创建目录:", settings.LOCAL_VECTOR_DATABASE_PATH)
     print(os.path.join(settings.LOCAL_VECTOR_DATABASE_PATH, settings.LOCAL_FAISS_NAME))
     faiss.write_index(index, os.path.join(settings.LOCAL_VECTOR_DATABASE_PATH, settings.LOCAL_FAISS_NAME))
     with open(os.path.join(settings.LOCAL_VECTOR_DATABASE_PATH, settings.LOCAL_METADATA_NAME), "wb") as f:
         pickle.dump(metadata, f)
+
+    print("向量库初始化完成")
 
     return reply.success({"success": "成功"})
 
@@ -77,7 +109,7 @@ def get_filtered_paper(text, k, threshold=None):
     with open(os.path.join(settings.LOCAL_VECTOR_DATABASE_PATH, settings.LOCAL_METADATA_NAME), "rb") as f:
         metadata = pickle.load(f)
     embed_texts = embed(text)
-    print(embed_texts)
+    # print(embed_texts)
     distances, indices = index.search(np.array(embed_texts).astype(np.float32), k)
     i2d_dict = {}
     for d, i in zip(distances[0], indices[0]):

@@ -9,21 +9,79 @@ import re
 import Levenshtein
 from django.views.decorators.http import require_http_methods
 
+# def insert_search_record_2_kb(search_record_id, tmp_kb_id):
+#     search_record_id = str(search_record_id)
+#     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+#         s_2_kb_map = json.load(f)
+#     s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
+#     if search_record_id in s_2_kb_map.keys():
+#         if delete_tmp_kb(s_2_kb_map[search_record_id]):
+#             print("删除TmpKb成功")
+#         else:
+#             print("删除TmpKb失败")
+
+#     s_2_kb_map[search_record_id] = tmp_kb_id
+#     with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+#         json.dump(s_2_kb_map, f, indent=4)
+
+
 def insert_search_record_2_kb(search_record_id, tmp_kb_id):
+    # 调试：打印输入参数
+    print(f"函数 insert_search_record_2_kb 被调用，参数：search_record_id={search_record_id}, tmp_kb_id={tmp_kb_id}")
+
+    # 转换 search_record_id 为字符串
     search_record_id = str(search_record_id)
-    with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
-        s_2_kb_map = json.load(f)
-    s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
-    if search_record_id in s_2_kb_map.keys():
-        if delete_tmp_kb(s_2_kb_map[search_record_id]):
-            print("删除TmpKb成功")
+    print(f"已将 search_record_id 转换为字符串：{search_record_id}")
+
+        # 调试：检查文件路径是否存在
+    print(f"检查文件路径：{settings.USER_SEARCH_MAP_PATH}")
+    if not os.path.exists(settings.USER_SEARCH_MAP_PATH):
+        print(f"文件 {settings.USER_SEARCH_MAP_PATH} 不存在，正在创建新文件。")
+        # 创建新文件并写入空的 JSON 对象
+        with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+            json.dump({}, f, indent=4)
+        print(f"已成功创建新文件：{settings.USER_SEARCH_MAP_PATH}")
+
+    try:
+        # 读取 JSON 文件
+        with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+            s_2_kb_map = json.load(f)
+        print(f"从文件加载的 s_2_kb_map：{s_2_kb_map}")
+
+        # 调试：检查映射关系
+        print(f"当前的 s_2_kb_map：{s_2_kb_map}")
+
+        # 转换键为字符串
+        s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
+        print(f"已将 s_2_kb_map 的键转换为字符串：{s_2_kb_map}")
+
+        # 检查 search_record_id 是否已存在
+        if search_record_id in s_2_kb_map:
+            print(f"发现 search_record_id 已存在：{search_record_id}，当前对应的 tmp_kb_id：{s_2_kb_map[search_record_id]}")
+
+            # 调试：尝试删除旧的 tmp_kb
+            old_tmp_kb_id = s_2_kb_map[search_record_id]
+            print(f"尝试删除旧的 tmp_kb_id：{old_tmp_kb_id}")
+
+            if delete_tmp_kb(old_tmp_kb_id):
+                print("删除 TmpKb 成功")
+            else:
+                print("删除 TmpKb 失败")
         else:
-            print("删除TmpKb失败")
+            print(f"未找到 search_record_id：{search_record_id} 的现有记录")
 
-    s_2_kb_map[search_record_id] = tmp_kb_id
-    with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
-        json.dump(s_2_kb_map, f, indent=4)
+        # 更新映射关系
+        s_2_kb_map[search_record_id] = tmp_kb_id
+        print(f"已更新 s_2_kb_map：{s_2_kb_map}")
 
+        # 写入 JSON 文件
+        with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+            json.dump(s_2_kb_map, f, indent=4)
+        print(f"已成功将更新后的 s_2_kb_map 写入文件：{settings.USER_SEARCH_MAP_PATH}")
+
+    except Exception as e:
+        print(f"发生错误：{e}")
+        raise  # 如果需要，可以重新抛出异常以便进一步处理
 
 def get_tmp_kb_id(search_record_id):
     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
@@ -46,7 +104,7 @@ def queryGLM(msg: str, history=None) -> str:
     else:
         history.extend([{'role' : 'user', 'content': msg}])
     response = openai.ChatCompletion.create(
-        model="chatglm3-6b",
+        model="zhipu-api",
         messages=history,
         stream=False
     )
@@ -69,10 +127,10 @@ def search_papers_by_keywords(keywords):
     return filtered_paper_list
 
 
-def update_search_record_2_paper(search_record, filtered_papers):
-    search_record.related_papers.clear()
-    for paper in filtered_papers:
-        search_record.related_papers.add(paper)
+# def update_search_record_2_paper(search_record, filtered_papers):
+#     search_record.related_papers.clear()
+#     for paper in filtered_papers:
+#         search_record.related_papers.add(paper)
 
 
 # @require_http_methods(["POST"])
@@ -385,7 +443,10 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
+
     kb_id = get_tmp_kb_id(search_record_id)
+    # kb_id = 0
+
     user = User.objects.filter(username=username).first()
     if user is None:
         return JsonResponse({'error': '用户不存在'}, status=404)
@@ -453,20 +514,20 @@ def dialog_query(request):
     return reply.success(res, msg='成功返回对话')
 
 
-@require_http_methods(["POST"])
-def build_kb(request):
-    ''''
-    这个方法是论文循证
-    输入为paper_id_list，重新构建一个知识库
-    '''
-    data = json.loads(request.body)
-    paper_id_list = data.get('paper_id_list')
-    try:
-        tmp_kb_id = build_abs_kb_by_paper_ids(paper_id_list, 'tmp_kb')
-    except Exception as e:
-        print(e)
-        return reply.fail(msg="构建知识库失败")
-    return reply.success({'kb_id': tmp_kb_id})
+# @require_http_methods(["POST"])
+# def build_kb(request):
+#     ''''
+#     这个方法是论文循证
+#     输入为paper_id_list，重新构建一个知识库
+#     '''
+#     data = json.loads(request.body)
+#     paper_id_list = data.get('paper_id_list')
+#     try:
+#         tmp_kb_id = build_abs_kb_by_paper_ids(paper_id_list, 'tmp_kb')
+#     except Exception as e:
+#         print(e)
+#         return reply.fail(msg="构建知识库失败")
+#     return reply.success({'kb_id': tmp_kb_id})
 
 def change_record_papers(request):
     '''
@@ -532,23 +593,23 @@ from django.conf import settings
 import requests
 from business.utils import reply
 from business.utils.knowledge_base import delete_tmp_kb, build_abs_kb_by_paper_ids
-from business.utils.paper_vdb_init import get_filtered_paper
+from business.utils.paper_vdb_init import get_filtered_paper, local_vdb_init
 
 
-def insert_search_record_2_kb(search_record_id, tmp_kb_id):
-    search_record_id = str(search_record_id)
-    with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
-        s_2_kb_map = json.load(f)
-    s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
-    if search_record_id in s_2_kb_map.keys():
-        if delete_tmp_kb(s_2_kb_map[search_record_id]):
-            print("删除TmpKb成功")
-        else:
-            print("删除TmpKb失败")
+# def insert_search_record_2_kb(search_record_id, tmp_kb_id):
+#     search_record_id = str(search_record_id)
+#     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+#         s_2_kb_map = json.load(f)
+#     s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
+#     if search_record_id in s_2_kb_map.keys():
+#         if delete_tmp_kb(s_2_kb_map[search_record_id]):
+#             print("删除TmpKb成功")
+#         else:
+#             print("删除TmpKb失败")
 
-    s_2_kb_map[search_record_id] = tmp_kb_id
-    with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
-        json.dump(s_2_kb_map, f, indent=4)
+#     s_2_kb_map[search_record_id] = tmp_kb_id
+#     with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
+#         json.dump(s_2_kb_map, f, indent=4)
 
 
 def get_tmp_kb_id(search_record_id):
@@ -563,45 +624,45 @@ def get_tmp_kb_id(search_record_id):
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-def queryGLM(msg: str, history=None) -> str:
-    '''
-    对chatGLM3-6B发出一次单纯的询问
-    '''
-    print(msg)
-    chat_chat_url = 'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/chat'
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    payload = json.dumps({
-        "query": msg,
-        "prompt_name": "default",
-        "temperature": 0.3
-    })
+# def queryGLM(msg: str, history=None) -> str:
+#     '''
+#     对chatGLM3-6B发出一次单纯的询问
+#     '''
+#     print(msg)
+#     chat_chat_url = 'http://115.190.109.233:7861/chat/chat'
+#     headers = {
+#         'Content-Type': 'application/json'
+#     }
+#     payload = json.dumps({
+#         "query": msg,
+#         "prompt_name": "default",
+#         "temperature": 0.3
+#     })
 
-    session = requests.Session()
-    retry = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
+#     session = requests.Session()
+#     retry = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
+#     adapter = HTTPAdapter(max_retries=retry)
+#     session.mount('http://', adapter)
+#     session.mount('https://', adapter)
 
-    try:
-        response = session.post(chat_chat_url, data=payload, headers=headers, stream=False)
-        response.raise_for_status()
+#     try:
+#         response = session.post(chat_chat_url, data=payload, headers=headers, stream=False)
+#         response.raise_for_status()
 
-        # 确保正确处理分块响应
-        decoded_line = next(response.iter_lines()).decode('utf-8')
-        print(decoded_line)
-        if decoded_line.startswith('data'):
-            data = json.loads(decoded_line.replace('data: ', ''))
-        else:
-            data = decoded_line
-        return data['text']
-    except requests.exceptions.ChunkedEncodingError as e:
-        print(f"ChunkedEncodingError: {e}")
-        return "错误: 响应提前结束"
-    except requests.exceptions.RequestException as e:
-        print(f"RequestException: {e}")
-        return f"错误: {e}"
+#         # 确保正确处理分块响应
+#         decoded_line = next(response.iter_lines()).decode('utf-8')
+#         print("AI回答: ", decoded_line)
+#         if decoded_line.startswith('data'):
+#             data = json.loads(decoded_line.replace('data: ', ''))
+#         else:
+#             data = decoded_line
+#         return data['text']
+#     except requests.exceptions.ChunkedEncodingError as e:
+#         print(f"ChunkedEncodingError: {e}")
+#         return "错误: 响应提前结束"
+#     except requests.exceptions.RequestException as e:
+#         print(f"RequestException: {e}")
+#         return f"错误: {e}"
 
 
 from django.views.decorators.http import require_http_methods
@@ -679,7 +740,7 @@ def search_my_model(query_string):
 
     return results
 
-def do_string_search(search_content):
+def do_string_search(search_content, max_results=10):
     pattern = r'[,\s!?.]+'
     search_terms = re.split(pattern, search_content)
     search_terms = [token for token in search_terms if token]
@@ -689,7 +750,7 @@ def do_string_search(search_content):
         query |= Q(title__icontains=term)
     # 执行查询，获取字符串检索的并集结果
     results = Paper.objects.filter(query)
-    print(results)
+    # print(results)
     # 计算编辑距离并排序
     results_with_distance = []
     for result in results:
@@ -701,7 +762,7 @@ def do_string_search(search_content):
 
     # 返回排序后的结果
     sorted_results = [result for distance, result in results_with_distance]
-    return sorted_results[:10]  # 返回前10篇相似度最高的文章
+    return sorted_results[:max_results]  # 返回前10篇相似度最高的文章
 
 @require_http_methods(["POST"])
 def vector_query(request):
@@ -750,6 +811,7 @@ def vector_query(request):
     if search_record_id is None:
         search_record = SearchRecord(user_id=user, keyword=search_content, conversation_path=None)
         search_record.save()
+        print("成功保存搜索记录")
         conversation_path = os.path.join(settings.USER_SEARCH_CONSERVATION_PATH,
                                          str(search_record.search_record_id) + '.json')
         if os.path.exists(conversation_path):
@@ -758,6 +820,7 @@ def vector_query(request):
             json.dump({"conversation": []}, f, indent=4)
         search_record.conversation_path = conversation_path
         search_record.save()
+        search_record_id = search_record.search_record_id
     else:
         search_record = SearchRecord.objects.get(search_record_id=search_record_id)
         conversation_path = search_record.conversation_path
@@ -767,10 +830,15 @@ def vector_query(request):
         'Content-Type': 'application/json'
     }
 
+    print("search_type: ", search_type)
+    
+    # local_vdb_init(None)
+
     if search_type == 'dialogue':
         filtered_papers = do_dialogue_search(search_content, chat_chat_url, headers)
     else:
         filtered_papers = do_string_search(search_content)
+        print("filtered_papers: ", filtered_papers)
         if len(filtered_papers) == 0:
             return JsonResponse({"paper_infos": [], 'ai_reply': "EPP助手哭哭惹，很遗憾未能检索出相关论文。",
                                  'search_record_id': search_record.search_record_id}, status=200)
@@ -820,6 +888,7 @@ def vector_query(request):
     # else:
     #     return reply.fail(msg='检索总结失败，请检查网络并重新尝试')
 
+    print("搜索记录id: ", search_record.search_record_id)
     update_search_record_2_paper(search_record, filtered_papers)
 
     # 处理历史记录部分, 无需向前端传递历史记录, 仅需对话文件中添加
@@ -843,16 +912,16 @@ def vector_query(request):
     for p in filtered_papers:
         filtered_papers_list.append(p.to_dict())
     
-    ### 构建知识库 ###
+    ### TODO 构建知识库 ###
     
-    # try:
-    #     tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
-    #     insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
-    # except Exception as e:
-    #     print("error1")
-    #     return reply.fail(msg="构建知识库失败")
+    try:
+        tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
+        insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
+    except Exception as e:
+        print("构建知识库失败")
+        return reply.fail(msg="构建知识库失败")
 
-    print("success")
+    print("向量检索完成")
     # 'keywords': keywords
     return JsonResponse({"paper_infos": filtered_papers_list, 'ai_reply': ai_reply, 'search_record_id' : search_record.search_record_id}, status=200)
 
@@ -990,9 +1059,10 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
-    #kb_id = get_tmp_kb_id(search_record_id) 
-    kb_id = 0 
-    #TODO:这里硬编码了kb_id，避免了get_tmp_kb_id找不到kb_id的问题，使得ai能跑起来，后续需要研究kb的实现，修改这个地方
+    # TODO 获取临时知识库id,debug
+    kb_id = get_tmp_kb_id(search_record_id) 
+    # kb_id = 0
+    
     user = User.objects.filter(username=username).first()
     if user is None:
         return JsonResponse({'error': '用户不存在'}, status=404)
@@ -1003,27 +1073,42 @@ def dialog_query(request):
         c = json.loads(open(conversation_path).read())
         history = c
     # 先判断下是不是要查询论文
-    prompt = '想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + message + '\n'
+    # prompt = f"想象你是一个科研助手，你手上有一些论文，你判断用户的需求是不是要求你去检索新的论文，你的回答只能是\"yes\"或者\"no\"，他的需求是：\n' + {message} + '\n"
+    prompt = f"""
+    你将收到一个查询请求，请判断这个请求是否要求检索相关论文。
+    如果是，请返回 "yes+关键词"，其中关键词是查询中提到的与论文相关的主题或关键词。
+    如果不是，请返回 "no"。
+
+    查询请求：{message}
+    """
     response_type = queryGLM(prompt)
+    print("是否为检索: ", response_type)
     papers = []
     dialog_type = ''
     content = ''
-    print(response_type)
+    # print(response_type)
     if 'yes' in response_type:  # 担心可能有句号等等
         # 查询论文，TODO:接入向量化检索
         # filtered_paper = query_with_vector(message) # 旧版的接口，换掉了 2024.4.28
+        search_content = response_type.split('+')[-1].strip()
+        print("search_content:", search_content)
+        # filtered_paper = do_string_search(search_content=search_content, max_results=5)   # 字符串匹配，检索效果较差
+        # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化,初始化之后注掉这个方法即可
+        #local_vdb_init(None)
         filtered_paper = get_filtered_paper(text=message, k=5)
+        print("filtered_paper: ", filtered_paper)
         dialog_type = 'query'
         papers = []
         for paper in filtered_paper:
             papers.append(paper.to_dict())
-        print(papers)
+        # print(papers)
         content = '根据您的需求，我们检索到了一些论文信息'
-        # for i in range(len(papers)):
-        #     content + '\n' + f'第{i}篇：'
-        #     # TODO: 这里需要把papers的信息整理到content里面
-        #     content += f'标题为：{papers[i]["title"]}\n'
-        #     content += f'摘要为：{papers[i]["abstract"]}\n'
+        for i in range(len(papers)):
+            content += '\n' + f'第{i+1}篇：' + papers[i]['title']
+            # content += '\n' + f'第{i+1}篇：'
+            # content += f'标题为：{papers[i]["title"]}\n'
+            # content += f'摘要为：{papers[i]["abstract"]}\n'
+        content += '\n'
     else:
 
         ############################################################
@@ -1034,7 +1119,7 @@ def dialog_query(request):
         # 对话，保存3轮最多了，担心吃不下
 
         input_history = history['conversation'].copy()[-5:] if len(history['conversation']) > 5 else history['conversation'].copy()
-        print(input_history)
+        print("对话历史", input_history)
         print('kb_id:', kb_id)
         print('message:', message)
         payload = json.dumps({
@@ -1044,7 +1129,8 @@ def dialog_query(request):
             "prompt_name": "text"  # 使用历史记录对话模式
         })
         ai_reply, origin_docs = kb_ask_ai(payload)
-        print(ai_reply)
+        # ai_reply = queryGLM(message, input_history)
+        print("kb_ask_ai_reply: ", ai_reply)
         dialog_type = 'dialog'
         papers = []
         content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话：'+ai_reply, [])
