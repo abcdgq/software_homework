@@ -20,7 +20,7 @@ import datetime
 from pathlib import Path
 from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
-    Subclass, UserVisit, SearchRecord, AnnotationReport, FileNote
+    Subclass, UserVisit, SearchRecord, AnnotationReport, FileNote, auto_check_record, AutoCheckRecord, AutoUndoRecord
 from business.models.auto_check_risk import AutoRiskRecord
 from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
@@ -699,64 +699,82 @@ def hot_searchword_statistic(request):
 
 @require_http_methods('GET')
 def auto_comment_report_list(request):
+    mode = int(request.GET.get('mode'))
+    date = request.GET.get('date', default=None)
+    page_num = int(request.GET.get('page_num', default=1))
+    page_size = int(request.GET.get('page_size', default=15))
 
-    data = {
-        'total': 0,
-        'content': [
-            # {
-            #     'id': 9,
-            #     'comment': {
-            #         'date': '2024-04-29 22:58:41',
-            #         'content': '测试评论'
-            #     },
-            #     'user': {
-            #         'user_id': '063eccd4-76b3-4755-84c0-eef9baf16c04',
-            #         'user_name': 'Ank'
-            #     },
-            #     'date': '',         # 审核时间
-            #     'isPassed': True,   # 是否通过
-            #     'reason': {         # 原因
-            #         'riskTips': [],
-            #         'riskWords': []
-            #     }
-            # }
-        ]
-    }
+    if mode == 1:
+        records = AutoCheckRecord.objects.filter(date__date=date) if date else \
+            AutoCheckRecord.objects.all()
+    elif mode == 2:
+        records = AutoRiskRecord.objects.all()
+    elif mode == 3:
+        records = AutoUndoRecord.objects.all()
+    else:
+        return reply.fail(msg="mode参数有误")
+    records = records.order_by('-date')
+    paginator = Paginator(records, page_size)
 
-    auto_record_list = AutoRiskRecord.objects.values_list('check_record', flat=True)
-    for record in auto_record_list:
-        comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
-        date = comment.date
-        content = comment.text
-        user_id = comment.user_id
-        auto_check_record = {
-                                'id': record.check_record_id,
-                                'comment': {
-                                    'date': date.strftime("%Y-%m-%d %H:%M:%S"),
-                                    'content': content
-                                },
-                                'user': {
-                                    'user_id': user_id,
-                                    'user_name': User.objects.filter(user_id=user_id).first().username
-                                },
-                                'date': record.date.strftime("%Y-%m-%d %H:%M:%S"),  # 审核时间
-                                'isPassed': record.security,                        # 是否通过
-                                'reason': {                                         # 原因
-                                    'riskTips': record.reason['riskTips'],
-                                    'riskWords': record.reason['riskWords']
-                                }
-                            }
-        data['content'].append(auto_check_record)
-        data['total'] = data['total'] + 1
+    try:
+        contacts = paginator.page(page_num)
+    except PageNotAnInteger:
+        contacts = paginator.page(1)
+    except EmptyPage:
+        contacts = paginator.page(paginator.num_pages)
 
-    return reply.success(data=data, msg="成功获取自动审核中存在问题的评论")
+    # 返回数据：包含序号和UUID
+    if mode == 1:
+        data = {
+            "total": len(records),
+            "records": [
+                {
+                    'serial_number': (page_num - 1) * page_size + idx + 1,  # 全局连续序号
+                    'record_id': str(record.check_record_id),  # 实际主键
+                    'date': record.date.strftime("%Y-%m-%d %H:%M:%S"),  # 审核时间
+                    'isPassed': record.security,  # 是否通过
+                    'reason': {  # 原因
+                        'riskTips': record.reason['riskTips'],
+                        'riskWords': record.reason['riskWords']
+                    }
+                }
+                for idx, record in enumerate(contacts)
+            ]
+        }
+        return reply.success(data=data, msg="所有审核记录获取成功")
+    elif mode == 2:
+        data = {
+            "total": len(records),
+            "records": [
+                {
+                    'serial_number': (page_num - 1) * page_size + idx + 1,  # 全局连续序号
+                    'record_id': str(record.risk_record_id),  # 实际主键
+                }
+                for idx, record in enumerate(contacts)
+            ]
+        }
+        return reply.success(data=data, msg="不安全评论审核记录获取成功")
+    elif mode == 3:
+        data = {
+            "total": len(records),
+            "records": [
+                {
+                    'serial_number': (page_num - 1) * page_size + idx + 1,  # 全局连续序号
+                    'record_id': str(record.undo_record_id),  # 实际主键
+                }
+                for idx, record in enumerate(contacts)
+            ]
+        }
+        return reply.success(data=data, msg="审核失败记录获取成功")
+    else :
+        return reply.fail(msg="mode错误")
 
 
 @require_http_methods('GET')
 def auto_comment_report_detail(request):
     review_id = request.body.get('review_id')
-    report = auto_check_record.objects.filter(check_record_id=review_id).first()
-    comment = report.comment_id_1 if report.comment_level == 1 else report.comment_id_2
+    record = auto_check_record.objects.filter(check_record_id=review_id).first()
+    comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
 
     data = {
         'id': review_id,
@@ -774,9 +792,9 @@ def auto_comment_report_detail(request):
             'content': comment.text,
             'visibility': comment.visibility
         },
-        'comment_level': report.comment_level,
-        'date': report.date,
-        'isPassed': report.security,
+        'comment_level': record.comment_level,
+        'date': record.date,
+        'isPassed': record.security,
         'reason': {
             'riskTips': record.reason['riskTips'],
             'riskWords': record.reason['riskWords']
