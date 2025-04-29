@@ -732,7 +732,9 @@ def auto_comment_report_list(request):
     }
     # 返回数据：包含序号和UUID
     if mode == 1:
+
         for record in contacts:
+
             comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
             obj = {
                 "id": str(record.check_record_id),
@@ -751,6 +753,7 @@ def auto_comment_report_list(request):
             data['content'].append(obj)
         return reply.success(data=data, msg="所有审核记录获取成功")
     elif mode == 2:
+
         for record in records:
             if not record.check_record.security:
                 record = record.check_record
@@ -770,6 +773,7 @@ def auto_comment_report_list(request):
                     "reason": json.loads(record.reason)['riskTips'] if 'riskTips' in record.reason else ""
                 }
                 data['content'].append(obj)
+
         return reply.success(data=data, msg="不安全评论审核记录获取成功")
     elif mode == 3:
         # data = {
