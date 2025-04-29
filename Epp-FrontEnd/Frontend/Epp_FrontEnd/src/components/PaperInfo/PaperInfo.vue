@@ -491,7 +491,7 @@ export default {
         if (!this.isTranslated) { // 还没有翻译过
           await translateAbstract(this.paper_id)
             .then((response) => {
-              this.translatedSummary = response.data
+              this.translatedSummary = response.translatedSummary
               this.isTranslated = true
             })
             .catch((error) => {

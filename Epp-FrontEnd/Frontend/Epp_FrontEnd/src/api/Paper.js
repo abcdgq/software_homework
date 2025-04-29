@@ -1,10 +1,7 @@
-import axios from 'axios'
-
-const serverUrl = 'http://127.0.0.1:8000'
-const instance = axios.create({baseURL: serverUrl})
+import request from '../request/request'
 
 export const translateAbstract = (paperId) => {
-  return instance({
+  return request({
     method: 'get',
     url: 'api/paper/translate_abstract',
     params: {
