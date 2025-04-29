@@ -124,6 +124,7 @@ export default {
                         total: response.data.total,
                         content: response.data.content
                     }
+                    console.log(response.data)
                 })
                 .catch((error) => {
                     ElMessage.error(error.response.data.message)
