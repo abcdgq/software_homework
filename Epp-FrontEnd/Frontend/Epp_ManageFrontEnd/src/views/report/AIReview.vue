@@ -41,14 +41,14 @@
             <el-table-column label="是否通过">
                 <template v-slot="scope">
                     <div class="table-text">
-                        {{ scope.isPassed }}
+                        {{ scope.row.isPassed }}
                     </div>
                 </template>
             </el-table-column>
             <el-table-column label="原因">
                 <template v-slot="scope">
                     <div class="table-text">
-                        {{ scope.row.reason}}
+                        {{ scope.row.reason }}
                     </div>
                 </template>
             </el-table-column>
