@@ -68,6 +68,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:10516',
     'http://127.0.0.1:10516',
     'https://epp.buaase.cn',
+    'http://114.116.205.43'
 ]
 
 CORS_ALLOW_METHODS = (

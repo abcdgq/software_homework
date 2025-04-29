@@ -41,7 +41,13 @@ def do_request(url, data):
 
 
 def upload(pdf_name):
-    route = os.path.join("D:\\software_homework\\Epp-BackEnd\\backend\scripts\\untranslated_pdf", pdf_name)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    untranslated_dir = os.path.join(script_dir, "untranslated_pdf")
+    os.makedirs(untranslated_dir, exist_ok=True)  # 创建目录（若不存在）
+    
+    # 拼接路径（使用 f-string 简化字符串拼接）
+    route = os.path.join(untranslated_dir,pdf_name)
+    # route = os.path.join("D:\\software_homework\\Epp-BackEnd\\backend\scripts\\untranslated_pdf", pdf_name)
     #route = os.path.join(".\\untranslated_pdf", pdf_name)
     f = open(route, 'rb')  # 二进制方式打开文件
     q = base64.b64encode(f.read())  # 读取文件内容，转换为base64编码
@@ -109,7 +115,9 @@ def download(q, pdf_name):
     response = do_request(YOUDAO_URL_DOWNLOAD, data)
     #print (response.content)
     # 定义PDF保存路径
-    route = os.path.join("D:\\software_homework\\Epp-BackEnd\\backend\scripts\\translated_pdf", "translated__"+pdf_name)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    translated_dir = os.path.join(script_dir, "translated_pdf")
+    route = os.path.join(translated_dir, "translated__"+pdf_name)
     #route = os.path.join(".\\untranslated_pdf", "translated__"+pdf_name)
 
     # 写入文件
@@ -128,4 +136,4 @@ def pdf_translate(pdf_name):
     else: print("error:" + status)
 
 if __name__ == '__main__':
-    pdf_translate("sam.pdf")
+    pdf_translate("test.pdf")
