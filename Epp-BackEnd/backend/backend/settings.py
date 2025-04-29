@@ -68,6 +68,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:10516',
     'http://127.0.0.1:10516',
     'https://epp.buaase.cn',
+    'http://114.116.205.43'
 ]
 
 CORS_ALLOW_METHODS = (
@@ -126,8 +127,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': '2024_EPP',
         'USER': 'root',
-        # 'PASSWORD': '2883536Dgq',
-        'PASSWORD': '58',
+        'PASSWORD': '2883536Dgq',
+        # 'PASSWORD': '58',
         #  'HOST': '114.116.214.56',
         'HOST': '127.0.0.1',
         'PORT': '3306',

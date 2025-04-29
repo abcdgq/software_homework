@@ -626,7 +626,7 @@ def get_document_note(request):
     document_id = request.GET.get('paper_id')
 
     data = {
-        'notes': []
+        'annotations': []
     }
 
     document = UserDocument.objects.filter(document_id=document_id).first()
