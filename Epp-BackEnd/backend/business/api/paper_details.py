@@ -2,25 +2,26 @@
     论文详情页相关接口
 """
 import json
+import os
 import random
 import time
 import zipfile
-import os
 
-from django.views.decorators.http import require_http_methods
+from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL
 from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
 from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification, \
     AnnotationReport, UserDocument, DocumentNote
-from business.models.paper_annotation import FileAnnotation
 from business.models.auto_check_record import AutoCheckRecord
 from business.models.auto_check_risk import AutoRiskRecord
 from business.models.auto_check_undo import AutoUndoRecord
+from business.models.paper_annotation import FileAnnotation
 from business.models.paper_note import FileNote
 from business.utils import reply
 from business.utils.download_paper import downloadPaper
-from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL, USER_DOCUMENTS_PATH, USER_DOCUMENTS_URL
-
 from scripts.aliyun_test import auto_comment_detection
+from scripts.text_translate_test import connect as text_translate_tool
 
 if not os.path.exists(BATCH_DOWNLOAD_PATH):
     os.makedirs(BATCH_DOWNLOAD_PATH)
@@ -684,3 +685,26 @@ def delete_document_note(request):
         },
         msg="删除笔记成功"
     )
+
+
+@require_http_methods("GET")
+def translate_abstract(require):
+    paper_id = require.GET.get('paper_id')
+
+    paper = Paper.objects.filter(paper_id=paper_id).first()
+
+    if paper is None:
+        return reply.fail(msg="未找到该论文")
+
+    abstract = paper.abstract
+
+    translated_abstract = text_translate_tool(abstract)
+
+    data = {
+        "translatedSummary": translated_abstract[0],
+    }
+
+    print("data:" + str(data))
+
+    return reply.success(data=data, msg="成功获取摘要翻译结果")
+

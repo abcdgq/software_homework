@@ -60,6 +60,7 @@ urlpatterns = [
                   path("api/study/deleteNote", paper_details.delete_paper_note),
                   path("api/study/reportAnnotation", paper_details.report_paper_annotation),
 
+                  path("api/paper/translate_abstract", paper_details.translate_abstract),
 
                   # 用户上传论文模块
                   path("api/uploadPaper", upload_document.upload_paper),
