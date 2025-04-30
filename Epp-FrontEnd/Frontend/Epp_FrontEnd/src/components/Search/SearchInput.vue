@@ -15,7 +15,7 @@
             <div class="history">
               <el-tag v-for="(record, index) in search_records" :key="index" closable
                 @close="removeRecord(record.search_record_id, index)"
-                @click="searchFromHistory(record.search_record_id)">
+                @click="searchFromHistory(record.search_record_id,record.keyword)">
                 <div style="display: flex; align-items: center;">
                   {{ record.keyword }}
                   <div class="record-date">
@@ -74,10 +74,11 @@ export default {
         query: { search_content: searchContent, searchRecordID: '', searchType: this.searchType }
       })
     },
-    searchFromHistory (searchRecordID) {
+    searchFromHistory (searchRecordID, keyword) {
       this.$router.push({
         name: 'search-results',
-        query: { search_content: '', searchRecordID: searchRecordID }
+        // query: { search_content: '', searchRecordID: searchRecordID }
+        query: { search_content: keyword, searchRecordID: '', searchType: this.searchType }
       })
     },
     removeRecord (searchRecordId, index) {

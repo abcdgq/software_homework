@@ -132,6 +132,8 @@ export default {
         })
     },
     fetchPrivateRecommend () {
+      this.recommendations = []
+      this.loading = true
       // TODO
       axios
         .get(this.$BASE_API_URL + '/paperPrivateRecommend')

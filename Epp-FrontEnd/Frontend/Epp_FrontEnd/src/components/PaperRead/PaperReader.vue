@@ -157,7 +157,9 @@ export default {
       isTranslated: false, // 是否翻译过
       showReport: false, // 是否显示举报框
       pendingAnnotationId: null, // 正在举报的批注ID
-      reportReason: '' // 新举报理由
+      reportReason: '', // 新举报理由
+      isFetchPaperSuccess: false, // 是否获取成功
+      isLoadPdfSuccess: false // 是否加载PDF成功
     }
   },
   created () {
@@ -174,7 +176,10 @@ export default {
           //   this.pdfUrl = '../../../static/Res3ATN -- Deep 3D Residual Attention Network for Hand Gesture  Recognition in Videos.pdf'
           console.log('论文PDF为', this.pdfUrl)
           // alert('论文PDF为' + this.pdfUrl)
-          this.initPDFViewer()
+          this.isFetchPaperSuccess = true
+          if (this.isLoadPdfSuccess) {
+            this.initPDFViewer()
+          }
         })
         .catch((error) => {
           console.log('请求论文PDF失败 ', error)
@@ -189,6 +194,10 @@ export default {
         console.log('PDF.js 加载成功') // 添加这行
         window.pdfjsLib.GlobalWorkerOptions.workerSrc =
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
+        this.isLoadPdfSuccess = true // PDF.js加载成功
+        if (this.isFetchPaperSuccess) {
+          this.initPDFViewer() // 确保PDF.js加载完成后再初始化查看器
+        }
       }
       script.onerror = () => {
         console.error('PDF.js 加载失败') // 添加错误处理

@@ -158,13 +158,16 @@ export default {
       isTranslated: false, // 是否翻译过
       showReport: false, // 是否显示举报框
       pendingAnnotationId: null, // 正在举报的批注ID
-      reportReason: '' // 新举报理由
+      reportReason: '', // 新举报理由
+      isFetchPaperSuccess: false, // 是否获取成功
+      isLoadPdfSuccess: false // 是否加载PDF成功
     }
   },
   created () {
+    this.fileReadingID = this.$route.query.fileReadingID
     this.loadPDFJS() // 动态加载PDF.js库，即使pdfurl修改，也不需要重新加载
     this.fetchPaperPDF()
-    this.fileReadingID = this.$route.query.fileReadingID
+    // 上述两个都加载好，才能进行初始化PDF查看器，已经在上面两个里面添加了对应的判断
   },
   methods: {
     fetchPaperPDF () {
@@ -174,7 +177,10 @@ export default {
           this.pdfUrl = this.originalUrl
           //   this.pdfUrl = '../../../static/Res3ATN -- Deep 3D Residual Attention Network for Hand Gesture  Recognition in Videos.pdf'
           console.log('论文PDF为', this.pdfUrl)
-          this.initPDFViewer()
+          this.isFetchPaperSuccess = true
+          if (this.isLoadPdfSuccess) {
+            this.initPDFViewer()
+          }
         })
         .catch((error) => {
           console.log('请求论文PDF失败 ', error)
@@ -188,6 +194,10 @@ export default {
         console.log('PDF.js 加载成功') // 添加这行
         window.pdfjsLib.GlobalWorkerOptions.workerSrc =
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
+        this.isLoadPdfSuccess = true // PDF.js加载成功
+        if (this.isFetchPaperSuccess) {
+          this.initPDFViewer()
+        }
       }
       script.onerror = () => {
         console.error('PDF.js 加载失败') // 添加错误处理
