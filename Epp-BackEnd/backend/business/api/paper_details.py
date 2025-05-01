@@ -624,7 +624,7 @@ def get_document_note(request):
     '''
     获得笔记
     '''
-    document_id = request.GET.get('paper_id')
+    document_id = request.GET.get('document_id')
 
     data = {
         'annotations': []
@@ -666,9 +666,9 @@ def delete_document_note(request):
     删除笔记
     '''
     data = json.loads(request.body)
-    note_id = data.get('note_id')
+    note_id = data.get('annotation_id')
 
-    note = DocumentNote.objects.filter(node_id=note_id).first()
+    note = DocumentNote.objects.filter(note_id=note_id).first()
 
     if not note:
         return reply.fail(
