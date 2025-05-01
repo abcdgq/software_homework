@@ -103,7 +103,7 @@
     </el-col>
     <el-col :span="8" style="height: 100vh; position: sticky; top: 55px">
       <ai-assistant v-if="aiReply.length > 0" :aiReply="aiReply" :paperIds="paperIds" :searchRecordID="searchRecordID"
-        :restoreHistory="restoreHistory" @find-paper="searchPaperByAssistant" />
+        :restoreHistory="restoreHistory" :isLoading="aiLoading"  @find-paper="searchPaperByAssistant" />
     </el-col>
   </el-col>
 </template>
@@ -142,7 +142,8 @@ export default {
       selectedPapers: [],
       checkedPapers: {},
       isDialogSearch: false,
-      defaultSearchContent: ''
+      defaultSearchContent: '',
+      aiLoading: true
     }
   },
   methods: {
@@ -194,7 +195,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       })
       await axios.post(this.$BASE_API_URL + '/search/vectorQuery', { 'search_content': this.$route.query.search_content, 'search_type': this.$route.query.searchType })
-        .then((response) => {
+        .then(async (response) => {
           console.log('response is ...')
           this.papers = response.data.paper_infos
           // 添加ai回答的逻辑
@@ -204,9 +205,30 @@ export default {
           this.searchRecordID = response.data.search_record_id
           this.defaultSearchContent = this.$route.query.search_content
           loadingInstance.close()
+          await this.buidKB()
         })
         .catch((error) => {
           console.error('语义检索失败:', error)
+        })
+      // axios.post(this.$BASE_API_URL + '/search/vectorQueryBuildKB', { 'paperIDs': this.paperIds, 'searchRecordId': this.searchRecordID })
+      //   .then((response) => {
+      //     console.log('论文循征成功, ', response.data.msg)
+      //   })
+      //   .catch((error) => {
+      //     console.error('知识库构建失败:', error)
+      //   })
+    },
+    async buidKB () {
+      this.aiLoading = true
+      await axios.post(this.$BASE_API_URL + '/search/vectorQueryBuildKB', { 'paperIDs': this.paperIds, 'searchRecordId': this.searchRecordID })
+        .then((response) => {
+          console.log('论文循征成功, ', response.data.msg)
+          this.aiLoading = false
+        })
+        .catch((error) => {
+          console.error('知识库构建失败:', error)
+          this.aiLoading = true
+          this.loadingText = '知识库构建失败，请稍后再试'
         })
     },
     async fetchPapersFromHistory () {
