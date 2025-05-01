@@ -119,6 +119,7 @@ urlpatterns = [
                   path('api/search/rebuildKB', search.build_kb),
                   # path('api/search/getSearchRecord', get_search_record),
                   path('api/search/changeRecordPapers', search.change_record_papers),
+                  path("api/search/vectorQueryBuildKB", search.vector_query_build_kb),
 
                   # 向量化模块
                   # path("insert_vector_database", insert_vector_database),

@@ -146,6 +146,7 @@ export default {
       allAnnotations: [], // 保存所有注释，每次渲染时从服务器获取即可，格式下面有样例
       pdfInstance: null, // PDF.js 实例
       containerOffsetTop: 0, // PDF 容器的顶部偏移
+      containerOffsetLeft: 0, // PDF 容器的左侧偏移
       showReadAssistant: true, // 是否显示阅读助手
       currentUser: localStorage.getItem('username'), // 当前用户
       filterType: 'all', // 筛选类型
@@ -158,13 +159,16 @@ export default {
       isTranslated: false, // 是否翻译过
       showReport: false, // 是否显示举报框
       pendingAnnotationId: null, // 正在举报的批注ID
-      reportReason: '' // 新举报理由
+      reportReason: '', // 新举报理由
+      isFetchPaperSuccess: false, // 是否获取成功
+      isLoadPdfSuccess: false // 是否加载PDF成功
     }
   },
   created () {
+    this.fileReadingID = this.$route.query.fileReadingID
     this.loadPDFJS() // 动态加载PDF.js库，即使pdfurl修改，也不需要重新加载
     this.fetchPaperPDF()
-    this.fileReadingID = this.$route.query.fileReadingID
+    // 上述两个都加载好，才能进行初始化PDF查看器，已经在上面两个里面添加了对应的判断
   },
   methods: {
     fetchPaperPDF () {
@@ -174,7 +178,10 @@ export default {
           this.pdfUrl = this.originalUrl
           //   this.pdfUrl = '../../../static/Res3ATN -- Deep 3D Residual Attention Network for Hand Gesture  Recognition in Videos.pdf'
           console.log('论文PDF为', this.pdfUrl)
-          this.initPDFViewer()
+          this.isFetchPaperSuccess = true
+          if (this.isLoadPdfSuccess) {
+            this.initPDFViewer()
+          }
         })
         .catch((error) => {
           console.log('请求论文PDF失败 ', error)
@@ -188,6 +195,10 @@ export default {
         console.log('PDF.js 加载成功') // 添加这行
         window.pdfjsLib.GlobalWorkerOptions.workerSrc =
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
+        this.isLoadPdfSuccess = true // PDF.js加载成功
+        if (this.isFetchPaperSuccess) {
+          this.initPDFViewer()
+        }
       }
       script.onerror = () => {
         console.error('PDF.js 加载失败') // 添加错误处理
@@ -244,10 +255,11 @@ export default {
       if (this.isSelecting) return
       this.isSelecting = true
       const container = document.getElementById('pdf-viewer-container')
-      this.startX = event.clientX
+      this.startX = event.clientX + container.scrollLeft // 修正 scrollLeft
       this.startY = event.clientY + container.scrollTop // 修正 scrollTop
 
       this.containerOffsetTop = container.getBoundingClientRect().top
+      this.containerOffsetLeft = container.getBoundingClientRect().left
 
       this.selectionBox = document.createElement('div')
       this.selectionBox.style.position = 'absolute'
@@ -260,14 +272,14 @@ export default {
       if (!this.isSelecting) return
       const container = document.getElementById('pdf-viewer-container')
 
-      const width = event.clientX - this.startX
+      const width = event.clientX + container.scrollLeft - this.startX
       const height = event.clientY + container.scrollTop - this.startY // 修正 scrollTop
 
-      this.selectionBox.style.left = `${this.startX}px`
+      this.selectionBox.style.left = `${this.startX - this.containerOffsetLeft}px`
       this.selectionBox.style.top = `${this.startY - this.containerOffsetTop}px`
       this.selectionBox.style.width = `${Math.abs(width)}px`
       this.selectionBox.style.height = `${Math.abs(height)}px`
-      // this.selectionBox.style.left = `${Math.round(this.startX)}px`
+      // this.selectionBox.style.left = `${Math.round(this.startX - this.containerOffsetLeft)}px`
       // this.selectionBox.style.top = `${Math.round(this.startY - this.containerOffsetTop)}px`
       // this.selectionBox.style.width = `${Math.round(Math.abs(width))}px`
       // this.selectionBox.style.height = `${Math.round(Math.abs(height))}px`
@@ -454,6 +466,13 @@ export default {
         console.log(comment, userName, isPublic, id)
         this.renderAnnotation(x, y, width, height, pageNum)
       })
+
+      // 添加窗口调整大小事件监听器
+      window.addEventListener('resize', this.handleResize)
+    },
+    // 处理窗口调整大小的事件
+    handleResize () {
+      this.renderAnnotations() // 重新渲染注释
     },
     // 从数据库加载所有已有评论，并渲染到页面上，可以分别renderAnnotation,也可以直接renderAnnotations
     // 这个只在开始调用一次，避免和数据库交互太多，影响性能。

@@ -914,16 +914,40 @@ def vector_query(request):
     
     ### TODO 构建知识库 ###
     
-    try:
-        tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
-        insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
-    except Exception as e:
-        print("构建知识库失败")
-        return reply.fail(msg="构建知识库失败")
+    # try:
+    #     tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
+    #     insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
+    # except Exception as e:
+    #     print("构建知识库失败")
+    #     return reply.fail(msg="构建知识库失败")
 
     print("向量检索完成")
     # 'keywords': keywords
     return JsonResponse({"paper_infos": filtered_papers_list, 'ai_reply': ai_reply, 'search_record_id' : search_record.search_record_id}, status=200)
+
+
+@require_http_methods('POST')
+def vector_query_build_kb(request):
+    '''
+        {
+            'paperIDs',
+            'searchRecordID'
+        }
+    '''
+    data = json.loads(request.body)
+    paper_id_list = data['paperIDs']
+    search_record_id = data['searchRecordID']
+
+    try:
+        tmp_kb_id = build_abs_kb_by_paper_ids(paper_id_list, search_record_id)
+        insert_search_record_2_kb(search_record_id, tmp_kb_id)
+    except Exception as e:
+        print("构建知识库失败")
+        return reply.fail(msg="构建知识库失败")
+
+    return reply.success(msg="成功构建知识库")
+
+
 
 @require_http_methods(["GET"])
 def restore_search_record(request):
