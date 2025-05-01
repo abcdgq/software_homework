@@ -27,6 +27,20 @@ const router = createRouter({
                     component: () => import(`@/views/report/ReportManage.vue`),
                     children: [
                         {
+                            path: '/report/annotation/',
+                            component: () => import('@/views/report/ReportManage.vue'),
+                            children: [
+                                {
+                                    path: '/report/annotation/handled',
+                                    component: ()=> import('@/views/report/annotation/HandledReport.vue')
+                                },
+                                {
+                                    path: '/report/annotation/unhandled',
+                                    component: () => import('@/views/report/annotation/UnhandledReport.vue')
+                                }
+                            ]
+                        },
+                        {
                             path: '/report/unhandled',
                             component: () => import(`@/views/report/UnhandledReport.vue`)
                         },
