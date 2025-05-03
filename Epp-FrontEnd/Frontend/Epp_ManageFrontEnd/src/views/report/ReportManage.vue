@@ -14,22 +14,6 @@
             <div style="padding: 10px"><router-view></router-view></div>
         </el-collapse-item>
 
-        <!-- 新增批注审核 -->
-        <el-collapse-item name="3">
-            <template #title>
-                <div class="collapse-title">
-                    <el-icon><></el-icon>
-                    <span class="collapse-title-text">批注举报审核</span>
-                </div>
-            </template>
-
-            <el-menu :default-active="$route.path" class="menu" model="horizontal" :ellipsis="false" router>
-                <el-menu-item class="menu-content" index="/report/annotation/unhandled">未审核</el-menu-item>
-                <el-menu-item class="menu-content" index="/report/annotation/handled">已审核</el-menu-item>
-            </el-menu>
-
-        </el-collapse-item>
-
         <!-- 新增的AI审核部分 -->
         <el-collapse-item name="2">
             <template #title>
@@ -44,7 +28,23 @@
             </el-menu>
             <div style="padding: 10px"><router-view></router-view></div>
         </el-collapse-item>
+
+        <!-- 新增批注审核 -->
+        <el-collapse-item name="3">
+            <template #title>
+                <div class="collapse-title">
+                    <el-icon><i-ep-ChatLineSquare /></el-icon>
+                    <span class="collapse-title-text">批注举报审核</span>
+                </div>
+            </template>
+            <el-menu :default-active="$route.path" class="menu" mode="horizontal" :ellipsis="false" router>
+                <el-menu-item class="menu-content" index="/report/annot-unhandled">未审核</el-menu-item>
+                <el-menu-item class="menu-content" index="/report/annot-handled">已审核</el-menu-item>
+            </el-menu>
+            <div style="padding: 10px"><router-view></router-view></div>
+        </el-collapse-item>
     </el-collapse>
+
 </template>
 
 <script>
@@ -53,7 +53,7 @@ export default {
     props: {},
     data() {
         return {
-            isClsActive: '0'
+            isClsActive: ['0']
         }
     },
     watch: {},

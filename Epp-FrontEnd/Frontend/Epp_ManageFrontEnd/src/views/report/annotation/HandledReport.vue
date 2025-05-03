@@ -5,8 +5,8 @@
                 v-model="searchDate"
                 type="date"
                 placeholder="选择日期"
-                foramt="YYYY-MM-DD"
-                value-format='YYYY-MM-DD'
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
             />
             <el-button type="primary" @click="handleSearch">搜索</el-button>
         </div>
@@ -17,9 +17,9 @@
             style="width: 96%; border-top: 1px solid #edebeb; font-size: 15px; margin: 0 auto"
             size="large"
             v-loading="isLoading"
-            header-cell-style="{ 'text-align': 'center'}"
-            cell-style="{ 'text-align': 'center', 'vertical-align': 'middle'}"
-            :default-sort="{ prop: 'date', order: 'decending'}"
+            :header-cell-style="{ 'text-align': 'center' }"
+            :cell-style="{ 'text-align': 'center', 'vertical-align': 'middle' }"
+            :default-sort="{ prop: 'date', order: 'descending' }"
             >
             <el-table-column label="序号" width="100" type="index" />
             <el-table-column label="日期" prop="date" width="200" sortable />
@@ -47,10 +47,10 @@
             </el-table-column>
             <el-table-column type="expand">
                 <template #default="props">
-                    <report-detail :reportID="props.row.id" />
+                    <report-detail :reportID="props.row.report_id" />
                 </template>
             </el-table-column>
-            <template #empty>
+            <template v-slot:empty>
                 <el-empty description="没有数据" />
             </template>
         </el-table>
@@ -59,14 +59,15 @@
             class="report-manage-pagination"
             v-model:current-page="currentPage"
             v-model:page-size="pageSize"
-            page-sizes="[10, 25, 50]"
+            :page-sizes="[10, 25, 50]"
             layout="total, sizes, prev, pager, next, jumper"
             :total="reportData.total"
             />
     </div>
 </template>
+
 <script>
-import {getAnnotReportHandled} from '@/api/report.js'
+import { getAnnotReportHandled } from '@/api/report.js'
 import ReportDetail from '@/views/report/annotation/ReportDetail.vue'
 export default {
     components: {
@@ -79,7 +80,7 @@ export default {
                 total: 1,
                 reports: [
                     {
-                        id: 1,
+                        report_id: 1,
                         annotation: {
                             date: '2025-05-01 10:28:28',
                             content: '批注内容'

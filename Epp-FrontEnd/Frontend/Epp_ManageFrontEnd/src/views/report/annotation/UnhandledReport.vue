@@ -17,9 +17,9 @@
             style="width: 96%; border-top: 1px solid #edebeb; font-size: 15px; margin: 0 auto"
             size="large"
             v-loading="isLoading"
-            header-cell-style="{ 'text-align': 'center' }"
-            cell-style="{ 'text-align': 'center', vertical-align': 'center' }"
-            :default-sort="{ porp: 'date', order: 'decending' }"
+            :header-cell-style="{ 'text-align': 'center' }"
+            :cell-style="{ 'text-align': 'center', 'vertical-align': 'center' }"
+            :default-sort="{ prop: 'date', order: 'descending' }"
             >
             <el-table-column label="序号" width="100" type="index" />
             <el-table-column label="日期" prop="date" width="200" sortable />
@@ -46,8 +46,8 @@
                 </template>
             </el-table-column>
             <el-table-column type="expand">
-                <template #deault="props">
-                    <report-detail :reportID="props.row.id" />
+                <template #default="props">
+                    <report-detail :reportID="props.row.report_id" />
                 </template>
             </el-table-column>
             <template #empty>
@@ -59,7 +59,7 @@
             class="report-manage-pagination"
             v-model:current-page="currentPage"
             v-model:page-size="pageSize"
-            page-sizes="[10, 25, 50]"
+            :page-sizes="[10, 25, 50]"
             layout="total, sizes, prev, pager, next, jumper"
             :total="reportData.total"
             />
@@ -72,7 +72,7 @@ import {getAnnotReportUnhandled} from '@/api/report.js'
 
 export default {
     components: {
-        reportDetail
+        ReportDetail
     },
     data() {
         return {
@@ -81,7 +81,7 @@ export default {
                 total: 1,
                 reports: [
                     {
-                        id: 1,
+                        report_id: 1,
                         annotation: {
                             date: '2025-05-01 10:28:28',
                             content: '批注内容'
@@ -112,15 +112,17 @@ export default {
                 .then((response) => {
                     console.log('getAnnotReportUnhandled:\n', response)
                     this.reportData = response.data
+                    console.log(response.data.reports[0].report_id)
+                    console.log(this.reportData.reports[0].report_id)
                 })
                 .catch((error) => {
                     console.log(error.response.data.message)
                 })
             this.isLoading = false
-        },
-        created() {
-            this.handleSearch()
         }
+    },
+    created() {
+        this.handleSearch()
     }
 }
 </script>

@@ -80,13 +80,26 @@ export const getAnnotReportUnhandled = ({ date, pageNum, pageSize }) => {
     })
 }
 
-export const getAnnotReportDetail = ({ pageId }) => {
+export const getAnnotReportDetail = (reportId) => {
     // 获取批注举报的详细信息
     return request({
         method: 'get',
         url: '/api/manage/annotationReportDetail',
         params: {
-            page_id: pageId
+            report_id: reportId
+        }
+    })
+}
+
+export const judgeAnnotReport = ({ reportID, text, visibility }) => {
+    // 审核批注举报
+    return request({
+        method: 'post',
+        url: '/api/manage/judgeAnnotationReport',
+        data: {
+            report_id: reportID,
+            text: text,
+            acceptReport: !visibility
         }
     })
 }

@@ -75,13 +75,11 @@
 
 <script>
 import { getAIReviewReject } from '@/api/aiReview'
-import ReportDetail from './ReportDetail.vue'
 import { ElMessage } from 'element-plus'
 import AIReviewDetail from "@/views/report/AIReviewDetail.vue";
 export default {
     components: {
         AIReviewDetail,
-        ReportDetail
     },
     data() {
         return {
