@@ -876,7 +876,7 @@ def judge_annotation_report(request):
         else:
             # 首次审核
             if acceptReport:
-                Notification(user_id=annotation_report.use, title="您的举报已被审核",
+                Notification(user_id=annotation_report.user, title="您的举报已被审核",
                          content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台审核。\n以下是审核意见：举报成功！{text}").save()
             else:
                 Notification(user_id=annotation_report.user, title="您的举报已被审核",
