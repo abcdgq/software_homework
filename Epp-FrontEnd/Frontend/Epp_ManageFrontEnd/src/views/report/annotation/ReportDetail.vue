@@ -3,9 +3,9 @@
         <div class="report-card">
             <el-card class="report-content" shadow="hover">
                 <div>
-                    <el-descriptions title="批注信息" colum="1" border>
+                    <el-descriptions title="批注信息" :column="1" border>
                         <el-descriptions-item label="批注用户">
-                            {{ reportDetail.annotation.user }}
+                            {{ reportDetail.annotation.note.username }}
                         </el-descriptions-item>
                         <el-descriptions-item label="批注时间">
                             {{ reportDetail.annotation.date }}
@@ -16,16 +16,16 @@
                     </el-descriptions>
                     <el-divider />
 
-                    <el-descriptions title="批注论文" column="1" border>
+                    <el-descriptions title="批注论文" :column="1" border>
                         <el-descriptions-item label="论文标题">
-                            {{ reportDetail.paper }}
+                            {{ reportDetail.annotation.paper.title }}
                         </el-descriptions-item>
                     </el-descriptions>
                     <el-divider />
 
-                    <el-descriptions title="举报信息" column="1" border>
+                    <el-descriptions title="举报信息" :column="1" border>
                         <el-descriptions-item label="举报用户">
-                            {{ reportDetail.user }}
+                            {{ reportDetail.user.user_name }}
                         </el-descriptions-item>
                         <el-descriptions-item label="举报日期">
                             {{ reportDetail.date }}
@@ -72,6 +72,7 @@
                             type="primary"
                             round
                             style="margin:0 auto"
+                            @click="handleSubmit"
                             >确认提交</el-button>
                     </div>
                 </div>
@@ -92,8 +93,11 @@ export default {
             reportDetail: {
                 annotation: {
                     annotation_id: 1,
-                    user: '批注用户',
-                    paper: '对应论文',
+                    user: 'user_id',
+                    paper: {
+                        paper_id: '',
+                        title: ''
+                    },
                     date: '',
                     note: {
                         note_id: 1,
@@ -108,11 +112,14 @@ export default {
                     }
                 },
 
-                user: '举报用户',
+                user: {
+                    user_id: '',
+                    user_name: '举报用户'
+                },
                 date: '',
                 content: '低俗，色情',
                 judgment: '审核意见',
-                acceptReport: true,
+                invisibility: true,
                 processed: false
             },
 
@@ -129,7 +136,8 @@ export default {
                 .then((response) => {
                     this.reportDetail = response.data
                     this.judgment.text = response.data.judgment
-                    this.judgment.invisibility = response.data.acceptReport
+                    this.judgment.invisibility = response.data.invisibility
+                    console.log(response.data)
                 })
                 .catch((error) => {
                     console.log(this.$props.reportID)
