@@ -835,9 +835,10 @@ def delete_annotation(annotation_id):
 @require_http_methods('POST')
 def judge_annotation_report(request):
     """ 批注举报审核意见 """
-    report_id = request.body.get('report_id')
-    text = request.body.get('text')
-    acceptReport = request.body.get('acceptReport')
+    data = json.loads(request.body)
+    report_id = data.get('report_id')
+    text = data.get('text')
+    acceptReport = data.get('acceptReport')
 
     # 获取对应批注举报和评论
     annotation_report = AnnotationReport.objects.filter(report_id=report_id).first()
@@ -851,14 +852,14 @@ def judge_annotation_report(request):
     # 保存审核信息，通知被举报批注所有者
     if acceptReport:
         # 经核实，批注违规,删除
-        Notification(user_id=annotation.user_id, title="您的批注被举报了！",
+        Notification(user_id=annotation.user, title="您的批注被举报了！",
                      content=f"您在 {annotation.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 被其他用户举报，根据EPP平台管理规定，检测到您的批注确为不合规，该批注现已删除。\n请注意遵守平台批注规范！"
                      ).save()
         annotation.visibility = False
         annotation.save()
     else:
         # 经核实，批注不违规
-        Notification(user_id=annotation.user_id, title="您的批注已恢复正常！",
+        Notification(user_id=annotation.user, title="您的批注已恢复正常！",
                      content=f"您在 {annotation.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 被平台重新审核后判定合规，因此已恢复正常。\n对您带来的不便，我们表示万分抱歉！"
                      ).save()
     # 通知举报者
@@ -867,18 +868,18 @@ def judge_annotation_report(request):
         if annotation_report.processed:
             # 重新审核
             if acceptReport:
-                Notification(user_id=annotation_report.user_id, title="您的举报已被重新审核",
+                Notification(user_id=annotation_report.user, title="您的举报已被重新审核",
                          content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台重新审核。\n以下是新的审核意见：举报成功！{text}").save()
             else:
-                Notification(user_id=annotation_report.user_id, title="您的举报已被重新审核",
+                Notification(user_id=annotation_report.user, title="您的举报已被重新审核",
                              content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台重新审核。\n以下是新的审核意见：举报失败！{text}").save()
         else:
             # 首次审核
             if acceptReport:
-                Notification(user_id=annotation_report.user_id, title="您的举报已被审核",
+                Notification(user_id=annotation_report.user, title="您的举报已被审核",
                          content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台审核。\n以下是审核意见：举报成功！{text}").save()
             else:
-                Notification(user_id=annotation_report.user_id, title="您的举报已被审核",
+                Notification(user_id=annotation_report.user, title="您的举报已被审核",
                              content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台审核。\n以下是审核意见：举报失败！{text}").save()
     annotation_report.processed = True
     annotation_report.save()
