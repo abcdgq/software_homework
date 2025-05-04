@@ -114,6 +114,7 @@ def create_paper_study(request):
         local_path = document.local_path
         content_type = document.format
         title = document.title
+        print("doc title: ", title)
         # 先查找数据库是否有对应的Filereading
         file_readings = FileReading.objects.filter(document_id=document_id)
         if file_readings.count() == 0:
@@ -246,7 +247,7 @@ def restore_paper_study(request):
         with open(fr.conversation_path, 'r') as f:
             conversation_history = json.load(f)  # 使用 json.load() 方法将 JSON 数据转换为字典
 
-        print("error1")
+        # print("error1")
 
         return reply.success(
             {'file_reading_id': file_reading_id, 'conversation_history': conversation_history},
@@ -392,6 +393,7 @@ import requests
 import re
 
 def do_file_chat(conversation_history, query, tmp_kb_id):
+    print("do_file_chat")
     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
     headers = {
         'Content-Type': 'application/json'
@@ -414,7 +416,7 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             "max_tokens": 500,
         })
 
-    print(f"Sending payload to server: {payload}")
+    # print(f"Sending payload to server: {payload}")
 
     def _get_ai_reply(payload):
         try:
@@ -430,7 +432,7 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             for line in response.iter_lines():
                 if line:
                     decoded_line = line.decode('utf-8')
-                    print(f"Received line: {decoded_line}")
+                    # print(f"Received line: {decoded_line}")
 
                     if decoded_line.startswith('data'):
                         data = decoded_line.replace('data: ', '')
@@ -473,7 +475,7 @@ def do_file_chat(conversation_history, query, tmp_kb_id):
             "temperature": 0.4
         })
 
-        print(f"Sending question payload to server: {payload}")
+        # print(f"Sending question payload to server: {payload}")
 
         try:
             question_reply, _ = _get_ai_reply(payload)
@@ -513,7 +515,7 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 '''
 
 
-@require_http_methods(["POST"])
+# @require_http_methods(["POST"])
 # def do_paper_study(request):
 #     # 鉴权
 #     username = request.session.get('username')
@@ -541,25 +543,115 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 #     add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
 #     return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
 
+def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
+    # 分发
+    from scripts.routing_agent import generate_subtasks,get_expert_weights
+    q_type, subtasks = generate_subtasks(query)
+    print("多智能体：完成子问题生成")
+    print(q_type, subtasks)
+
+    print("多智能体：开始问题分发")
+    if q_type == "other":
+        print("other type")
+        # llm
+        return do_file_chat(conversation_history, query, tmp_kb_id)
+    else:
+        # api
+        api_query = subtasks.get("api")
+        api_reply = ''
+        api_reply, docs_from_api = get_api_reply(api_query)
+        print(api_reply)
+        print("多智能体：已获取api专家回答")
+
+        # search
+        search_query = subtasks.get("search")
+        search_reply = ''
+        search_reply, docs_from_search = get_search_reply(search_query)
+        print(search_reply)
+        print("多智能体：已获取搜索引擎专家回答")
+
+        # llm
+        llm_query = subtasks.get("llm")
+        print(conversation_history)
+        llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
+        print(llm_reply)
+        print("多智能体：已获取原生LLM专家回答")
+
+    # 整合
+    from scripts.gennerate_result import aggregate_answers
+    weight = get_expert_weights(q_type)
+    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
+    print("多智能体：已完成问题整合")
+
+    # 整合docs  
+    for doc in docs_from_api: #规范docs格式
+        origin_docs.append(" " + doc)
+    for doc in docs_from_search: #规范docs格式
+        origin_docs.append(" " + doc)
+    docs = origin_docs
+    print(origin_docs)
+    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+    # docs.append(doc)
+    print("多智能体：已完成来源整合")
+
+    return ai_reply, docs, question_reply
+
+def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
+    from scripts.test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
+    return test_localvdb_and_scholarapi(api_auery)
+
+def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
+    from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
+    qa_list = tavily_advanced_search(search_query).get("results")
+    uselist = []
+    times = 0
+    while True: #防止产生的结果过长，导致后边没法喂给大模型进行整合，进行一下筛选
+        if times > 5: #防止问太多遍
+            break
+        for qa in qa_list:
+            if qa['raw_content']:
+                if(len(qa['raw_content']) < 2000):
+                    uselist.append(qa)
+            else:
+                if(len(qa['content']) < 2000):
+                    uselist.append(qa)
+        if len(uselist) >= 2:
+            break
+        else: #数量不够就重新问，重新筛
+            qa_list = tavily_advanced_search(search_query + "len < 2000").get("results")
+            uselist = []
+
+    search_reply = "\n".join([
+        f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_content'])} score ：{qa['score']}"
+        for qa in uselist
+        ])
+    
+    from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+    summarized_search_reply = text_summarizer(search_reply)
+
+    docs = []
+    for qa in uselist:
+        docs.append(qa['title'] + "   "+ qa['url'])
+    #返回示例  ['VQ-VAE Explained - Papers With Code   https://paperswithcode.com/method/vq-vae', 
+    # 'PDF   https://xnought.github.io/files/vq_vae_explainer.pdf']
+
+    return summarized_search_reply, docs
+
+@require_http_methods(["POST"])
 def do_paper_study(request):
     # 调试：打印请求信息
-    print(f"请求方法: {request.method}")
-    print(f"请求路径: {request.path}")
-    print(f"请求查询参数: {request.GET}")
-    print(f"请求体: {request.body}")
+    # print(f"请求方法: {request.method}")
+    # print(f"请求路径: {request.path}")
+    # print(f"请求查询参数: {request.GET}")
+    # print(f"请求体: {request.body}")
 
     # 鉴权
     username = request.session.get('username')
-    print(f"从会话获取的用户名: {username}")
     if username is None:
         username = 'sanyuba'
-        print(f"用户名未找到，使用默认用户名: {username}")
-
     user = User.objects.filter(username=username).first()
-    print(f"查询到的用户: {user}")
 
     if user is None:
-        print("用户未登录或不存在，返回失败响应")
         return reply.fail(msg="请先正确登录")
 
     try:
@@ -576,6 +668,8 @@ def do_paper_study(request):
         # 查询 FileReading 对象
         fr = FileReading.objects.get(id=file_reading_id)
         print(f"查询到的 FileReading 对象: {fr}")
+        # print("doc id: ", fr.document_id)
+        # print("paper id: ",fr.paper_id)
 
         # 获取临时知识库 ID
         tmp_kb_id = get_tmp_kb_id(file_reading_id=file_reading_id)  # 临时知识库id
@@ -589,14 +683,20 @@ def do_paper_study(request):
         print(f"加载对话历史文件路径: {fr.conversation_path}")
         with open(fr.conversation_path, 'r') as f:
             conversation_history = json.load(f)
-        print(f"加载的对话历史: {conversation_history}")
+        # print(f"加载的对话历史: {conversation_history}")
 
         conversation_history = list(conversation_history.get('conversation'))  # List[Dict]
-        print(f"转换后的对话历史: {conversation_history}")
+        # print(f"转换后的对话历史: {conversation_history}")
 
         # 调用 AI 聊天函数
-        print(f"调用 do_file_chat，参数: conversation_history={conversation_history}, query={query}, tmp_kb_id={tmp_kb_id}")
-        ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
+        # print(f"调用 do_file_chat，参数: conversation_history={conversation_history}, query={query}, tmp_kb_id={tmp_kb_id}")
+        # ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
+        
+        # 获取title
+        title = fr.document_id if fr.document_id else fr.paper_id
+        print("paper title: ", title)
+        ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id, title)
+
         print(f"AI 回复: {ai_reply}")
         print(f"原始文档: {origin_docs}")
         print(f"问题回复: {question_reply}")
