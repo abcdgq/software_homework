@@ -38,7 +38,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column label="举报意见">
+            <el-table-column label="举报理由">
                 <template v-slot="scope">
                     <div class="table-text">
                         {{ scope.row.content }}

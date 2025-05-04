@@ -30,7 +30,7 @@
                         <el-descriptions-item label="举报日期">
                             {{ reportDetail.date }}
                         </el-descriptions-item>
-                        <el-descriptions-item label="举报内容">
+                        <el-descriptions-item label="举报理由">
                             {{ reportDetail.content }}
                         </el-descriptions-item>
                     </el-descriptions>
