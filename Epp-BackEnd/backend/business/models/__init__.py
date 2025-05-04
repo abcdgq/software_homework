@@ -22,6 +22,7 @@ from .paper_note import FileNote
 from .recommended_papers import RecommendedPaper
 from .document_note import DocumentNote
 from .annotation_report import AnnotationReport
+from .problem import problem_record
 
 __all__ = [
     'User',
@@ -47,5 +48,6 @@ __all__ = [
     'FileNote',
     'RecommendedPaper',
     'DocumentNote',
-    'AnnotationReport'
+    'AnnotationReport',
+    'problem_record'
 ]

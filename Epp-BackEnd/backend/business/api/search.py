@@ -8,6 +8,7 @@ import re
 
 import Levenshtein
 from django.views.decorators.http import require_http_methods
+from business.models.problem import problem_record
 
 # def insert_search_record_2_kb(search_record_id, tmp_kb_id):
 #     search_record_id = str(search_record_id)
@@ -443,6 +444,10 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
+
+    problem_obj, created = problem_record.objects.get_or_create(content=message)
+    problem_obj.number = problem_obj.number + 1 if not created else 1  # 简洁写法
+    problem_obj.save()
 
     kb_id = get_tmp_kb_id(search_record_id)
     # kb_id = 0

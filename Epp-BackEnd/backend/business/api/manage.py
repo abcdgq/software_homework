@@ -697,7 +697,24 @@ def hot_searchword_statistic(request):
 
     return reply.success(data=data, msg="获取高频检索词成功")
 
-
+from business.models import problem_record
+@require_http_methods(["GET"])
+def get_top_problems(request):
+    """
+    返回出现次数最多的前10条热门问题
+    """
+    # 按出现次数降序排列，取前10条
+    top_problems = problem_record.objects.order_by("-number")[:10]
+    
+    # 转换为列表格式：[{"content": "问题内容", "number": 次数}, ...]
+    data = []
+    for problem in top_problems:
+        data.append({
+            "content": problem.content,
+            "number": problem.number
+        })
+    
+    return reply.success(data=data, msg="获取热门问题成功")
 @require_http_methods('GET')
 def auto_comment_report_list(request):
     mode = int(request.GET.get('mode'))
