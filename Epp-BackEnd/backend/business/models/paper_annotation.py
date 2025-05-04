@@ -16,9 +16,11 @@ class FileAnnotation(models.Model):
         - user_id               用户ID
         - paper_id              论文ID
         - date                  笔记创建时间
+        - visibility            为举报服务，有问题的将不可见
     """
     annotation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     note = models.ForeignKey(FileNote, on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     paper_id = models.ForeignKey(Paper, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateTimeField(auto_now=True)
+    visibility = models.BooleanField(default=True)

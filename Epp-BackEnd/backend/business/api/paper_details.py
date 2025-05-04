@@ -495,7 +495,7 @@ def get_paper_annotation(request):
 
     print(paper)
 
-    annotation_list = FileAnnotation.objects.filter(paper_id=paper)
+    annotation_list = FileAnnotation.objects.filter(paper_id=paper, visibility=True)
 
     print(annotation_list)
 
