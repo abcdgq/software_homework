@@ -69,6 +69,7 @@
 <script>
 import ReportDetail from '@/views/report/annotation/ReportDetail.vue'
 import {getAnnotReportUnhandled} from '@/api/report.js'
+import {ElMessage} from "element-plus";
 
 export default {
     components: {
@@ -116,7 +117,7 @@ export default {
                     console.log(this.reportData.reports[0].report_id)
                 })
                 .catch((error) => {
-                    console.log(error.response.data.message)
+                    console.log(error)
                 })
             this.isLoading = false
         }

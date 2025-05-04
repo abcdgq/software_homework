@@ -85,6 +85,7 @@
 <script>
 import {getAnnotReportDetail} from '@/api/report.js'
 import {judgeAnnotReport} from "@/api/report.js"
+import {ElMessage} from "element-plus";
 
 export default {
     props: { reportID: Number },
@@ -152,10 +153,10 @@ export default {
                 visibility: !this.judgment.invisibility
             })
                 .then((response) => {
-                    console.log(response.data.message)
+                    ElMessage.success(response.data.message)
                 })
                 .catch((error) => {
-                    console.log(error.response.data.message)
+                    ElMessage.error(error.response.data.message)
                 })
         }
     },
