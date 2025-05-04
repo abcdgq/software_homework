@@ -546,7 +546,7 @@ def user_active_option(request):
     mode = request.GET.get('mode', '1')  # 默认模式1
     if mode not in ('1', '2', '3'):
         return reply.fail(msg="非法mode参数")
-
+    mode = '3'
     now = timezone.now()
     periods = [
         (0, 3, '00:00-03:00'),
@@ -619,10 +619,11 @@ def user_active_option(request):
         if mode == '1':
             value = day_total
         elif mode == '2':
-            value = week_avg
+            # value = week_avg
+            value = week_total
         elif mode == '3':
-            value = month_avg
-
+            # value = month_avg
+            value = month_total
         data['value'].append(value)
         data['name'].append(label)
 
@@ -853,7 +854,8 @@ def judge_annotation_report(request):
         Notification(user_id=annotation.user_id, title="您的批注被举报了！",
                      content=f"您在 {annotation.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 被其他用户举报，根据EPP平台管理规定，检测到您的批注确为不合规，该批注现已删除。\n请注意遵守平台批注规范！"
                      ).save()
-        delete_annotation(annotation.note.note_id)
+        annotation.visibility = False
+        annotation.save()
     else:
         # 经核实，批注不违规
         Notification(user_id=annotation.user_id, title="您的批注已恢复正常！",
@@ -955,10 +957,11 @@ def annotation_report_detail(request):
                     "isPublic": report.annotation.note.isPublic
                 }
             },
-            'user': report.user_id.simply_desc(),
+            'user': report.user.simply_desc(),
             'date': report.date.strftime("%Y-%m-%d %H:%M:%S"),
             'content': report.content,
             'judgment': report.judgment,
+            'invisibility': not report.annotation.visibility,
             'processed': report.processed,
         }
         return reply.success(data=data, msg="举报详情信息获取成功")
