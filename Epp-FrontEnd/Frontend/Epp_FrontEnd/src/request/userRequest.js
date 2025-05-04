@@ -8,7 +8,7 @@ axios.defaults.withCredentials = true
 
 Vue.prototype.$axios = axios
 // const baseURL = 'https://epp.buaase.cn/api/'
-const baseURL = 'http://114.116.205.43/api/'
+const baseURL = 'http://114.116.205.43:8000/api/'
 
 const api = axios.create({
   baseURL,

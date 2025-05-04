@@ -2,7 +2,7 @@ import axios from 'axios'
 // import { ElMessage } from 'element-plus'
 
 // const serverURL = 'https://epp.buaase.cn'
-const serverURL = 'http://114.116.205.43'
+const serverURL = 'http://114.116.205.43:8000'
 
 const instance = axios.create({ baseURL: serverURL })
 
