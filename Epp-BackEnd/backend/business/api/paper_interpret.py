@@ -284,7 +284,9 @@ def get_paper_local_url(paper):
     original_url = original_url.replace('abs', 'pdf')
     # 访问url，下载文献到服务器
     filename = str(paper.paper_id)
+    print("开始下载")
     local_path = downloadPaper(original_url, filename)
+    print("下载完成")
     paper.local_path = local_path
     paper.save()
 

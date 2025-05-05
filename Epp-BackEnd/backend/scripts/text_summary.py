@@ -20,9 +20,9 @@ def text_summarizer(text, sentences_count=3):
     parser = PlaintextParser.from_string(text, Tokenizer(language))
     summarizer = TextRankSummarizer()
     summary = summarizer(parser.document, sentences_count)
-    for s in summary:
-        print(s)
-        print("len:", len(str(s)))
+    # for s in summary:
+    #     print(s)
+    #     print("len:", len(str(s)))
     return " ".join([str(s) for s in summary])
 
 
