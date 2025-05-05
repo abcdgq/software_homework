@@ -276,7 +276,7 @@ def create_abstract_report(request):
     # 先查询存不存在响应的解读
 
     print("查询是否存在解读", local_path)
-
+    
     # PDF分块
     from scripts.grobid_test import getXml, parse_grobid_xml, reorganize_sections
     xml = getXml(local_path, None, None)
@@ -315,13 +315,13 @@ def create_abstract_report(request):
     # 不存在
     if ar is None:
         # 创建一个线程，直接开始创建
-        
+               
         # 判断逻辑可能有问题，不确定是否需要删除
         ar2 = AbstractReport.objects.filter(report_path=report_path).first()
         if ar2:
             print("同名文章解读已存在，将重新生成")
             ar2.delete()
-
+            
         ## 先创建一个知识库
         ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path)
         upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
@@ -341,7 +341,7 @@ def create_abstract_report(request):
         tmp_kb_id = response.json()['data']['id']
         print(tmp_kb_id, report_path, local_path)
         print("解读文章标题为: ", paper_title)
-        abs_control_thread(tmp_kb_id=tmp_kb_id, report_path=report_path, local_path=local_path, title=paper_title).start()
+        abs_control_thread(tmp_kb_id=tmp_kb_id, report_path=report_path, local_path=local_path, title=paper_title, sections=sections).start()
         return success(msg="正在生成中，请稍后查看")
     elif ar is not None and ar.status == AbstractReport.STATUS_PENDING or ar.status == AbstractReport.STATUS_IN_PROGRESS:
         # 存在
@@ -354,17 +354,55 @@ def create_abstract_report(request):
         ar.delete()
         return fail(msg="生成摘要失败")
 
+def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
+        from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
+        qa_list = tavily_advanced_search(search_query).get("results")
+        uselist = []
+        times = 0
+        while True: #防止产生的结果过长，导致后边没法喂给大模型进行整合，进行一下筛选
+            if times > 5: #防止问太多遍
+                break
+            for qa in qa_list:
+                if qa['raw_content']:
+                    if(len(qa['raw_content']) < 2000):
+                        uselist.append(qa)
+                else:
+                    if(len(qa['content']) < 2000):
+                        uselist.append(qa)
+            if len(uselist) >= 2:
+                break
+            else: #数量不够就重新问，重新筛
+                qa_list = tavily_advanced_search(search_query + "len < 2000").get("results")
+                uselist = []
+
+        search_reply = "\n".join([
+            f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_content'])} score ：{qa['score']}"
+            for qa in uselist
+            ])
+    
+        from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+        summarized_search_reply = text_summarizer(search_reply)
+
+        docs = []
+        for qa in uselist:
+            docs.append(qa['title'] + "   "+ qa['url'])
+        #返回示例  ['VQ-VAE Explained - Papers With Code   https://paperswithcode.com/method/vq-vae', 
+        # 'PDF   https://xnought.github.io/files/vq_vae_explainer.pdf']
+
+        return summarized_search_reply
+
 
 from business.models.abstract_report import AbstractReport
 
 
 class abs_control_thread(threading.Thread):
-    def __init__(self, tmp_kb_id, report_path, local_path, title):
+    def __init__(self, tmp_kb_id, report_path, local_path, title, sections):
         threading.Thread.__init__(self)
         self.tmp_kb_id = tmp_kb_id
         self.report_path = report_path
         self.local_path = local_path
         self.title = title
+        self.sections = sections
         self.ttl = 300  # 5分钟
         self.setDaemon(True)
 
@@ -372,7 +410,7 @@ class abs_control_thread(threading.Thread):
         import time
         cur = 0
         # 执行gen_abstract的时间不能超过ttl
-        a = abs_gen_thread(self.tmp_kb_id, self.report_path, self.local_path, self.title)
+        a = abs_gen_thread(self.tmp_kb_id, self.report_path, self.local_path, self.title, self.sections)
         a.start()
         while cur < self.ttl:
             ar = AbstractReport.objects.get(file_local_path=self.local_path)
@@ -384,12 +422,13 @@ class abs_control_thread(threading.Thread):
 
 
 class abs_gen_thread(threading.Thread):
-    def __init__(self, tmp_kb_id, report_path, local_path, title):
+    def __init__(self, tmp_kb_id, report_path, local_path, title, sections):
         threading.Thread.__init__(self)
         self.tmp_kb_id = tmp_kb_id
         self.report_path = report_path
         self.local_path = local_path
         self.title = title
+        self.sections = sections
         self.isend = False
         self.setDaemon(True)
 
@@ -402,87 +441,114 @@ class abs_gen_thread(threading.Thread):
         summary += '# 摘要报告\n'
 
         from business.api.paper_interpret import do_file_chat
+        from scripts.text_summary import text_summarizer
+        title_prompt = "论文标题为" + self.title + '\n'
 
         #### 研究现状
         if self.isend:
             ar.status = AbstractReport.STATUS_TIMEOUT
             return
         
-        title_prompt = "论文标题为" + self.title + '\n'
+        #获得sections中关于研究现状的部分，先用text_summarizer，再交给ai总结
+        long_relatedwork = ".".join(str(i) for i in self.sections.get("sections").get("RelatedWork"))
+        relatedwork = text_summarizer(long_relatedwork)
 
-        query_current_situation = '请讲述研究现状部分\n' + title_prompt
+        query_current_situation = title_prompt + relatedwork +'请根据提供资料讲述研究现状部分\n'
         payload_cur_situation = json.dumps({
             "query": query_current_situation,
             "knowledge_id": self.tmp_kb_id,
             "prompt_name": "default"  # 使用普通对话模式
         })
         response_current_situation, _ = ask_ai_single_paper(payload=payload_cur_situation)
-        print(_)
+        print("未整合的回答\n")
+        print(response_current_situation)
+
+        # response_current_situation_from_search = get_search_reply(query_current_situation)
+        # prompt = f"""
+        #     {title_prompt},{response_current_situation_from_search},{response_current_situation},请整理前边的材料讲述文章的研究现状
+        # """
+        # payload_cur_situation = json.dumps({
+        #     "query": prompt,
+        #     "knowledge_id": self.tmp_kb_id,
+        #     "prompt_name": "default"  # 使用普通对话模式
+        # })
+        # response_current_situation, _ = ask_ai_single_paper(payload=payload_cur_situation)
+        # print("整合后的回答\n")
+        # print(response_current_situation)
+
         summary += '## 研究现状\n' + response_current_situation + '\n'
         if self.isend:
             ar.status = AbstractReport.STATUS_TIMEOUT
             return
 
         #### 解决问题
+        long_problem = ".".join(str(i) for i in self.sections.get("sections").get("Introduction"))
+        problem = text_summarizer(long_problem)
 
-        query_problem = '请讲讲这篇论文解决的问题\n' + title_prompt
+        query_problem = title_prompt +  problem +'请根据提供资料讲述解决问题部分\n'
         payload_problem = json.dumps({
             "query": query_problem,
             "knowledge_id": self.tmp_kb_id,
             "prompt_name": "default"
         })
         response_problem, _ = ask_ai_single_paper(payload=payload_problem)
-        print(_)
+        print("未整合的回答\n")
+        print(response_problem)
+
         summary += '## 解决问题\n' + response_problem + '\n'
         if self.isend:
             ar.status = AbstractReport.STATUS_TIMEOUT
             return
         #### 解决方法
+        long_solution = ".".join(str(i) for i in self.sections.get("sections").get("Methodology"))
+        solution = text_summarizer(long_solution)
 
-        query_solution = '请说明这篇论文中提出的解决方法\n' + title_prompt
+        query_solution = title_prompt +  solution +'请根据提供资料讲述解决方法部分\n'
         payload_solution = json.dumps({
             "query": query_solution,
             "knowledge_id": self.tmp_kb_id,
             "prompt_name": "default"  # 使用普通对话模式
         })
         response_solution, _ = ask_ai_single_paper(payload=payload_solution)
-        print(_)
-        # query_solution1 = response_solution
-        # payload_solution1 = json.dumps({
-        #     "query": query_solution1,
-        #     "knowledge_id": self.tmp_kb_id,
-        #     "prompt_name": "default"  # 使用普通对话模式
-        # })
-        # response_solution1, _ = ask_ai_single_paper(payload=payload_solution1)
-        # print(_)
+        print("未整合的回答\n")
+        print(response_problem)
+
         summary += '## 解决方法\n' + response_solution + '\n'
         if self.isend:
             ar.status = AbstractReport.STATUS_TIMEOUT
             return
-            #### 实验结果
+        #### 实验结果
+        long_result = ".".join(str(i) for i in self.sections.get("sections").get("Experiments"))
+        result = text_summarizer(long_result)
 
-        query_result = '请讲讲这篇论文实验得到的结果\n' + title_prompt
+        query_result = title_prompt + result +'请根据提供资料讲述这篇论文实验得到的结果\n'
         payload_res = json.dumps({
             "query": query_result,
             "knowledge_id": self.tmp_kb_id,
             "prompt_name": "default"  # 使用普通对话模式
         })
         response_result, _ = ask_ai_single_paper(payload=payload_res)
-        print(_)
+        print("未整合的回答\n")
+        print(response_problem)
+
         summary += '## 实验结果\n' + response_result + '\n'
         if self.isend:
             ar.status = AbstractReport.STATUS_TIMEOUT
             return
         #### 结论
+        long_conclusion = ".".join(str(i) for i in self.sections.get("sections").get("Conclusion"))
+        conclusion = text_summarizer(long_conclusion)
 
-        query_conclusion = '请讲讲这篇论文得出的结论\n' + title_prompt
+        query_conclusion = title_prompt + conclusion +'请根据提供资料讲述这篇论文实验得出的结论\n'
         payload_conclusion = json.dumps({
             "query": query_conclusion,
             "knowledge_id": self.tmp_kb_id,
             "prompt_name": "default"  # 使用普通对话模式
         })
         response_conclusion, _ = ask_ai_single_paper(payload=payload_conclusion)
-        print(_)
+        print("未整合的回答\n")
+        print(response_problem)
+
         summary += '## 结论\n' + response_conclusion + '\n'
 
         # 修改语病，更加通顺
@@ -498,6 +564,6 @@ class abs_gen_thread(threading.Thread):
     def stop(self):
         # 设置线程停止
         self.isend = True
-
+    
 if __name__ == '__main__':
     queryGLM("你好")
