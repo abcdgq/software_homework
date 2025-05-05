@@ -113,6 +113,7 @@ export default {
     }
   },
   created () {
+    console.log("created")
     if (this.isPrivateHot) {
       this.fetchPrivateRecommend()
     } else {
@@ -124,6 +125,7 @@ export default {
       axios
         .get(this.$BASE_API_URL + '/paperRecommend')
         .then(response => {
+          console.log("paperRecommend", response.data)
           this.recommendations = response.data.papers
           this.loading = false
         })

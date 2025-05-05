@@ -489,14 +489,16 @@ def record_visit(request):
         print("no user")
         return reply.fail(msg="请先正确登录")
 
-    print(request.META.items())
+    # print(request.META.items())
     # x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     # if x_forwarded_for:
     #     ip_address = x_forwarded_for.split(',')[0].strip()  # 提取第一个 IP
     # else:
     #     ip_address = request.META.get('REMOTE_ADDR')  # 直接获取（可能为 127.0.0.1）
-    # ip_address = request.META.get('REMOTE_ADDR')
-    ip_address = request.META.get('HTTP_X_REAL_IP')
+    if 'REMOTE_ADDR' in request.META:
+        ip_address = request.META.get('REMOTE_ADDR')
+    if 'HTTP_X_REAL_IP' in request.META:
+        ip_address = request.META.get('HTTP_X_REAL_IP')
     
     
     now = datetime.datetime.now()
