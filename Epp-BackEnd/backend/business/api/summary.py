@@ -65,6 +65,7 @@ def queryGLM(msg: str, history=None) -> str:
 
 
 def get_summary(paper_ids, report_id):
+    print("开始生成多篇综述")
     print('report_id:', report_id)
     report = SummaryReport.objects.get(report_id=report_id)
     report.status = SummaryReport.STATUS_IN_PROGRESS
@@ -75,13 +76,13 @@ def get_summary(paper_ids, report_id):
         paper_situations = []
         for id in paper_ids:
             p = Paper.objects.filter(paper_id=id).first()
-            content_prompt = '将这篇论文的摘要以第三人称的方式复述一遍，摘要如下：\n' + p.abstract
+            content_prompt = '将这篇论文的摘要以第三人称的方式复述一遍（中文），摘要如下：\n' + p.abstract
             paper_content.append(queryGLM(content_prompt, []))
-            content_prompt = '将这篇论文的题目转化为中文：\n' + p.title
+            content_prompt = '将这篇论文的题目转化为中文，不需要多余信息：\n' + p.title
             paper_themes.append(queryGLM(content_prompt, []))
-            content_prompt = '将这篇论文的现状部分以第三人称的方式复述一遍：\n' + p.abstract
+            content_prompt = '将这篇论文的现状部分以第三人称的方式复述一遍（中文）：\n' + p.abstract
             paper_situations.append(queryGLM(content_prompt, []))
-            content_prompt = '将这篇论文的结论和展望部分以第三人称的方式复述一遍：\n' + p.abstract
+            content_prompt = '将这篇论文的结论和展望部分以第三人称的方式复述一遍（中文）：\n' + p.abstract
             paper_conclusions.append(queryGLM(content_prompt, []))
         # 生成引言
         introduction_prompt = '请根据以下信息生成综述的引言：\n'
@@ -111,6 +112,7 @@ def get_summary(paper_ids, report_id):
         report.report_path = md_path
         report.status = SummaryReport.STATUS_COMPLETED
         report.save()
+        print('综述生成完毕')
         # os.remove(md_path)
         print(response)
     except Exception as e:
@@ -235,6 +237,8 @@ def create_abstract_report(request):
     request_data = json.loads(request.body)
     document_id = request_data.get("document_id")
     paper_id = request_data.get("paper_id")
+    print("document_id: ", document_id)
+    print("paper_id: ", paper_id)
     username = request.session.get('username')
     if username is None:
         username = 'sanyuba'
@@ -248,6 +252,7 @@ def create_abstract_report(request):
         local_path = document.local_path
         content_type = document.format
         title = document.title
+        print("title: ", title)
     elif len(paper_id) != 0:
         p = Paper.objects.filter(paper_id=paper_id).first()
         pdf_url = p.original_url.replace('abs/', 'pdf/') + '.pdf'
@@ -259,6 +264,7 @@ def create_abstract_report(request):
             downloadPaper(url=pdf_url, filename=str(p.paper_id))
         content_type = '.pdf'
         title = str(p.paper_id)
+        print("title: ", title)
     print('下载完毕')
 
     from business.models.abstract_report import AbstractReport
@@ -267,12 +273,21 @@ def create_abstract_report(request):
 
     # 先查询存不存在响应的解读
 
+    print("查询是否存在解读", local_path)
     ar = AbstractReport.objects.filter(file_local_path=local_path).first()
+    if ar is not None:
+        print("同一篇文章解读已存在，将重新生成")
+        ar.delete()
+        ar = None
 
     # 不存在
     if ar is None:
         # 创建一个线程，直接开始创建
         ## 先创建一个知识库
+        ar2 = AbstractReport.objects.filter(report_path=report_path).first()
+        if ar2:
+            print("同名文章解读已存在，将重新生成")
+            ar2.delete()
         ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path)
         upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
         local_path = local_path[1:] if local_path.startswith('/') else local_path
@@ -290,7 +305,8 @@ def create_abstract_report(request):
             return fail(msg="连接模型服务器失败")
         tmp_kb_id = response.json()['data']['id']
         print(tmp_kb_id, report_path, local_path)
-        abs_control_thread(tmp_kb_id=tmp_kb_id, report_path=report_path, local_path=local_path).start()
+        print("解读文章标题为: ", title)
+        abs_control_thread(tmp_kb_id=tmp_kb_id, report_path=report_path, local_path=local_path, title=title).start()
         return success(msg="正在生成中，请稍后查看")
     elif ar is not None and ar.status == AbstractReport.STATUS_PENDING or ar.status == AbstractReport.STATUS_IN_PROGRESS:
         # 存在
@@ -308,11 +324,12 @@ from business.models.abstract_report import AbstractReport
 
 
 class abs_control_thread(threading.Thread):
-    def __init__(self, tmp_kb_id, report_path, local_path):
+    def __init__(self, tmp_kb_id, report_path, local_path, title):
         threading.Thread.__init__(self)
         self.tmp_kb_id = tmp_kb_id
         self.report_path = report_path
         self.local_path = local_path
+        self.title = title
         self.ttl = 300  # 5分钟
         self.setDaemon(True)
 
@@ -320,7 +337,7 @@ class abs_control_thread(threading.Thread):
         import time
         cur = 0
         # 执行gen_abstract的时间不能超过ttl
-        a = abs_gen_thread(self.tmp_kb_id, self.report_path, self.local_path)
+        a = abs_gen_thread(self.tmp_kb_id, self.report_path, self.local_path, self.title)
         a.start()
         while cur < self.ttl:
             ar = AbstractReport.objects.get(file_local_path=self.local_path)
@@ -332,11 +349,12 @@ class abs_control_thread(threading.Thread):
 
 
 class abs_gen_thread(threading.Thread):
-    def __init__(self, tmp_kb_id, report_path, local_path):
+    def __init__(self, tmp_kb_id, report_path, local_path, title):
         threading.Thread.__init__(self)
         self.tmp_kb_id = tmp_kb_id
         self.report_path = report_path
         self.local_path = local_path
+        self.title = title
         self.isend = False
         self.setDaemon(True)
 
@@ -354,8 +372,10 @@ class abs_gen_thread(threading.Thread):
         if self.isend:
             ar.status = AbstractReport.STATUS_TIMEOUT
             return
+        
+        title_prompt = "论文标题为" + self.title + '\n'
 
-        query_current_situation = '请讲述研究现状部分\n'
+        query_current_situation = '请讲述研究现状部分\n' + title_prompt
         payload_cur_situation = json.dumps({
             "query": query_current_situation,
             "knowledge_id": self.tmp_kb_id,
@@ -370,7 +390,7 @@ class abs_gen_thread(threading.Thread):
 
         #### 解决问题
 
-        query_problem = '请讲讲这篇论文解决的问题\n'
+        query_problem = '请讲讲这篇论文解决的问题\n' + title_prompt
         payload_problem = json.dumps({
             "query": query_problem,
             "knowledge_id": self.tmp_kb_id,
@@ -384,7 +404,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 解决方法
 
-        query_solution = '请说明这篇论文中提出的解决方法\n'
+        query_solution = '请说明这篇论文中提出的解决方法\n' + title_prompt
         payload_solution = json.dumps({
             "query": query_solution,
             "knowledge_id": self.tmp_kb_id,
@@ -406,7 +426,7 @@ class abs_gen_thread(threading.Thread):
             return
             #### 实验结果
 
-        query_result = '请讲讲这篇论文实验得到的结果\n'
+        query_result = '请讲讲这篇论文实验得到的结果\n' + title_prompt
         payload_res = json.dumps({
             "query": query_result,
             "knowledge_id": self.tmp_kb_id,
@@ -420,7 +440,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 结论
 
-        query_conclusion = '请讲讲这篇论文得出的结论\n'
+        query_conclusion = '请讲讲这篇论文得出的结论\n' + title_prompt
         payload_conclusion = json.dumps({
             "query": query_conclusion,
             "knowledge_id": self.tmp_kb_id,
