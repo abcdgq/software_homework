@@ -65,7 +65,7 @@ export default {
   },
   created () {
     this.updateSelectedTab()
-
+    console.log('NavBar-created')
     var username = localStorage.getItem('username')
     if (username) {
       this.username = username
