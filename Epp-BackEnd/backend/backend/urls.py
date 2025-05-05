@@ -102,6 +102,7 @@ urlpatterns = [
                   path("api/manage/userActiveOption", manage.user_active_option),
                   path("api/manage/promptwordStatistic", manage.hot_promptword_statistic),
                   path("api/manage/searchWordStatistic", manage.hot_searchword_statistic),
+                  path("api/manage/problemStatistic", manage.get_top_problems),
                   path("api/manage/autoCommentReports", manage.auto_comment_report_list),
                   path("api/manage/autoCommentReportDetail", manage.auto_comment_report_detail),
                   path("api/manage/annotationReports", manage.annotation_report_list),

@@ -49,7 +49,7 @@ export default {
           this.isLogged = true
           localStorage.setItem('username', this.username)
           // localStorage.setItem('avatar', 'https://epp.buaase.cn' + res.data.avatar)
-          localStorage.setItem('avatar', 'http://127.0.0.1:8000' + res.data.avatar)
+          localStorage.setItem('avatar', 'http://114.116.205.43' + res.data.avatar)
         } else {
           params = {
             'username': this.username,
@@ -65,6 +65,8 @@ export default {
         }
       } catch (error) {
         console.log('error')
+        console.log(error)
+        console.log('error again')
         if (this.isLogin) {
           this.message = '登录失败，请重新输入'
         } else {
