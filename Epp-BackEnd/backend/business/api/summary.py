@@ -252,7 +252,8 @@ def create_abstract_report(request):
         local_path = document.local_path
         content_type = document.format
         title = document.title
-        print("title: ", title)
+        paper_title = document.title
+        print("title: ", paper_title)
     elif len(paper_id) != 0:
         p = Paper.objects.filter(paper_id=paper_id).first()
         pdf_url = p.original_url.replace('abs/', 'pdf/') + '.pdf'
@@ -264,7 +265,8 @@ def create_abstract_report(request):
             downloadPaper(url=pdf_url, filename=str(p.paper_id))
         content_type = '.pdf'
         title = str(p.paper_id)
-        print("title: ", title)
+        paper_title = p.title
+        print("title: ", paper_title)
     print('下载完毕')
 
     from business.models.abstract_report import AbstractReport
@@ -274,6 +276,36 @@ def create_abstract_report(request):
     # 先查询存不存在响应的解读
 
     print("查询是否存在解读", local_path)
+
+    # PDF分块
+    from scripts.grobid_test import getXml, parse_grobid_xml, reorganize_sections
+    xml = getXml(local_path, None, None)
+    parsed_data = parse_grobid_xml(xml)
+    sections = reorganize_sections(parsed_data)
+    # print("sections: ", sections)
+
+    # 测试，输出到json文件，方便查看
+    output_dir = "grobid_output"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    output_path = os.path.join(output_dir, "output.xml")
+    fh = open(output_path, "w", encoding="utf-8")
+    fh.write(xml)
+    fh.close()
+
+    output_file1 = os.path.join(output_dir, "output1.json")
+    with open(output_file1, "w", encoding="utf-8") as f:
+        json.dump(parsed_data, f, ensure_ascii=False, indent=4)
+    
+    sections = reorganize_sections(parsed_data)
+    output_file2 = os.path.join(output_dir, "output2.json")
+    with open(output_file2, "w", encoding="utf-8") as f:
+        json.dump(sections, f, ensure_ascii=False, indent=4)
+    print("分块结果已输出到json文件")
+    # 测试结束
+
+
     ar = AbstractReport.objects.filter(file_local_path=local_path).first()
     if ar is not None:
         print("同一篇文章解读已存在，将重新生成")
@@ -283,11 +315,14 @@ def create_abstract_report(request):
     # 不存在
     if ar is None:
         # 创建一个线程，直接开始创建
-        ## 先创建一个知识库
+        
+        # 判断逻辑可能有问题，不确定是否需要删除
         ar2 = AbstractReport.objects.filter(report_path=report_path).first()
         if ar2:
             print("同名文章解读已存在，将重新生成")
             ar2.delete()
+
+        ## 先创建一个知识库
         ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path)
         upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
         local_path = local_path[1:] if local_path.startswith('/') else local_path
@@ -305,8 +340,8 @@ def create_abstract_report(request):
             return fail(msg="连接模型服务器失败")
         tmp_kb_id = response.json()['data']['id']
         print(tmp_kb_id, report_path, local_path)
-        print("解读文章标题为: ", title)
-        abs_control_thread(tmp_kb_id=tmp_kb_id, report_path=report_path, local_path=local_path, title=title).start()
+        print("解读文章标题为: ", paper_title)
+        abs_control_thread(tmp_kb_id=tmp_kb_id, report_path=report_path, local_path=local_path, title=paper_title).start()
         return success(msg="正在生成中，请稍后查看")
     elif ar is not None and ar.status == AbstractReport.STATUS_PENDING or ar.status == AbstractReport.STATUS_IN_PROGRESS:
         # 存在
