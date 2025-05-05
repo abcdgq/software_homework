@@ -53,8 +53,8 @@ MIDDLEWARE = [
 
 # 设置跨域SESSION配置，本地测试时需要SESSION_COOKIE_SECURE = False
 # SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'Lax'
 CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_HTTPONLY = True
 # 设置iframe跨域
@@ -128,11 +128,16 @@ DATABASES = {
         'NAME': '2024_EPP',
         'USER': 'root',
         # 'PASSWORD': '2883536Dgq',
-        'PASSWORD': '58',
+        'PASSWORD': '2025Ruangong3!',
         #  'HOST': '114.116.214.56',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
+}
+
+MIGRATION_MODULES = {
+    # 格式：'app_name': 'custom_migration_module_path'
+    'business': 'migrations.business',  # 将 business 应用的迁移文件存到 shared_migrations/business
 }
 
 # Password validation
@@ -167,6 +172,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = '/var/www/project/software_homework/Epp-BackEnd/backend/static'
 MEDIA_URL = '/resource/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'resource')
 
