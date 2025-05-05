@@ -442,7 +442,6 @@ class abs_gen_thread(threading.Thread):
 
         from business.api.paper_interpret import do_file_chat
         from scripts.text_summary import text_summarizer
-        title_prompt = "论文标题为" + self.title + '\n'
 
         #### 研究现状
         if self.isend:
@@ -453,7 +452,7 @@ class abs_gen_thread(threading.Thread):
         long_relatedwork = ".".join(str(i) for i in self.sections.get("sections").get("RelatedWork"))
         relatedwork = text_summarizer(long_relatedwork)
 
-        query_current_situation = title_prompt + relatedwork +'请根据提供资料讲述研究现状部分\n'
+        query_current_situation = relatedwork +'请根据以上提供的资料信息讲述这篇论文的研究现状部分\n'
         payload_cur_situation = json.dumps({
             "query": query_current_situation,
             "knowledge_id": self.tmp_kb_id,
@@ -485,7 +484,7 @@ class abs_gen_thread(threading.Thread):
         long_problem = ".".join(str(i) for i in self.sections.get("sections").get("Introduction"))
         problem = text_summarizer(long_problem)
 
-        query_problem = title_prompt +  problem +'请根据提供资料讲述解决问题部分\n'
+        query_problem = problem +'请根据提供资料讲述解决问题部分\n'
         payload_problem = json.dumps({
             "query": query_problem,
             "knowledge_id": self.tmp_kb_id,
@@ -503,7 +502,7 @@ class abs_gen_thread(threading.Thread):
         long_solution = ".".join(str(i) for i in self.sections.get("sections").get("Methodology"))
         solution = text_summarizer(long_solution)
 
-        query_solution = title_prompt +  solution +'请根据提供资料讲述解决方法部分\n'
+        query_solution = solution +'请根据提供资料讲述解决方法部分\n'
         payload_solution = json.dumps({
             "query": query_solution,
             "knowledge_id": self.tmp_kb_id,
@@ -521,7 +520,7 @@ class abs_gen_thread(threading.Thread):
         long_result = ".".join(str(i) for i in self.sections.get("sections").get("Experiments"))
         result = text_summarizer(long_result)
 
-        query_result = title_prompt + result +'请根据提供资料讲述这篇论文实验得到的结果\n'
+        query_result = result +'请根据提供资料讲述这篇论文实验得到的结果\n'
         payload_res = json.dumps({
             "query": query_result,
             "knowledge_id": self.tmp_kb_id,
@@ -537,9 +536,9 @@ class abs_gen_thread(threading.Thread):
             return
         #### 结论
         long_conclusion = ".".join(str(i) for i in self.sections.get("sections").get("Conclusion"))
-        conclusion = text_summarizer(long_conclusion)
+        conclusion = text_summarizer(long_conclusion, sentences_count=7)
 
-        query_conclusion = title_prompt + conclusion +'请根据提供资料讲述这篇论文实验得出的结论\n'
+        query_conclusion = conclusion +'请根据提供资料讲述这篇论文得出的结论\n'
         payload_conclusion = json.dumps({
             "query": query_conclusion,
             "knowledge_id": self.tmp_kb_id,
