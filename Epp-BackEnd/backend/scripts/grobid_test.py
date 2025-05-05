@@ -202,6 +202,7 @@ def reorganize_sections(original_data: Dict) -> Dict:
     # 1. Introduction逻辑
     if matches["Introduction"]:
         section_index["Introduction"]["start"] = matches["Introduction"][0]
+        section_index["Introduction"]["end"] = matches["Introduction"][0]
     else:
         section_index["Introduction"]["start"] = 0  # 默认第一章
         section_index["Introduction"]["end"] = 0
@@ -209,29 +210,35 @@ def reorganize_sections(original_data: Dict) -> Dict:
     # 2. Conclusion逻辑
     if matches["Conclusion"]:
         section_index["Conclusion"]["start"] = matches["Conclusion"][-1]  # 取最后一个匹配项
+        section_index["Conclusion"]["end"] = matches["Conclusion"][-1]
     else:
         section_index["Conclusion"]["start"] = total_sections - 1  # 默认最后一章
+        section_index["Conclusion"]["end"] = total_sections - 1
 
     # 3. RelatedWork逻辑
     if matches["RelatedWork"]:
-        rel_start = find_parent
-        section_index["RelatedWork"]["start"] = matches["RelatedWork"][0]
+        rel_match = matches["RelatedWork"][0]
+        start, end = get_subsection_range(raw_sections, rel_match)
+        section_index["RelatedWork"]["start"] = start
+        section_index["RelatedWork"]["end"] = end
     else:
         # 使用Introduction章节作为RelatedWork
         section_index["RelatedWork"]["start"] = section_index["Introduction"]["start"]
+        section_index["RelatedWork"]["end"] = section_index["Introduction"]["end"]
 
     # 4. Experiments逻辑
     if matches["Experiments"]:
-        exp_start = matches["Experiments"][0]
+        exp_match = matches["Experiments"][0]
+        exp_start, exp_end =  get_subsection_range(raw_sections, exp_match)
         section_index["Experiments"]["start"] = exp_start
         section_index["Experiments"]["end"] = section_index["Conclusion"]["start"] - 1
     else:
         # RelatedWork到Conclusion之间的内容
-        section_index["Experiments"]["start"] = section_index["RelatedWork"]["start"] + 1
+        section_index["Experiments"]["start"] = section_index["RelatedWork"]["end"] + 1
         section_index["Experiments"]["end"] = section_index["Conclusion"]["start"] - 1
 
     # 5. Methodology逻辑
-    methodology_start = section_index["RelatedWork"]["start"] + 1
+    methodology_start = section_index["RelatedWork"]["end"] + 1
     methodology_end = section_index["Experiments"]["start"] - 1
     if methodology_start > methodology_end:
         # 没有独立章节时使用Experiments内容
@@ -262,7 +269,7 @@ def reorganize_sections(original_data: Dict) -> Dict:
             new_structure["sections"]["Introduction"].append(simplified_sec)
         
         # RelatedWork
-        if  section_index["RelatedWork"]["start"] <= idx <= section_index["RelatedWork"]["end"]:
+        if section_index["RelatedWork"]["start"] <= idx <= section_index["RelatedWork"]["end"]:
             new_structure["sections"]["RelatedWork"].append(simplified_sec)
         
         # Methodology
@@ -279,27 +286,66 @@ def reorganize_sections(original_data: Dict) -> Dict:
 
     return new_structure
 
+def get_parent_section_num(section_number: str) -> str:
+    """
+    根据章节号获取顶层章节号
+    """
+    # 去除末尾可能存在的点（如 "2." -> "2"）
+    cleaned = section_number.rstrip('.')
+    # 找到第一个分隔符的位置
+    dot_pos = cleaned.find('.')
+    return cleaned[:dot_pos] if dot_pos != -1 else cleaned
+
+def get_subsection_range(sections, index):
+    """
+    获取指定索引的所有子章节范围（起止索引）
+    """
+
+    n = sections[index]["n"]
+    if n == "":
+        return index, index
+    
+    start_idx = -1
+    end_idx = -1
+    parent_section_num = get_parent_section_num(n)
+    
+    # 遍历查找所有匹配章节
+    for idx, sec in enumerate(sections):
+        cur_n = sec["n"]
+        if cur_n != "" and parent_section_num == get_parent_section_num(cur_n):
+            if start_idx == -1:
+                start_idx = idx
+            end_idx = idx
+    
+    # 处理未找到的情况
+    if start_idx == -1:
+        return index, index
+    
+    return start_idx, end_idx
+
 def run(files_paths, output_file_path):
     for i, file_path in enumerate(files_paths) :
         print("i file_path:", file_path)
         getXml(file_path, output_file_path, i)
 
 if __name__ ==  "__main__":
-    output_dir = "grobid_output"
-    # input_path = [os.path.join("sam.pdf")]
-    input_file_path = "./Epp-BackEnd/backend/resource/uploads/users/documents/2017-NeurIPS-Neural Discrete Representation Learning20250504184945_69.pdf"
-    print("path: ", input_file_path)
-    # run(input_path, output_path)
-    xml = getXml(input_file_path, output_dir, 0)
+    # output_dir = "grobid_output"
+    # # input_path = [os.path.join("sam.pdf")]
+    # input_file_path = "./Epp-BackEnd/backend/resource/uploads/users/documents/2017-NeurIPS-Neural Discrete Representation Learning20250504184945_69.pdf"
+    # print("path: ", input_file_path)
+    # # run(input_path, output_path)
+    # xml = getXml(input_file_path, output_dir, 0)
 
-    parsed_data = parse_grobid_xml(xml)
-    print(parsed_data)
-    output_file = os.path.join(output_dir, "output1.json")
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(parsed_data, f, ensure_ascii=False, indent=4)
+    # parsed_data = parse_grobid_xml(xml)
+    # print(parsed_data)
+    # output_file = os.path.join(output_dir, "output1.json")
+    # with open(output_file, "w", encoding="utf-8") as f:
+    #     json.dump(parsed_data, f, ensure_ascii=False, indent=4)
     
-    sections = reorganize_sections(parsed_data)
-    output_file = os.path.join(output_dir, "output2.json")
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(sections, f, ensure_ascii=False, indent=4)
+    # sections = reorganize_sections(parsed_data)
+    # output_file = os.path.join(output_dir, "output2.json")
+    # with open(output_file, "w", encoding="utf-8") as f:
+    #     json.dump(sections, f, ensure_ascii=False, indent=4)
+
+    print(get_parent_section_num(str(3.2)))
 
