@@ -319,6 +319,7 @@ def get_paper_url(request):
     paper = Paper.objects.get(paper_id=paper_id)
     print('title:' + paper.title)
     paper_local_url = get_paper_local_url(paper)
+    print('local_url:' + paper_local_url)
     if paper_local_url is None:
         print('文献下载失败，请检查网络或联系管理员')
         return reply.fail(msg="文献下载失败，请检查网络或联系管理员")
