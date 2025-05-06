@@ -108,7 +108,7 @@ def generate_subtasks(query: str) -> dict:
                     "llm": query
                 }
             else:
-                return q_type, {
+                return "other", {
                     "llm": query
                 }
         
