@@ -480,6 +480,7 @@ def record_visit(request):
     """ 记录用户访问 """
     # 需要用户鉴权
     print("******recordvisit******")
+    print(request.session.items())
     username = request.session.get('username')
     print("username:    " + str(username))
     user = User.objects.filter(username=username).first()
@@ -488,7 +489,18 @@ def record_visit(request):
         print("no user")
         return reply.fail(msg="请先正确登录")
 
-    ip_address = request.META.get('REMOTE_ADDR')
+    # print(request.META.items())
+    # x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    # if x_forwarded_for:
+    #     ip_address = x_forwarded_for.split(',')[0].strip()  # 提取第一个 IP
+    # else:
+    #     ip_address = request.META.get('REMOTE_ADDR')  # 直接获取（可能为 127.0.0.1）
+    if 'REMOTE_ADDR' in request.META:
+        ip_address = request.META.get('REMOTE_ADDR')
+    if 'HTTP_X_REAL_IP' in request.META:
+        ip_address = request.META.get('HTTP_X_REAL_IP')
+    
+    
     now = datetime.datetime.now()
     if now > now.replace(minute=30, second=0, microsecond=0):
         start_of_hour = now.replace(minute=30, second=0, microsecond=0)
@@ -697,7 +709,24 @@ def hot_searchword_statistic(request):
 
     return reply.success(data=data, msg="获取高频检索词成功")
 
-
+from business.models import problem_record
+@require_http_methods(["GET"])
+def get_top_problems(request):
+    """
+    返回出现次数最多的前10条热门问题
+    """
+    # 按出现次数降序排列，取前10条
+    top_problems = problem_record.objects.order_by("-number")[:10]
+    
+    # 转换为列表格式：[{"content": "问题内容", "number": 次数}, ...]
+    data = []
+    for problem in top_problems:
+        data.append({
+            "content": problem.content,
+            "number": problem.number
+        })
+    
+    return reply.success(data=data, msg="获取热门问题成功")
 @require_http_methods('GET')
 def auto_comment_report_list(request):
     mode = int(request.GET.get('mode'))

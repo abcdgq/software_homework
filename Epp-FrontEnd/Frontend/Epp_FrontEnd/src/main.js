@@ -21,8 +21,8 @@ Vue.config.productionTip = false
 
 // Vue.prototype.$BASE_URL = 'https://epp.buaase.cn'
 // Vue.prototype.$BASE_API_URL = 'https://epp.buaase.cn/api'
-Vue.prototype.$BASE_URL = 'http://114.116.205.43:8000'
-Vue.prototype.$BASE_API_URL = 'http://114.116.205.43:8000/api'
+Vue.prototype.$BASE_URL = 'http://114.116.205.43'
+Vue.prototype.$BASE_API_URL = 'http://114.116.205.43/api'
 
 /* eslint-disable no-new */
 new Vue({

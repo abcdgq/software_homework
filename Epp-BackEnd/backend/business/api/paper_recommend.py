@@ -34,6 +34,7 @@ from business.api.summary import queryGLM
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from django.views.decorators.http import require_http_methods
+from business.utils.paper_vdb_init import get_filtered_paper
 
 # server_ip = '114.116.205.43'
 # url = f'http://{server_ip}:20005'
@@ -159,7 +160,7 @@ def refreshCache(self):
 
     # 从关键词中提取论文
     key = queryGLM(msg='帮我从这些关键词中提取出来十个关键词：' + ','.join(str(keywords)), history=[])
-    from business.utils.paper_vdb_init import get_filtered_paper
+    
     papers = get_filtered_paper(key, k=10)
     # 将推荐数据缓存一天
     info = []
@@ -244,7 +245,7 @@ def get_unique_recommendation(request):
 
     try:
         result = queryGLM(prompt)
-        # print(result)
+        print(result)
         # response = openai.ChatCompletion.create(
         #     model=model,
         #     messages=[{"role": "user", "content": prompt}],
@@ -260,9 +261,12 @@ def get_unique_recommendation(request):
     count = 0
 
     keywords = json.loads(result)['keywords']
+    print(keywords)
     filtered_papers_list = []
     for keyword in keywords:
-        papers = do_string_search(keyword)
+        # papers = do_string_search(keyword)
+        papers = get_filtered_paper(keyword,4)
+        print('papers:', papers)
         count_keyword = 0
         for p in papers:
             # print(p.title)
@@ -273,5 +277,7 @@ def get_unique_recommendation(request):
                 break
         if count > 20:
             break
+
+    print(filtered_papers_list)
 
     return reply.success(data={'papers': filtered_papers_list}, msg='success')

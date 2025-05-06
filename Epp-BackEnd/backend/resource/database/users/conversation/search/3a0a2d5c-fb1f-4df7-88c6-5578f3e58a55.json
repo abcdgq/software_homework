@@ -1,0 +1,1 @@
+{"conversation": [{"role": "user", "content": "nihao"}, {"role": "assistant", "content": "\u9519\u8bef: HTTPConnectionPool(host='127.0.0.1', port=7890): Max retries exceeded with url: http://%7bsettings.remote_model_base_path%7d/chat/chat (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))"}]}
