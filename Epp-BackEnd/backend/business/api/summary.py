@@ -450,7 +450,7 @@ class abs_gen_thread(threading.Thread):
         
         #获得sections中关于研究现状的部分，先用text_summarizer，再交给ai总结
         long_relatedwork = ".".join(str(i) for i in self.sections.get("sections").get("RelatedWork"))
-        relatedwork = text_summarizer(long_relatedwork)
+        relatedwork = text_summarizer(long_relatedwork, 7)
 
         query_current_situation = relatedwork +'请根据以上提供的资料信息讲述这篇论文的研究现状部分\n'
         payload_cur_situation = json.dumps({
@@ -482,7 +482,7 @@ class abs_gen_thread(threading.Thread):
 
         #### 解决问题
         long_problem = ".".join(str(i) for i in self.sections.get("sections").get("Introduction"))
-        problem = text_summarizer(long_problem)
+        problem = text_summarizer(long_problem, 7)
 
         query_problem = problem +'请根据提供资料讲述解决问题部分\n'
         payload_problem = json.dumps({
@@ -500,7 +500,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 解决方法
         long_solution = ".".join(str(i) for i in self.sections.get("sections").get("Methodology"))
-        solution = text_summarizer(long_solution)
+        solution = text_summarizer(long_solution, 7)
 
         query_solution = solution +'请根据提供资料讲述解决方法部分\n'
         payload_solution = json.dumps({
@@ -518,7 +518,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 实验结果
         long_result = ".".join(str(i) for i in self.sections.get("sections").get("Experiments"))
-        result = text_summarizer(long_result)
+        result = text_summarizer(long_result, 7)
 
         query_result = result +'请根据提供资料讲述这篇论文实验得到的结果\n'
         payload_res = json.dumps({
@@ -536,7 +536,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 结论
         long_conclusion = ".".join(str(i) for i in self.sections.get("sections").get("Conclusion"))
-        conclusion = text_summarizer(long_conclusion, sentences_count=7)
+        conclusion = text_summarizer(long_conclusion, 7)
 
         query_conclusion = conclusion +'请根据提供资料讲述这篇论文得出的结论\n'
         payload_conclusion = json.dumps({
