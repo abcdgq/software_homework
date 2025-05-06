@@ -83,7 +83,7 @@ def downloadPaper(url, filename):
             response = session.get(
                 cleaned_url,
                 stream=True,
-                timeout=(10, 300),  # 连接超时10秒，读取超时30秒
+                timeout=(10, 300),  # 连接超时10秒，读取超时300秒
                 allow_redirects=True  # 显式允许重定向
             )
             response.raise_for_status()  # 自动触发HTTPError异常
