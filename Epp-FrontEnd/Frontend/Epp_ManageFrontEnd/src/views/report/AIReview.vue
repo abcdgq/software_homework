@@ -75,13 +75,11 @@
 
 <script>
 import { getAIReviewAll } from '@/api/aiReview.js'
-import ReportDetail from './ReportDetail.vue'
 import { ElMessage } from 'element-plus'
 import AIReviewDetail from "@/views/report/AIReviewDetail.vue";
 export default {
     components: {
         AIReviewDetail,
-        ReportDetail
     },
     data() {
         return {
@@ -124,6 +122,7 @@ export default {
                         total: response.data.total,
                         content: response.data.content
                     }
+                    console.log(response)
                     console.log(response.data)
                 })
                 .catch((error) => {

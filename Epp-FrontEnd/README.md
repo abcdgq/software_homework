@@ -41,3 +41,11 @@ npm uninstall babel-core --save-dev
 npm install --save-dev @babel/core@latest @babel/cli@latest @babel/plugin-proposal-class-properties@latest @babel/preset-env@latest
 npm install --save-dev babel-loader@latest
 npm install --save-dev vue-loader@latest -->
+
+----
+
+## 本地文件传输到服务器
+
+`scp -O -r dist/ root@114.116.205.43:/home/www/manage/`
+
+注：保证www下面原本没有manage文件夹
