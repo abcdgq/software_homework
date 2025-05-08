@@ -53,8 +53,8 @@ MIDDLEWARE = [
 
 # 设置跨域SESSION配置，本地测试时需要SESSION_COOKIE_SECURE = False
 # SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
 CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_HTTPONLY = True
 # 设置iframe跨域
@@ -129,7 +129,7 @@ DATABASES = {
         'NAME': '2024_EPP',
         'USER': 'root',
         # 'PASSWORD': '2883536Dgq',
-        'PASSWORD': '2025Ruangong3!',
+        'PASSWORD': '58',
         #  'HOST': '114.116.214.56',
         'HOST': '127.0.0.1',
         'PORT': '3306',
