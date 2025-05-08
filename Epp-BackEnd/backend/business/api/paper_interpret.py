@@ -284,7 +284,9 @@ def get_paper_local_url(paper):
     original_url = original_url.replace('abs', 'pdf')
     # 访问url，下载文献到服务器
     filename = str(paper.paper_id)
+    print("开始下载")
     local_path = downloadPaper(original_url, filename)
+    print("下载完成")
     paper.local_path = local_path
     paper.save()
 
@@ -319,6 +321,7 @@ def get_paper_url(request):
     paper = Paper.objects.get(paper_id=paper_id)
     print('title:' + paper.title)
     paper_local_url = get_paper_local_url(paper)
+    print('local_url:' + paper_local_url)
     if paper_local_url is None:
         print('文献下载失败，请检查网络或联系管理员')
         return reply.fail(msg="文献下载失败，请检查网络或联系管理员")

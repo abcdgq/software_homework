@@ -138,6 +138,7 @@ export default {
       axios
         .get(this.$BASE_API_URL + '/paperPrivateRecommend')
         .then(response => {
+          console.log('paperPrivateRecommend', response.data)
           this.recommendations = response.data.papers
           this.loading = false
         })

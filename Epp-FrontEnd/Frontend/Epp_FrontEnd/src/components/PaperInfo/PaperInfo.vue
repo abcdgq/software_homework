@@ -487,17 +487,16 @@ export default {
     },
 
     async toggleTranslation () { // 显示隐藏翻译
-      if (!this.isSummaryVisible) {
-        if (!this.isTranslated) { // 还没有翻译过
-          await translateAbstract(this.paper_id)
-            .then((response) => {
-              this.translatedSummary = response.translatedSummary
-              this.isTranslated = true
-            })
-            .catch((error) => {
-              console.error('翻译失败', error)
-            })
-        }
+      if (!this.isTranslated) { // 还没有翻译过
+        await translateAbstract(this.paper_id)
+          .then((response) => {
+            this.translatedSummary = response.translatedSummary
+            this.isTranslated = true
+            console.log(response)
+          })
+          .catch((error) => {
+            console.error('翻译失败', error)
+          })
       }
 
       this.isSummaryVisible = !this.isSummaryVisible

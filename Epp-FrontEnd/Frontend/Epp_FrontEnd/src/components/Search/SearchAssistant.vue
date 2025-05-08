@@ -31,8 +31,8 @@
         </el-main>
 
         <el-footer>
-          <el-input v-model="chatInput" placeholder="输入你的消息..." @keyup.enter.native="chatToAI" clearable></el-input>
-          <el-button type="primary" @click="chatToAI">发送</el-button>
+          <el-input v-model="chatInput" :placeholder="isLoading ? '正在加载ai，请勿输入' : '输入你的消息...'"  @keyup.enter.native="chatToAI" clearable :disabled="isLoading"></el-input>
+          <el-button type="primary" @click="chatToAI" :disabled="isLoading">发送</el-button>
         </el-footer>
     </el-container>
 </template>
@@ -60,6 +60,10 @@ export default {
     restoreHistory: {
       type: Boolean,
       defrault: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   },
   data () {

@@ -3,37 +3,36 @@
         <div class="report-card">
             <el-card class="report-content" shadow="hover">
                 <div>
-                    <el-descriptions title="评论信息" :column="1" border>
-                        <el-descriptions-item label="评论用户">
-                            {{ reportData.comment.user.user_name }}
+                    <el-descriptions title="批注信息" :column="1" border>
+                        <el-descriptions-item label="批注用户">
+                            {{ reportDetail.annotation.note.username }}
                         </el-descriptions-item>
-                        <el-descriptions-item label="评论日期">
-                            {{ reportData.comment.date }}
+                        <el-descriptions-item label="批注时间">
+                            {{ reportDetail.annotation.date }}
                         </el-descriptions-item>
-                        <el-descriptions-item label="评论内容">
-                            {{ reportData.comment.content }}
+                        <el-descriptions-item label="批注内容">
+                            {{ reportDetail.annotation.note.comment }}
                         </el-descriptions-item>
                     </el-descriptions>
-                    <el-divider></el-divider>
+                    <el-divider />
 
-                    <el-descriptions title="相关论文" :column="1" border>
-                        <el-descriptions-item label="论文ID">
-                            {{ reportData.comment.paper.paper_id }}
-                        </el-descriptions-item>
+                    <el-descriptions title="批注论文" :column="1" border>
                         <el-descriptions-item label="论文标题">
-                            {{ reportData.comment.paper.title }}
+                            {{ reportDetail.annotation.paper.title }}
                         </el-descriptions-item>
                     </el-descriptions>
-                    <el-divider></el-divider>
+                    <el-divider />
 
                     <el-descriptions title="举报信息" :column="1" border>
                         <el-descriptions-item label="举报用户">
-                            {{ reportData.user.user_name }}
+                            {{ reportDetail.user.user_name }}
                         </el-descriptions-item>
                         <el-descriptions-item label="举报日期">
-                            {{ reportData.date }}
+                            {{ reportDetail.date }}
                         </el-descriptions-item>
-                        <el-descriptions-item label="举报内容">{{ reportData.content }} </el-descriptions-item>
+                        <el-descriptions-item label="举报理由">
+                            {{ reportDetail.content }}
+                        </el-descriptions-item>
                     </el-descriptions>
                 </div>
             </el-card>
@@ -43,116 +42,115 @@
                 <div style="padding: 16px">
                     <el-input
                         v-model="judgment.text"
-                        style="width: 100%; min-height: 50%"
+                        sytle="width: 100%; min-height: 50%"
                         :autosize="{ minRows: 10, maxRows: 20 }"
                         type="textarea"
-                        placeholder="请输入反馈意见"
+                        placeholder="请输入审核意见"
                         maxlength="200"
                         show-word-limit
-                    />
-                    <div style="margin-top: 20px">
-                        <span>删除评论</span>
-                        <el-switch
-                            v-model="judgment.unvisibility"
-                            style="margin-left: 10px; --el-switch-on-color: #13ce66; --el-switch-off-color: #d0d0d0"
                         />
+                    <div style="margin-top: 20px">
+                        <span>删除批注</span>
+                        <el-switch
+                            v-model="judgment.invisibility"
+                            style="margin-left: 10px; --el-switch-on-color: #13ce66; --el-switch-off-color: #d0d0d0"
+                            />
                     </div>
 
                     <div style="margin-top: 20px">
                         <el-button
-                            v-if="reportData.processed"
+                            v-if="reportDetail.processed"
                             class="button"
                             type="primary"
                             round
                             style="margin: 0 auto"
                             @click="handleSubmit"
-                        >
-                            确认修改
-                        </el-button>
+                            >确认修改</el-button>
                         <el-button
                             v-else
                             class="button"
                             type="primary"
                             round
-                            style="margin: 0 auto"
+                            style="margin:0 auto"
                             @click="handleSubmit"
-                        >
-                            确认提交
-                        </el-button>
+                            >确认提交</el-button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </template>
 
 <script>
-import { getReportDetail, judgeReport } from '@/api/report'
-import { ElMessage } from 'element-plus'
+import {getAnnotReportDetail} from '@/api/report.js'
+import {judgeAnnotReport} from "@/api/report.js"
+import {ElMessage} from "element-plus";
+
 export default {
-    components: {},
     props: { reportID: Number },
     data() {
         return {
-            reportData: {
-                id: 10,
-                comment: {
-                    comment_id: '',
-                    user: {
-                        user_id: '',
-                        user_name: ''
-                    },
+            reportDetail: {
+                annotation: {
+                    annotation_id: 1,
+                    user: 'user_id',
                     paper: {
                         paper_id: '',
                         title: ''
                     },
                     date: '',
-                    content: '',
-                    visibility: false
+                    note: {
+                        note_id: 1,
+                        x: 0.5,
+                        y: 0.6,
+                        width: 20,
+                        height: 10,
+                        pageNum: 10,
+                        comment: '',
+                        username: '',
+                        isPublic: true
+                    }
                 },
+
                 user: {
                     user_id: '',
-                    user_name: ''
+                    user_name: '举报用户'
                 },
-                comment_level: 1,
                 date: '',
-                content: '',
-                judgment: '',
+                content: '低俗，色情',
+                judgment: '审核意见',
+                invisibility: true,
                 processed: false
             },
+
             judgment: {
-                text: '',
-                unvisibility: false
+                text: '审核意见',
+                invisibility: true
             }
         }
     },
-    watch: {
-        reportID: {
-            handler() {
-                this.draw()
-            },
-            immediate: true,
-            deep: true
-        }
-    },
-    computed: {},
+
     methods: {
         async draw() {
-            await getReportDetail(this.$props.reportID)
+            await getAnnotReportDetail(this.$props.reportID)
                 .then((response) => {
-                    this.reportData = response.data
+                    this.reportDetail = response.data
                     this.judgment.text = response.data.judgment
-                    this.judgment.unvisibility = !response.data.comment.visibility
+                    this.judgment.invisibility = response.data.invisibility
+                    console.log(response.data)
                 })
                 .catch((error) => {
-                    ElMessage.error(error.response.data.message)
+                    console.log(this.$props.reportID)
+                    console.log(error)
                 })
         },
+
         async handleSubmit() {
-            await judgeReport({
-                report_id: this.$props.reportID,
+            await judgeAnnotReport({
+                reportID: this.$props.reportID,
                 text: this.judgment.text,
-                visibility: !this.judgment.unvisibility
+                visibility: !this.judgment.invisibility
             })
                 .then((response) => {
                     ElMessage.success(response.data.message)
@@ -161,11 +159,21 @@ export default {
                     ElMessage.error(error.response.data.message)
                 })
         }
-    }
+    },
+    watch: {
+        reportID: {
+            handler() {
+                this.draw()
+            },
+            immediate: true
+        }
+    },
+
 }
 </script>
 
-<style lang="scss" scoped>
+
+<style>
 .report-card {
     display: flex;
     flex-direction: row;
@@ -188,6 +196,7 @@ export default {
             font-weight: bold;
         }
     }
+
 }
 
 :deep(.el-descriptions__label) {
