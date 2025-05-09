@@ -178,6 +178,8 @@ def comment_paper(request):
                 if if_success:
                     auto_record = AutoCheckRecord(comment_id_1=comment, comment_level=1, labels=labels, reason=reason)
                     auto_record.save()
+
+                    safe = True
                     if len(labels) == 0 or labels.isspace():
                         comment.visibility = True
                         auto_record.security = True
@@ -185,6 +187,7 @@ def comment_paper(request):
                         auto_record.save()
                     else:
                         # 将不安全审核记录到表中
+                        safe = False
                         risk_record = AutoRiskRecord(check_record=auto_record)
                         risk_record.save()
                 else:
@@ -231,7 +234,7 @@ def comment_paper(request):
             if safe:
                 return JsonResponse({'message': '评论成功', 'is_success': True})
             else:
-                return JsonResponse({'error': json.loads(reason)['riskTips'] if 'riskTips' in reason else "", 'is_success': False}, status=400)
+                return JsonResponse({'message': '评论存在不适合展示的内容：' + json.loads(reason)['riskTips'] if 'riskTips' in reason else labels, 'is_success': False})
         else:
             return JsonResponse({'error': '用户或文献不存在', 'is_success': False}, status=400)
     else:
