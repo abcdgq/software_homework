@@ -497,8 +497,8 @@ def record_visit(request):
     #     ip_address = request.META.get('REMOTE_ADDR')  # 直接获取（可能为 127.0.0.1）
     if 'REMOTE_ADDR' in request.META:
         ip_address = request.META.get('REMOTE_ADDR')
-    if 'HTTP_X_REAL_IP' in request.META:
-        ip_address = request.META.get('HTTP_X_REAL_IP')
+    # if 'HTTP_X_REAL_IP' in request.META:
+    #     ip_address = request.META.get('HTTP_X_REAL_IP')
     
     
     now = datetime.datetime.now()

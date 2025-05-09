@@ -302,7 +302,16 @@ export default {
     },
     getSummaryReportStatus (reportID) {
       console.log('报告ID是', reportID)
+      let pollCount = 0
+      const MAX_POLL_COUNT = 3 // 30秒（因为每秒一次）
       let intervalID = setInterval(() => {
+        pollCount++
+        // 检查是否超过最大次数
+        if (pollCount > MAX_POLL_COUNT) {
+          this.$message.error('生成报告超时，请稍后手动刷新查看')
+          clearInterval(intervalID)
+          return
+        }
         axios.get(this.$BASE_API_URL + '/summary/getSummaryStatus?report_id=' + reportID)
           .then(response => {
             if (response.data.status === '生成成功') {
