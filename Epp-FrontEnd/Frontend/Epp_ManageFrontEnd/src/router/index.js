@@ -28,27 +28,27 @@ const router = createRouter({
                     children: [
                         {
                             path: 'unhandled',
-                            component: () => import(`@/views/report/UnhandledReport.vue`)
+                            components: { comment: () => import(`@/views/report/UnhandledReport.vue`) }
                         },
                         {
                             path: 'handled',
-                            component: () => import(`@/views/report/HandledReport.vue`)
+                            components: { comment: () => import(`@/views/report/HandledReport.vue`) }
                         },
                         {
                             path: 'ai-review',
-                            component: () => import('@/views/report/AIReview.vue')
+                            components: { ai: () => import('@/views/report/AIReview.vue')}
                         },
                         {
                             path: 'ai-reject',
-                            component: () => import('@/views/report/AIReject.vue')
+                            components: { ai: () => import('@/views/report/AIReject.vue') }
                         },
                         {
                             path: 'annot-handled',
-                            component: () => import('@/views/report/annotation/HandledReport.vue')
+                            components: { annot: () => import('@/views/report/annotation/HandledReport.vue') }
                         },
                         {
                             path: 'annot-unhandled',
-                            component: () => import('@/views/report/annotation/UnhandledReport.vue')
+                            components: { annot: () => import('@/views/report/annotation/UnhandledReport.vue') }
                         }
                     ]
                 }
