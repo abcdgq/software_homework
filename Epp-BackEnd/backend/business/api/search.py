@@ -855,8 +855,8 @@ def extract_search_conditions(query: str):
     except Exception as e:
         print(f"提取出错: {e}")
 
-    # 如果提取失败，返回输入str
-    return query
+    # 如果提取失败，返回根据输入字符串查找的论文
+    return get_filtered_paper(text=query, k=5)
 
 @require_http_methods(["POST"])
 def vector_query(request):
