@@ -764,6 +764,47 @@ def do_string_search(search_content, max_results=10):
     sorted_results = [result for distance, result in results_with_distance]
     return sorted_results[:max_results]  # 返回前10篇相似度最高的文章
 
+def search_papers(keywords, start_year=None, end_year=None, authors=None, max_results=10):
+    print("search_papers参数设置: keywords: ", keywords, "start_year: ", start_year, "end_year: ", end_year, "authors: ", authors, "max_results: ", max_results)
+    query = Q()
+
+    # 关键词搜索（标题/摘要）
+    if keywords:
+        keyword_query = Q()
+        for keyword in keywords:
+            keyword_query |= Q(title__icontains=keyword) | Q(abstract__icontains=keyword)
+        query &= keyword_query
+
+    # 作者搜索（处理逗号分隔的字符串）
+    if authors:
+        author_query = Q()
+        for author in authors:
+            # 增加前后逗号的精确匹配（防止匹配到名字片段）
+            author_query |= Q(authors__icontains=author)
+            # 更精确的方式（需处理首尾作者的情况）：
+            # author_query |= Q(authors__startswith=f"{author},") | 
+            #                 Q(authors__contains=f",{author},") |
+            #                 Q(authors__endswith=f",{author}")
+        query &= author_query
+
+    # 时间范围过滤（处理DateField的年份）
+    if start_year is not None:
+        query &= Q(publication_date__year__gte=start_year)
+    if end_year is not None:
+        query &= Q(publication_date__year__lte=end_year)
+
+    # 执行查询（添加时间倒序排序）
+    results = Paper.objects.filter(query).order_by('-publication_date')
+    
+    # 去重处理（虽然主键唯一，但可能因多对多关系产生重复）
+    if authors or keywords:
+        results = results.distinct()
+    
+    print("search_papers返回结果: ")
+    for result in results[:max_results]:
+        print(result.title + " " + str(result.publication_date) + " " + result.authors)
+    return list(results[:max_results])
+
 @require_http_methods(["POST"])
 def vector_query(request):
     """
@@ -838,6 +879,9 @@ def vector_query(request):
         filtered_papers = do_dialogue_search(search_content, chat_chat_url, headers)
     else:
         filtered_papers = do_string_search(search_content)
+        search_papers(["VAE"])
+        search_papers(["VAE"], 2020, 2022)
+        search_papers(["VAE"], 2018, 2024, ["ean"])
         print("filtered_papers: ", filtered_papers)
         if len(filtered_papers) == 0:
             return JsonResponse({"paper_infos": [], 'ai_reply': "EPP助手哭哭惹，很遗憾未能检索出相关论文。",
