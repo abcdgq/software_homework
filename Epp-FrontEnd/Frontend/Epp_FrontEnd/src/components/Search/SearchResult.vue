@@ -303,7 +303,7 @@ export default {
     getSummaryReportStatus (reportID) {
       console.log('报告ID是', reportID)
       let pollCount = 0
-      const MAX_POLL_COUNT = 3 // 30秒（因为每秒一次）
+      const MAX_POLL_COUNT = 300 // 10min（因为每2秒一次）
       let intervalID = setInterval(() => {
         pollCount++
         // 检查是否超过最大次数
@@ -326,7 +326,7 @@ export default {
             console.error('查询状态失败:', error)
             clearInterval(this.intervalID) // 错误时停止轮询
           })
-      }, 1000) // 每秒查询一次
+      }, 2000) // 每2秒查询一次
     },
     downloadPapers () {
       if (this.selectedPapers.length === 0) {
