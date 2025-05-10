@@ -805,6 +805,59 @@ def search_papers(keywords, start_year=None, end_year=None, authors=None, max_re
         print(result.title + " " + str(result.publication_date) + " " + result.authors)
     return list(results[:max_results])
 
+def extract_search_conditions(query: str):
+
+
+    """
+    使用AI提取结构化搜索条件
+    
+    参数：
+    query: 用户自然语言查询
+    
+    返回：json格式查找条件
+    """
+    prompt = f"""您是一个专业的学术搜索引擎解析器，请从查询{query}中提取信息，返回格式如下：
+
+  "keywords": [],  # 研究主题相关词汇
+  "start_year": 2010,  # 开始年份（含）
+  "end_year":  2022    # 结束年份（含）
+  "authors": [],  # 作者名称
+
+
+解析规则：
+1. 时间相关表述处理：
+   - "XX年以前" -> end_year=XX-1
+   - "XX年之后" -> start_year=XX+1，end_year=2025
+   - "XX到YY年间" -> start_year=XX, end_year=YY
+   - "最近N年" -> start_year=2025-N，end_year=2025
+
+2. 逻辑关系处理：
+   - "包含A和B" -> 逻辑AND
+   - "A或B" -> 逻辑OR
+   - "排除C" -> NOT条件
+
+3. 特殊语义转换：
+   - "最新研究" -> start_year=2023，end_year=2025
+
+4.如果相关词汇与作者名称没有提取到对应属性，则保持这两项对应的列表为空
+
+5.start_year默认为2010， end_year默认为2022
+
+6.研究主题相关词汇用英文输出
+
+返回纯JSON对象，不要额外解释"""
+
+    try:
+        r = queryGLM(prompt)
+        result = json.loads(r)
+        print(result)
+        return result
+    except Exception as e:
+        print(f"提取出错: {e}")
+
+    # 如果提取失败，返回输入str
+    return query
+
 @require_http_methods(["POST"])
 def vector_query(request):
     """
@@ -1186,7 +1239,6 @@ def dialog_query(request):
         content: '回复内容'
     }
     
-    TODO:
         1. 从Request中获取对话内容
         2. 根据最后一条user的对话回答进行关键词触发，分析属于哪种对话类型
             - 如果对话类型为'query'
@@ -1205,9 +1257,8 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
-    # TODO 获取临时知识库id,debug
+    # 获取临时知识库id
     kb_id = get_tmp_kb_id(search_record_id) 
-    # kb_id = 0
     
     user = User.objects.filter(username=username).first()
     if user is None:
@@ -1234,14 +1285,17 @@ def dialog_query(request):
     content = ''
     # print(response_type)
     if 'yes' in response_type:  # 担心可能有句号等等
-        # 查询论文，TODO:接入向量化检索
+        # 查询论文
         # filtered_paper = query_with_vector(message) # 旧版的接口，换掉了 2024.4.28
         search_content = response_type.split('+')[-1].strip()
         print("search_content:", search_content)
+
+        conditions = extract_search_conditions(message)
         # filtered_paper = do_string_search(search_content=search_content, max_results=5)   # 字符串匹配，检索效果较差
         # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化,初始化之后注掉这个方法即可
         #local_vdb_init(None)
-        filtered_paper = get_filtered_paper(text=message, k=5)
+        filtered_paper = search_papers(keywords=conditions["keywords"], start_year=conditions["start_year"], end_year=conditions["end_year"],authors=conditions["authors"])
+        #filtered_paper = get_filtered_paper(text=message, k=5)
         print("filtered_paper: ", filtered_paper)
         dialog_type = 'query'
         papers = []
@@ -1249,6 +1303,9 @@ def dialog_query(request):
             papers.append(paper.to_dict())
         # print(papers)
         content = '根据您的需求，我们检索到了一些论文信息'
+        if len(filtered_paper) == 0:
+            dialog_type = 'dialog'
+            content = "抱歉，没有查找到相关论文"
         for i in range(len(papers)):
             content += '\n' + f'第{i+1}篇：' + papers[i]['title']
             # content += '\n' + f'第{i+1}篇：'
@@ -1274,11 +1331,10 @@ def dialog_query(request):
         #     "history": list(input_history),
         #     "prompt_name": "text"  # 使用历史记录对话模式
         # })
-        # TODO 分发与整合
-        ai_reply, origin_docs = get_final_answer(input_history, message, kb_id)
         # ai_reply, origin_docs = kb_ask_ai(payload)
         # ai_reply = queryGLM(message, input_history)
         # print("ai_reply: ", ai_reply)
+        ai_reply, origin_docs = get_final_answer(input_history, message, kb_id)
         dialog_type = 'dialog'
         papers = []
         content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话（注意不要出现作为EPP论文助手等语句，直接给出转述后的内容）：' + ai_reply, [])
