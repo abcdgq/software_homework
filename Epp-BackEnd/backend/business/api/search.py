@@ -855,8 +855,8 @@ def extract_search_conditions(query: str):
     except Exception as e:
         print(f"提取出错: {e}")
 
-    # 如果提取失败，返回根据输入字符串查找的论文
-    return get_filtered_paper(text=query, k=5)
+    # 如果提取失败，返回None,后边根据None
+    return None
 
 @require_http_methods(["POST"])
 def vector_query(request):
@@ -1291,11 +1291,15 @@ def dialog_query(request):
         print("search_content:", search_content)
 
         conditions = extract_search_conditions(message)
+        
         # filtered_paper = do_string_search(search_content=search_content, max_results=5)   # 字符串匹配，检索效果较差
         # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化,初始化之后注掉这个方法即可
         #local_vdb_init(None)
-        filtered_paper = search_papers(keywords=conditions["keywords"], start_year=conditions["start_year"], end_year=conditions["end_year"],authors=conditions["authors"])
-        #filtered_paper = get_filtered_paper(text=message, k=5)
+        filtered_paper=[]
+        if conditions == None:
+            filtered_paper = get_filtered_paper(text=message, k=5)
+        else:
+            filtered_paper = search_papers(keywords=conditions["keywords"], start_year=conditions["start_year"], end_year=conditions["end_year"],authors=conditions["authors"])
         print("filtered_paper: ", filtered_paper)
         dialog_type = 'query'
         papers = []
