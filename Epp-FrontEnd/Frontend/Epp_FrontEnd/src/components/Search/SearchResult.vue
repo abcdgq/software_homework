@@ -188,6 +188,10 @@ export default {
     },
     async fetchPapers () {
       console.log('Fetching papers...')
+      console.log({
+        searchType: this.$route.query.searchType,
+        searchContent: this.$route.query.search_content
+      })
       const loadingInstance = this.$loading({
         lock: true,
         text: 'Loading...',
