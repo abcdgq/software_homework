@@ -11,6 +11,8 @@ __pycache__
 # 忽略同目录下的 resource 文件夹及其所有内容 #
 /resource/
 
+/migrations/
+
 # 忽略setting.py #
 # backend/settings.py
  
