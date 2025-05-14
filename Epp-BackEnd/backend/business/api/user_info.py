@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from backend.settings import USER_REPORTS_PATH, BASE_DIR, USER_READ_CONSERVATION_PATH
 
-from business.models import User
+from business.models import User, AbstractReport
 from business.models import SearchRecord
 from business.models import SummaryReport
 from business.models import FileReading
@@ -167,8 +167,20 @@ def summary_report_list(request):
             "report_id": report.report_id,
             "title": report.title,
             "path": report.report_path,
-            "date": report.date.strftime("%Y-%m-%d %H:%M:%S")
+            "date": report.date.strftime("%Y-%m-%d %H:%M:%S"),
+            "type": "summary"
         })
+    abstract_reports = AbstractReport.objects.filter(user_id=user, status=SummaryReport.STATUS_COMPLETED)
+    data['total'] += len(abstract_reports)
+    for report in abstract_reports:
+        data['reports'].append({
+            "report_id": report.report_id,
+            "title": report.title,
+            "path": report.report_path,
+            "date": report.date.strftime("%Y-%m-%d %H:%M:%S"),
+            "type": "abstract"
+        })
+
     print(data)
     return reply.success(data=data, msg='综述报告列表获取成功')
 
@@ -342,10 +354,32 @@ def get_summary_report(request):
         return reply.fail(msg="请先正确登录")
 
     report_id = request.GET.get('report_id')
-    report = SummaryReport.objects.filter(report_id=report_id, user_id=user).first()
-    if report:
-        with open(report.report_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        return reply.success(data={'summary': content}, msg='综述报告获取成功')
+    data = json.loads(request.body)
+    type = data.get('type', None)
+    if type == 'summary':
+        # 多篇论文综述
+        report = SummaryReport.objects.filter(report_id=report_id, user_id=user).first()
+        if report:
+            with open(report.report_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return reply.success(data={'summary': content}, msg='论文综述报告获取成功')
+        else:
+            return reply.fail(msg='论文综述报告不存在')
     else:
-        return reply.fail(msg='综述报告不存在')
+        # 单篇文件综述
+        report = AbstractReport.objects.filter(report_id=report_id, user_id=user).first()
+        if report:
+            with open(report.report_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return reply.success(data={'summary': content}, msg='文件综述报告获取成功')
+        else:
+            return reply.fail(msg='文件综述报告不存在')
+
+
+    # report = SummaryReport.objects.filter(report_id=report_id, user_id=user).first()
+    # if report:
+    #     with open(report.report_path, 'r', encoding='utf-8') as f:
+    #         content = f.read()
+    #     return reply.success(data={'summary': content}, msg='综述报告获取成功')
+    # else:
+    #     return reply.fail(msg='综述报告不存在')
