@@ -231,7 +231,7 @@ export default {
         })
         .catch((error) => {
           console.error('知识库构建失败:', error)
-          this.aiLoading = true
+          this.aiLoading = false // 错误时停止，不然我前端都没法测试
           this.loadingText = '知识库构建失败，请稍后再试'
         })
     },

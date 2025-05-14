@@ -481,6 +481,10 @@ export default {
         this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
         this.annotations = this.allAnnotations
         this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+        this.$message({
+          message: '添加批注成功',
+          type: 'success'
+        })
       }).catch(error => {
         console.error('保存注释失败', error)
         this.$message({

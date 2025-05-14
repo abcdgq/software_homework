@@ -24,7 +24,8 @@
             element-loading-spinner="el-icon-loading" style="width: 100px; height: 40px;">
           </div>
           <div v-else>
-            <p style="white-space: pre-wrap;">{{ message.text }}</p>
+            <!-- <p style="white-space: pre-wrap;">{{ message.text }}</p> -->
+            <p style="white-space: pre-wrap;" v-html="renderMessageText(message)"></p>
             <el-button type="text" @click="regenerateAnswer"
               v-show="index == chatMessages.length - 1 && answerFinished">
               <i class="fas fa-refresh"></i>
@@ -57,7 +58,7 @@
 
 <script>
 import axios from 'axios'
-import markdownIt from 'markdown-it'
+// import markdownIt from 'markdown-it'
 export default {
   props: {
     paperID: {
@@ -83,6 +84,13 @@ export default {
   mounted () {
     this.fileReadingID = this.fileReadingId
     this.initialize()
+    this.$el.addEventListener('click', e => {
+      const target = e.target
+      if (target.classList.contains('highlight-word')) {
+        const word = target.dataset.word
+        this.onWordClick(word)
+      }
+    })
   },
   methods: {
     initialize () {
@@ -92,7 +100,7 @@ export default {
         this.createPaperStudy()
       }
     },
-    createPaperStudy () {
+    async createPaperStudy () {
       const loadingInstance = this.$loading({
         lock: true,
         text: '正在初始化...',
@@ -100,7 +108,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)',
         target: '.read-assistant'
       })
-      axios.post(this.$BASE_API_URL + '/study/createPaperStudy', {'document_id': this.paperID, 'file_type': 1})
+      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', {'document_id': this.paperID, 'file_type': 1}, { timeout: 1000 })
         .then((response) => {
           if (response.status === 200) {
             this.fileReadingID = response.data.file_reading_id
@@ -135,7 +143,7 @@ export default {
           loadingInstance.close()
         })
     },
-    restorePaperStudy () {
+    async restorePaperStudy () {
       console.log('研读对话的id, ', this.fileReadingID)
       const loadingInstance = this.$loading({
         lock: true,
@@ -144,7 +152,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)',
         target: '.read-assistant' // 指定加载动画的目标
       })
-      axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', {'file_reading_id': this.fileReadingID})
+      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', {'file_reading_id': this.fileReadingID}, { timeout: 1000 })
         .then((response) => {
           const history = response.data.conversation_history.conversation
           for (const message of history) {
@@ -185,11 +193,25 @@ export default {
       let loadingMessage = { sender: 'ai', text: 'AI正在思考...', loading: true }
       this.chatMessages.push(loadingMessage)
       let answer = ''
+      let highlights = []
       //   Add user message to chat
       try {
         await this.$axios.post(this.$BASE_API_URL + '/study/doPaperStudy', { 'query': chatMessage, 'file_reading_id': this.fileReadingID })
           .then(response => {
             answer = response.data.ai_reply
+            highlights = response.data.highlights
+            if (!highlights || highlights.length === 0) {
+              highlights = [
+                {
+                  start: 0,
+                  end: 2,
+                  word: '抱歉',
+                  tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+                  // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+                }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+              ]
+            }
+            loadingMessage.highlights = highlights
             this.docs = response.data.docs
             this.probQuestions = response.data.prob_question
             loadingMessage.loading = false
@@ -200,6 +222,15 @@ export default {
         loadingMessage.text = ''
         answer = '抱歉, 无法从AI获取回应。'
         loadingMessage.loading = false
+        loadingMessage.highlights = [
+          {
+            start: 0,
+            end: 2,
+            word: '抱歉',
+            tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+            // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+          }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+        ]
       } finally {
         this.answerFinished = false
         let cur = 0
@@ -221,6 +252,7 @@ export default {
       lastMessage.loading = true
       this.answerFinished = false
       let answer = ''
+      let highlights = []
       console.log('file_reading_id', this.fileReadingID)
       await axios.post(this.$BASE_API_URL + '/study/reDoPaperStudy', {'file_reading_id': this.fileReadingID})
         .then((response) => {
@@ -228,12 +260,34 @@ export default {
           this.probQuestions = response.data.prob_question
           lastMessage.text = ''
           lastMessage.loading = false
+          highlights = response.data.highlights
+          if (!highlights || highlights.length === 0) {
+            highlights = [
+              {
+                start: 0,
+                end: 2,
+                word: '抱歉',
+                tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+                // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+              }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+            ]
+          }
+          lastMessage.highlights = highlights
         })
         .catch((error) => {
           console.error('Error:', error)
           lastMessage.text = ''
           answer = '抱歉, 无法从AI获取回应。'
           lastMessage.loading = false
+          lastMessage.highlights = [
+            {
+              start: 0,
+              end: 2,
+              word: '抱歉',
+              tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+              // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+            }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+          ]
         })
       let cur = 0
       while (cur < answer.length) {
@@ -269,21 +323,25 @@ export default {
       this.answerFinished = true
     },
     renderMarkdown () {
-      const md = markdownIt()
+      // const md = markdownIt()
       console.log('document id is...', this.paperID)
       axios.post(this.$BASE_API_URL + '/study/generateAbstractReport', {document_id: this.paperID, paper_id: ''})
         .then((response) => {
-          if (response.data.summary) {
-            const summary = response.data.summary
-            this.markdownFile = md.render(summary)
-            this.showSummaryModal = true
-          } else {
-            this.$message({
-              message: '正在为您生成摘要，请稍等...',
-              type: 'warning'
-            })
-            this.summaryFinished = false
-          }
+          // if (response.data.summary) {
+          //   const summary = response.data.summary
+          //   this.markdownFile = md.render(summary)
+          //   this.showSummaryModal = true
+          // } else {
+          //   this.$message({
+          //     message: '正在为您生成总结，请稍后去个人中心查看...',
+          //     type: 'warning'
+          //   })
+          //   this.summaryFinished = false
+          // }
+          this.$message({
+            message: '正在为您生成总结，请稍后去个人中心查看...',
+            type: 'warning'
+          })
         })
         .catch(() => {
           this.$message({
@@ -309,6 +367,92 @@ export default {
         .catch((error) => {
           console.error('清除对话失败', error)
         })
+    },
+    renderMessageText (message) {
+      if (!message.highlights || message.highlights.length === 0) {
+        return message.text
+      }
+
+      const text = message.text
+      const highlights = message.highlights.sort((a, b) => a.start - b.start)
+      let result = ''
+      let cur = 0
+
+      highlights.forEach(hl => {
+        if (cur < hl.start) {
+          result += text.slice(cur, hl.start)
+        }
+
+        const word = text.slice(hl.start, hl.end)
+        // 给特定词加上 span 和 data-* 属性
+        result += `<span class="highlight-word" data-word="${word}" title="${hl.tooltip}">${word}</span>`
+        cur = hl.end
+      })
+
+      if (cur < text.length) {
+        result += text.slice(cur)
+      }
+
+      return result
+    },
+    async onWordClick (highlight) {
+      console.log('Clicked word payload:')
+      const chatMessage = '请具体解释其中的:' + highlight
+      // this.chatInput = ''
+      this.answerFinished = false
+      this.chatMessages.push({sender: 'user', text: chatMessage, loading: false})
+
+      let loadingMessage = { sender: 'ai', text: 'AI正在思考...', loading: true }
+      this.chatMessages.push(loadingMessage)
+      let answer = ''
+      let highlights = []
+      //   Add user message to chat
+      try {
+        await this.$axios.post(this.$BASE_API_URL + '/study/doPaperStudy', { 'query': chatMessage, 'file_reading_id': this.fileReadingID })
+          .then(response => {
+            answer = response.data.ai_reply
+            highlights = response.data.highlights
+            if (!highlights || highlights.length === 0) {
+              highlights = [
+                {
+                  start: 0,
+                  end: 2,
+                  word: '抱歉',
+                  tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+                  // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+                }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+              ]
+            }
+            loadingMessage.highlights = highlights
+            this.docs = response.data.docs
+            this.probQuestions = response.data.prob_question
+            loadingMessage.loading = false
+            loadingMessage.text = ''
+          })
+      } catch (error) {
+        console.error('Error:', error)
+        loadingMessage.text = ''
+        answer = '抱歉, 无法从AI获取回应。'
+        loadingMessage.loading = false
+        loadingMessage.highlights = [
+          {
+            start: 0,
+            end: 2,
+            word: '抱歉',
+            tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+            // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+          }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+        ]
+      } finally {
+        this.answerFinished = false
+        let cur = 0
+        while (cur < answer.length) {
+          loadingMessage.text += answer.charAt(cur)
+          cur++
+          await this.delay(50)
+        }
+        this.answerFinished = true
+      }
     }
   }
 
@@ -383,6 +527,13 @@ export default {
   font-size: small;
   max-width: 90%;
   cursor: pointer
+}
+
+/deep/ .highlight-word {
+  text-decoration: underline wavy #1e90ff; /* 使用常见的蓝色 (DodgerBlue) */
+  text-underline-offset: 2px;              /* 微调下划线的位置 */
+  /* text-decoration-thickness: 2px;             加粗下划线 */
+  cursor: pointer;
 }
 
 </style>
