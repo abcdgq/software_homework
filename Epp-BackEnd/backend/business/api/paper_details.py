@@ -533,7 +533,32 @@ def get_paper_annotation(request):
             'date': date
         })
 
-    return reply.success(data=data, msg="成功获取公开批注")
+    username = request.session.get('username')
+    note_list = FileNote.objects.filter(paper_id=paper, username=username,  isPublic=False)
+    for note in note_list:
+        x = note.x
+        y = note.y
+        width = note.width
+        height = note.height
+        pageNum = note.pageNum
+        comment = note.comment
+        isPublic = note.isPublic
+        id = note.note_id
+        date = note.date
+        data['annotations'].append({
+            'x': x,
+            'y': y,
+            'width': width,
+            'height': height,
+            'pageNum': pageNum,
+            'comment': comment,
+            'userName': username,
+            'isPublic': isPublic,
+            'id': id,               # id为note_id
+            'date': date
+        })
+
+    return reply.success(data=data, msg="成功获取批注")
 
 
 @require_http_methods('POST')
