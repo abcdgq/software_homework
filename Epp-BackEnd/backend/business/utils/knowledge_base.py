@@ -29,10 +29,12 @@ def build_kb_by_paper_ids(paper_id_list : list[str]):
         p = Paper.objects.get(paper_id=id)
         pdf_url = p.original_url.replace('abs/','pdf/') + '.pdf'
         local_path = settings.PAPERS_URL  + str(p.paper_id)
-        paper_nam = str(p.paper_id)
+        paper_name = str(p.paper_id)
         print(local_path)
         print(pdf_url)
-        downloadPaper(pdf_url, paper_nam)
+        downloadPaper(pdf_url, paper_name)
+        # processor = PDFProcessor()
+        # processor.download_with_repair(pdf_url,paper_name)
         files.append(
             ('files', (p.title + '.pdf', open(local_path + '.pdf', 'rb'),
                 'application/vnd.openxmlformats-officedocument.presentationml.presentation')))

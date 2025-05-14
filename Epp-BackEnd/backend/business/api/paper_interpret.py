@@ -278,6 +278,8 @@ def get_paper_local_url(paper):
     local_path = paper.local_path
     print("get url: ", local_path)
     print("ori url: ", paper.original_url)
+    # if local_path is not None and local_path.endswith('.pdf'):
+    #     return local_path
 
     original_url = paper.original_url
     # 将路径中的abs修改为pdf
@@ -286,6 +288,8 @@ def get_paper_local_url(paper):
     filename = str(paper.paper_id)
     print("开始下载")
     local_path = downloadPaper(original_url, filename)
+    # processor = PDFProcessor()
+    # local_path = processor.download_with_repair(original_url,filename)
     print("下载完成")
     paper.local_path = local_path
     paper.save()

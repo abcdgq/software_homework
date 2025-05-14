@@ -359,7 +359,9 @@ def batch_download_papers(request):
                     original_url = original_url.replace('abs', 'pdf') + '.pdf'
                     # 访问url，下载文献到服务器
                     filename = str(paper.paper_id)
+                    
                     local_path = downloadPaper(original_url, filename)
+                    
                     paper.local_path = local_path
                     paper.save()
 
