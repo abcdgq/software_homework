@@ -216,14 +216,48 @@ export default {
       container.innerHTML = '' // 清空容器
       container.style.position = 'relative' // 设为相对定位
       container.style.overflow = 'auto' // 添加滚动支持
-      window.pdfjsLib.getDocument(this.pdfUrl).promise
+      // window.pdfjsLib.getDocument(this.pdfUrl).promise
+      //   .then(pdf => {
+      //     this.pdfInstance = pdf
+      //     this.renderAllPages(pdf, container)
+      //     this.loadAnnotations() // 加载已有注释,同时顺便渲染一下
+      //   })
+      //   .catch(error => {
+      //     console.error('PDF加载失败:', error)
+      //   })
+      // 1. 配置全局PDF.js选项（推荐放在应用初始化时）
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js'
+
+      // 2. 加载PDF文档（含中文支持配置）
+      window.pdfjsLib.getDocument({
+        url: this.pdfUrl,
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/cmaps/', // 关键：中文CMAP
+        cMapPacked: true,
+        useSystemFonts: false, // 禁用系统字体回退
+        disableFontFace: false // 启用@font-face
+      }).promise
         .then(pdf => {
           this.pdfInstance = pdf
           this.renderAllPages(pdf, container)
-          this.loadAnnotations() // 加载已有注释,同时顺便渲染一下
+          this.loadAnnotations()
+          // 可选：检查字体嵌入情况（调试用）
+          // pdf.getPage(1).then(page => {
+          //   page.getTextContent().then(textContent => {
+          //     console.log('文档字体情况:', textContent.styles)
+          //   })
+          // })
         })
         .catch(error => {
           console.error('PDF加载失败:', error)
+          // 友好错误提示（根据实际UI框架调整）
+          if (error.name === 'MissingPDFException') {
+            alert('PDF文件不存在或路径错误')
+          } else if (error.name === 'InvalidPDFException') {
+            alert('PDF文件已损坏')
+          } else {
+            alert('PDF加载失败，请确保文件使用标准字体嵌入')
+          }
         })
       // 监听用户框选事件
       container.addEventListener('mousedown', this.handleMouseDown)
@@ -452,7 +486,7 @@ export default {
       }).catch(error => {
         console.error('保存注释失败', error)
         this.$message({
-          message: '添加批注失败',
+          message: error.response.data.error || '保存注释失败',
           type: 'error'
         })
       })
