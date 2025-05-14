@@ -23,8 +23,11 @@ class AbstractReport(models.Model):
         (STATUS_TIMEOUT, '超时')
     ]
     
+    report_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     file_local_path = models.CharField(max_length=255, primary_key=True)
     report_path = models.CharField(max_length=255, unique=True)
+    date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=2,
         choices=STATUS_CHOICES,
