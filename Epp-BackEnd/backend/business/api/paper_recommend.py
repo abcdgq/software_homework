@@ -291,7 +291,7 @@ def get_related_paper(request):
     collected_papers_list = user.collected_papers.all()
 
     paper_id = request.GET.get('paper_id')
-    paper = Paper.objects.filter(paper_id=paper_id)
+    paper = Paper.objects.filter(paper_id=paper_id).first()
     title = paper.title
 
     data = {
