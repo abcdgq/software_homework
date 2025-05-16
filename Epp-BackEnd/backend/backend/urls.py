@@ -46,6 +46,7 @@ urlpatterns = [
                   path("api/getComment2", paper_details.get_second_comment),
                   path("api/likeComment", paper_details.like_comment),
                   path("api/getUserPaperInfo", paper_details.get_user_paper_info),
+                  path("api/relatedPaper", paper_recommend.get_related_paper),
 
                   path("api/saveAnnotation", paper_details.save_document_note),
                   path("api/getAnnotations", paper_details.get_document_note),
