@@ -25,6 +25,7 @@ class FileNote(models.Model):
         - comment               笔记内容
         - username              用户名
         - isPublic              是否公开
+        - visibility            是否可见
     """
     note_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -40,4 +41,5 @@ class FileNote(models.Model):
     comment = models.TextField(default="")
     username = models.CharField(max_length=255)
     isPublic = models.BooleanField(default=False)
+    visibility = models.BooleanField(default=True)
 
