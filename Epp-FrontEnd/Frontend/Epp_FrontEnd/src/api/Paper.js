@@ -23,7 +23,7 @@ export const collectPaper = (paperId) => {
 export const fetchFurtherReadingPapers = (paperId) => {
   return request({
     method: 'get',
-    url: '',
+    url: 'api/relatedPaper',
     params: {
       paper_id: paperId
     }
