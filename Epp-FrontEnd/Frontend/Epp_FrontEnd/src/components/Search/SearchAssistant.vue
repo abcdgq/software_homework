@@ -11,7 +11,8 @@
                         element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" style="width: 100px; height: 40px;">
                     </div>
                     <div v-else>
-                        <p style="white-space: pre-wrap;">{{ message.text }}</p>
+                        <!-- <p style="white-space: pre-wrap;">{{ message.text }}</p> -->
+                         <p style="white-space: pre-wrap;" v-html="renderMessageText(message)"></p>
                         <div v-if="message.type === 'query'" style="margin-top: 10px;">
                           <div v-for="(paper, index) of papers" :key="index">
                             <paper-card :paper="paper" />
@@ -38,7 +39,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+// import axios from 'axios'
 import PaperCard from './PaperCard.vue'
 export default {
   components: {
@@ -81,6 +82,15 @@ export default {
       this.createDialogStudy()
     }
   },
+  mounted () {
+    this.$el.addEventListener('click', e => {
+      const target = e.target
+      if (target.classList.contains('highlight-word')) {
+        const word = target.dataset.word
+        this.onWordClick(word)
+      }
+    })
+  },
   methods: {
     createDialogStudy () {
       this.paperIds = this.paperIds.slice(0, 5)
@@ -102,6 +112,7 @@ export default {
       this.chatMessages.push(loadingMessage)
       let answer = ''
       this.chatInput = ''
+      let highlights = []
       try {
         console.log('search-record-id: ', this.searchRecordID)
         await this.$axios.post(this.$BASE_API_URL + '/search/dialogQuery', { 'message': chatMessage, 'paper_ids': this.paperIds, 'search_record_id': this.searchRecordID })
@@ -114,12 +125,34 @@ export default {
             loadingMessage.loading = false
             loadingMessage.text = ''
             answer = response.data.content
+            highlights = response.data.highlights
+            if (!highlights || highlights.length === 0) {
+              highlights = [
+                {
+                  start: 0,
+                  end: 2,
+                  word: '抱歉',
+                  tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+                  // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+                }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+              ]
+            }
+            loadingMessage.highlights = highlights
           })
       } catch (error) {
         console.error('Error:', error)
         loadingMessage.text = ''
         answer = '抱歉, 无法从AI获取回应。'
         loadingMessage.loading = false
+        loadingMessage.highlights = [
+          {
+            start: 0,
+            end: 2,
+            word: '抱歉',
+            tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+            // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+          }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+        ]
       } finally {
         this.answerFinished = false
         let cur = 0
@@ -157,33 +190,6 @@ export default {
     delay (ms) {
       return new Promise(resolve => setTimeout(resolve, ms))
     },
-    async regenerateAnswer () {
-      console.log('regenerating...')
-      const lastMessage = this.chatMessages[this.chatMessages.length - 1]
-      lastMessage.text = 'AI正在思考...'
-      lastMessage.loading = true
-      this.answerFinished = false
-      let answer = ''
-      await axios.post(this.$BASE_API_URL + '/search/dialogQuery', { 'message': lastMessage, 'paper_ids': this.paperIds, 'search_record_id': this.searchRecordID })
-        .then((response) => {
-          answer = response.data.ai_reply
-          lastMessage.text = ''
-          lastMessage.loading = false
-        })
-        .catch((error) => {
-          console.error('重新生成对话式检索结果失败: ', error)
-          lastMessage.text = ''
-          answer = '抱歉, 无法从AI获取回应。'
-          lastMessage.loading = false
-        })
-      let cur = 0
-      while (cur < answer.length) {
-        lastMessage.text += answer.charAt(cur)
-        cur++
-        await this.delay(100)
-      }
-      this.answerFinished = true
-    },
     // createKB () {
     //   console.log('创建知识库的论文ids', this.paperIds)
     //   let firstMessage = this.chatMessages[this.chatMessages.length - 1]
@@ -212,6 +218,92 @@ export default {
     restoreDialogSearch () {
       for (const message of this.aiReply) {
         this.chatMessages.push(message)
+      }
+    },
+    renderMessageText (message) {
+      if (!message.highlights || message.highlights.length === 0) {
+        return message.text
+      }
+
+      const text = message.text
+      const highlights = message.highlights.sort((a, b) => a.start - b.start)
+      let result = ''
+      let cur = 0
+
+      highlights.forEach(hl => {
+        if (cur < hl.start) {
+          result += text.slice(cur, hl.start)
+        }
+
+        const word = text.slice(hl.start, hl.end)
+        // 给特定词加上 span 和 data-* 属性
+        result += `<span class="highlight-word" data-word="${word}" title="${hl.tooltip}">${word}</span>`
+        cur = hl.end
+      })
+
+      if (cur < text.length) {
+        result += text.slice(cur)
+      }
+
+      return result
+    },
+    async onWordClick (highlight) {
+      console.log('Clicked word payload:')
+      const chatMessage = '请具体解释其中的:' + highlight
+      // this.chatInput = ''
+      this.answerFinished = false
+      this.chatMessages.push({sender: 'user', text: chatMessage, loading: false})
+
+      let loadingMessage = { sender: 'ai', text: 'AI正在思考...', loading: true }
+      this.chatMessages.push(loadingMessage)
+      let answer = ''
+      let highlights = []
+      //   Add user message to chat
+      try {
+        await this.$axios.post(this.$BASE_API_URL + '/study/doPaperStudy', { 'query': chatMessage, 'file_reading_id': this.fileReadingID })
+          .then(response => {
+            answer = response.data.ai_reply
+            highlights = response.data.highlights
+            if (!highlights || highlights.length === 0) {
+              highlights = [
+                {
+                  start: 0,
+                  end: 2,
+                  word: '抱歉',
+                  tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+                  // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+                }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+              ]
+            }
+            loadingMessage.highlights = highlights
+            this.docs = response.data.docs
+            this.probQuestions = response.data.prob_question
+            loadingMessage.loading = false
+            loadingMessage.text = ''
+          })
+      } catch (error) {
+        console.error('Error:', error)
+        loadingMessage.text = ''
+        answer = '抱歉, 无法从AI获取回应。'
+        loadingMessage.loading = false
+        loadingMessage.highlights = [
+          {
+            start: 0,
+            end: 2,
+            word: '抱歉',
+            tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
+            // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
+          }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
+        ]
+      } finally {
+        this.answerFinished = false
+        let cur = 0
+        while (cur < answer.length) {
+          loadingMessage.text += answer.charAt(cur)
+          cur++
+          await this.delay(50)
+        }
+        this.answerFinished = true
       }
     }
   }
@@ -272,5 +364,12 @@ export default {
   float: left;
   clear: both;
   border-radius: 0 15px 15px 15px;
+}
+
+/deep/ .highlight-word {
+  text-decoration: underline wavy #1e90ff; /* 使用常见的蓝色 (DodgerBlue) */
+  text-underline-offset: 2px;              /* 微调下划线的位置 */
+  /* text-decoration-thickness: 2px;             加粗下划线 */
+  cursor: pointer;
 }
 </style>

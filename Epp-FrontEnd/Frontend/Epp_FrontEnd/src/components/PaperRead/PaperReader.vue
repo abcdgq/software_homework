@@ -65,12 +65,16 @@
                 </div>
               </div>
               <div class="annotation-actions">
-                <div v-if="annotation.userName === currentUser">
-                  <el-button type="text" @click="deleteAnnotation(annotation.id)">删除</el-button>
-                </div>
-                <div v-else>
-                  <el-button type="text" @click="reportAnnotation(annotation.id)">举报</el-button>
-                </div>
+                <div class="action-buttons">
+                    <el-button type="text" class="annotation-jump" @click="scrollToPage(annotation.pageNum,annotation.y)">定位</el-button>
+
+                    <div v-if="annotation.userName === currentUser">
+                      <el-button type="text" class="danger-button" @click="deleteAnnotation(annotation.id)">删除</el-button>
+                    </div>
+                    <div v-else>
+                      <el-button type="text" class="danger-button" @click="reportAnnotation(annotation.id)">举报</el-button>
+                    </div>
+                  </div>
                 <el-dialog title="举报批注" :visible.sync="showReport" width="50%" @close="closeReport">
                   <el-form>
                       <el-form-item>
@@ -477,6 +481,10 @@ export default {
         this.allAnnotations.push(annotation) // 新加的注释已经保存到本地数组。
         this.annotations = this.allAnnotations
         this.renderAnnotations() // 重新渲染所有注释，这里就不从数据库重新调了
+        this.$message({
+          message: '添加批注成功',
+          type: 'success'
+        })
       }).catch(error => {
         console.error('保存注释失败', error)
         this.$message({
@@ -665,6 +673,20 @@ export default {
       if (!date) return ''
       const [d, t] = date.split('T')
       return `${d}\n${t.slice(0, 8)}` // 只保留到秒
+    },
+    scrollToPage (pageNum, y) {
+      const container = document.getElementById('pdf-viewer-container')
+      const canvas = container.querySelector(`canvas[data-page-num="${pageNum}"]`)
+      if (!canvas) return
+
+      // 获取目标canvas元素的顶部位置
+      const targetTop = Math.max(0, canvas.offsetTop + y - 20)
+
+      // 平滑滚动到目标位置
+      container.scroll({
+        top: targetTop,
+        behavior: 'smooth'
+      })
     }
   }
 }
@@ -753,10 +775,40 @@ export default {
   margin-top: 10px;
 }
 
-.annotation-actions .el-button {
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 跳转按钮简洁风格 */
+.annotation-jump {
   font-size: 13px;
   color: #409EFF;
-  padding: 2px 6px;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  line-height: 1; /* 与 el-button 保持一致 */
+}
+
+.annotation-jump:hover {
+  text-decoration: underline;
+}
+
+/* 红色按钮统一样式（删除/举报） */
+.danger-button {
+  color: #f56c6c !important;
+  font-size: 13px;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  line-height: 1; /* 与 el-button 保持一致 */
+}
+
+.danger-button:hover {
+  background-color: #fde2e2;
 }
 
 /* .annotation {

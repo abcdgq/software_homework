@@ -128,8 +128,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': '2024_EPP',
         'USER': 'root',
-        # 'PASSWORD': '2883536Dgq',
-        'PASSWORD': '58',
+        'PASSWORD': '2883536Dgq',
+        # 'PASSWORD': '58',
         #  'HOST': '114.116.214.56',
         'HOST': '127.0.0.1',
         'PORT': '3306',
@@ -138,7 +138,8 @@ DATABASES = {
 
 MIGRATION_MODULES = {
     # 格式：'app_name': 'custom_migration_module_path'
-    'business': 'migrations.business',  # 将 business 应用的迁移文件存到 shared_migrations/business
+    # 'business': 'migrations.business',  # 将 business 应用的迁移文件存到 shared_migrations/business
+    'business': 'business.migrations',
 }
 
 # Password validation

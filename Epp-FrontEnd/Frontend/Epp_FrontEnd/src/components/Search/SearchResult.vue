@@ -188,6 +188,10 @@ export default {
     },
     async fetchPapers () {
       console.log('Fetching papers...')
+      console.log({
+        searchType: this.$route.query.searchType,
+        searchContent: this.$route.query.search_content
+      })
       const loadingInstance = this.$loading({
         lock: true,
         text: 'Loading...',
@@ -227,7 +231,7 @@ export default {
         })
         .catch((error) => {
           console.error('知识库构建失败:', error)
-          this.aiLoading = true
+          this.aiLoading = false // 错误时停止，不然我前端都没法测试
           this.loadingText = '知识库构建失败，请稍后再试'
         })
     },
