@@ -287,7 +287,7 @@ def get_unique_recommendation(request):
 @require_http_methods("GET")
 def get_related_paper(request):
     username = request.session.get('username')
-    user = User.objects.filter(username=username)
+    user = User.objects.filter(username=username).first()
     collected_papers_list = user.collected_papers.all()
 
     paper_id = request.GET.get('paper_id')
