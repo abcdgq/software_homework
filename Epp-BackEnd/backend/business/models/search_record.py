@@ -17,6 +17,7 @@ class SearchRecord(models.Model):
         - date                  搜索时间
         - conservation_path     对话文件地址
         - related_papers        相关论文
+        - search_content        搜索内容
     """
     search_record_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -24,3 +25,5 @@ class SearchRecord(models.Model):
     date = models.DateTimeField(auto_now=True)
     conversation_path = models.CharField(max_length=255, null=True)
     related_papers = models.ManyToManyField(Paper, related_name='related_search_record', blank=True)
+    # search_content = models.TextField(null=True, blank=True)
+    # x = models.TextField(null=True, blank=True)

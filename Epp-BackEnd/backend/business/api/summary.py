@@ -263,6 +263,8 @@ def create_abstract_report(request):
         if os.path.exists(local_path) == False:
             # 下载下来
             downloadPaper(url=pdf_url, filename=str(p.paper_id))
+            # processor = PDFProcessor()
+            # local_path = processor.download_with_repair(pdf_url,str(p.paper_id))
         content_type = '.pdf'
         title = str(p.paper_id)
         paper_title = p.title
@@ -276,7 +278,7 @@ def create_abstract_report(request):
     # 先查询存不存在响应的解读
 
     print("查询是否存在解读", local_path)
-    
+
     # PDF分块
     from scripts.grobid_test import getXml, parse_grobid_xml, reorganize_sections
     xml = getXml(local_path, None, None)
@@ -297,7 +299,7 @@ def create_abstract_report(request):
     output_file1 = os.path.join(output_dir, "output1.json")
     with open(output_file1, "w", encoding="utf-8") as f:
         json.dump(parsed_data, f, ensure_ascii=False, indent=4)
-    
+
     sections = reorganize_sections(parsed_data)
     output_file2 = os.path.join(output_dir, "output2.json")
     with open(output_file2, "w", encoding="utf-8") as f:
@@ -315,15 +317,15 @@ def create_abstract_report(request):
     # 不存在
     if ar is None:
         # 创建一个线程，直接开始创建
-               
+
         # 判断逻辑可能有问题，不确定是否需要删除
         ar2 = AbstractReport.objects.filter(report_path=report_path).first()
         if ar2:
             print("同名文章解读已存在，将重新生成")
             ar2.delete()
-            
+
         ## 先创建一个知识库
-        ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path)
+        ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path, user_id=user)
         upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
         local_path = local_path[1:] if local_path.startswith('/') else local_path
         print(local_path)
@@ -450,7 +452,7 @@ class abs_gen_thread(threading.Thread):
         
         #获得sections中关于研究现状的部分，先用text_summarizer，再交给ai总结
         long_relatedwork = ".".join(str(i) for i in self.sections.get("sections").get("RelatedWork"))
-        relatedwork = text_summarizer(long_relatedwork)
+        relatedwork = text_summarizer(long_relatedwork, 7)
 
         query_current_situation = relatedwork +'请根据以上提供的资料信息讲述这篇论文的研究现状部分\n'
         payload_cur_situation = json.dumps({
@@ -482,7 +484,7 @@ class abs_gen_thread(threading.Thread):
 
         #### 解决问题
         long_problem = ".".join(str(i) for i in self.sections.get("sections").get("Introduction"))
-        problem = text_summarizer(long_problem)
+        problem = text_summarizer(long_problem, 7)
 
         query_problem = problem +'请根据提供资料讲述解决问题部分\n'
         payload_problem = json.dumps({
@@ -500,7 +502,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 解决方法
         long_solution = ".".join(str(i) for i in self.sections.get("sections").get("Methodology"))
-        solution = text_summarizer(long_solution)
+        solution = text_summarizer(long_solution, 7)
 
         query_solution = solution +'请根据提供资料讲述解决方法部分\n'
         payload_solution = json.dumps({
@@ -518,7 +520,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 实验结果
         long_result = ".".join(str(i) for i in self.sections.get("sections").get("Experiments"))
-        result = text_summarizer(long_result)
+        result = text_summarizer(long_result, 7)
 
         query_result = result +'请根据提供资料讲述这篇论文实验得到的结果\n'
         payload_res = json.dumps({
@@ -536,7 +538,7 @@ class abs_gen_thread(threading.Thread):
             return
         #### 结论
         long_conclusion = ".".join(str(i) for i in self.sections.get("sections").get("Conclusion"))
-        conclusion = text_summarizer(long_conclusion, sentences_count=7)
+        conclusion = text_summarizer(long_conclusion, 7)
 
         query_conclusion = conclusion +'请根据提供资料讲述这篇论文得出的结论\n'
         payload_conclusion = json.dumps({

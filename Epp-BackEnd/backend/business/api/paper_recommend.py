@@ -1,6 +1,9 @@
 '''
 用于热门文献推荐，热门文献推荐基于用户的搜索历史，点赞历史，收藏历史
 '''
+from business.api.search import do_string_search
+from business.api.user_info import collected_papers_list
+
 # -*- coding: utf-8 -*-
 """
 几乎所有推荐系统都是有着前后顺序的，但是我们的没有这些，这也就意味着我们的推荐系统是一个无状态的推荐系统
@@ -13,7 +16,7 @@
 from django_cron import CronJobBase, Schedule
 from django.utils import timezone
 from business.utils import reply
-from business.models import Paper
+from business.models import Paper, SearchRecord, User
 import random
 import requests
 # from bs4 import BeautifulSoup
@@ -26,50 +29,59 @@ from xml.etree import ElementTree as ET
 import json
 import openai
 from django.conf import settings
+from business.api.summary import queryGLM
 
 
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from django.views.decorators.http import require_http_methods
+from business.utils.paper_vdb_init import get_filtered_paper
 
-def queryGLM(msg: str, history=None) -> str:
-    '''
-    对chatGLM3-6B发出一次单纯的询问
-    '''
-    print(msg)
-    chat_chat_url = 'http://172.17.62.88:7861/chat/chat'
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    payload = json.dumps({
-        "query": msg,
-        "prompt_name": "default",
-        "temperature": 0.3
-    })
+# server_ip = '114.116.205.43'
+# url = f'http://{server_ip}:20005'
+# model = 'zhipu-api'
+# openai.api_base = f'http://{server_ip}:20005/v1'
+# openai.api_key = "adadd89573e44bbcab20a88177aef2af.rk3feklpIYygkLPZ"
 
-    session = requests.Session()
-    retry = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-
-    try:
-        response = session.post(chat_chat_url, data=payload, headers=headers, stream=False)
-        response.raise_for_status()
-
-        # 确保正确处理分块响应
-        decoded_line = next(response.iter_lines()).decode('utf-8')
-        print(decoded_line)
-        if decoded_line.startswith('data'):
-            data = json.loads(decoded_line.replace('data: ', ''))
-        else:
-            data = decoded_line
-        return data['text']
-    except requests.exceptions.ChunkedEncodingError as e:
-        print(f"ChunkedEncodingError: {e}")
-        return "错误: 响应提前结束"
-    except requests.exceptions.RequestException as e:
-        print(f"RequestException: {e}")
-        return f"错误: {e}"
+# def queryGLM(msg: str, history=None) -> str:
+#     '''
+#     对chatGLM3-6B发出一次单纯的询问
+#     '''
+#     print(msg)
+#     chat_chat_url = 'http://172.17.62.88:7861/chat/chat'
+#     headers = {
+#         'Content-Type': 'application/json'
+#     }
+#     payload = json.dumps({
+#         "query": msg,
+#         "prompt_name": "default",
+#         "temperature": 0.3
+#     })
+#
+#     session = requests.Session()
+#     retry = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
+#     adapter = HTTPAdapter(max_retries=retry)
+#     session.mount('http://', adapter)
+#     session.mount('https://', adapter)
+#
+#     try:
+#         response = session.post(chat_chat_url, data=payload, headers=headers, stream=False)
+#         response.raise_for_status()
+#
+#         # 确保正确处理分块响应
+#         decoded_line = next(response.iter_lines()).decode('utf-8')
+#         print(decoded_line)
+#         if decoded_line.startswith('data'):
+#             data = json.loads(decoded_line.replace('data: ', ''))
+#         else:
+#             data = decoded_line
+#         return data['text']
+#     except requests.exceptions.ChunkedEncodingError as e:
+#         print(f"ChunkedEncodingError: {e}")
+#         return "错误: 响应提前结束"
+#     except requests.exceptions.RequestException as e:
+#         print(f"RequestException: {e}")
+#         return f"错误: {e}"
 
 
 class arxiv_paper:
@@ -149,7 +161,7 @@ def refreshCache(self):
 
     # 从关键词中提取论文
     key = queryGLM(msg='帮我从这些关键词中提取出来十个关键词：' + ','.join(str(keywords)), history=[])
-    from business.utils.paper_vdb_init import get_filtered_paper
+    
     papers = get_filtered_paper(key, k=10)
     # 将推荐数据缓存一天
     info = []
@@ -188,3 +200,111 @@ def get_recommendation(request):
     cache.set('recommended_papers', papers, timeout=86400)
 
     return reply.success(data={'papers': papers}, msg='success')
+
+
+
+@require_http_methods(["GET"])
+def get_unique_recommendation(request):
+    username = request.session.get('username')
+    user = User.objects.filter(username=username).first()
+
+    search_record_list = SearchRecord.objects.filter(user_id=user)
+
+    content = "["
+    for record in search_record_list:
+        content = content + record.keyword + ","
+    content = content + "]"
+
+    prompt = f"""
+**任务说明**
+你是一名学术文献推荐系统的智能分析引擎，需要根据用户的历史搜索记录生成精准的向量数据库查询词。请按以下步骤处理：
+
+**输入数据**
+用户历史搜索记录："{content}"
+
+**处理要求**
+1. 语义解构：
+   - 识别核心研究领域（如：机器学习>图神经网络>药物研发）
+   - 提取技术关键词（如：GNN、分子表征学习）
+   - 分析潜在需求（如：方法比较/应用场景/理论突破）
+
+2. 查询词生成
+
+3. 输出规范：
+   • 中英文混合术语（适应跨库检索）
+   • 语义分层结构：
+     [核心主题] > [技术方法] > [应用场景]
+   • 排除非学术词汇（如"最佳实践"等模糊表述）
+   • 生成10-15个检索词，按相关性降序排列
+
+请严格按以下JSON格式回答，仅在中括号中填写内容，除了这个JSON内容以外不要回答任何其他内容:
+{{
+    "keywords": [keyword]
+}}"""
+
+    result = "{\"keywords\": []}"
+
+    try:
+        result = queryGLM(prompt)
+        print(result)
+        # response = openai.ChatCompletion.create(
+        #     model=model,
+        #     messages=[{"role": "user", "content": prompt}],
+        #     stream=False
+        # )
+        #
+        # if response.choices[0].message.role == "assistant":
+        #     result = json.loads(response.choices[0].message.content)
+        #     keywords = result['keywords']
+    except Exception as e:
+        print(f"未能正确获得个性化推荐: {e}")
+
+    count = 0
+
+    keywords = json.loads(result)['keywords']
+    print(keywords)
+    filtered_papers_list = []
+    for keyword in keywords:
+        # papers = do_string_search(keyword)
+        papers = get_filtered_paper(keyword,4)
+        print('papers:', papers)
+        count_keyword = 0
+        for p in papers:
+            # print(p.title)
+            filtered_papers_list.append(p.to_dict())
+            count = count + 1
+            count_keyword = count_keyword + 1
+            if count_keyword > 3:
+                break
+        if count > 20:
+            break
+
+    print(filtered_papers_list)
+
+    return reply.success(data={'papers': filtered_papers_list}, msg='success')
+
+
+@require_http_methods("GET")
+def get_related_paper(request):
+    username = request.session.get('username')
+    user = User.objects.filter(username=username).first()
+    collected_papers_list = user.collected_papers.all()
+
+    paper_id = request.GET.get('paper_id')
+    paper = Paper.objects.filter(paper_id=paper_id).first()
+    title = paper.title
+
+    data = {
+        'papers': []
+    }
+
+    papers = get_filtered_paper(title, 5)
+    for p in papers:
+        data['papers'].append({
+            'id': p.paper_id,
+            'title': p.title,
+            'summary': '无',
+            'collected': p in collected_papers_list
+        })
+
+    return reply.success(data=data, msg='获取成功')

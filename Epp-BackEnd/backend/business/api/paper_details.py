@@ -2,24 +2,28 @@
     论文详情页相关接口
 """
 import json
+import os
 import random
 import time
 import zipfile
-import os
 
-from django.views.decorators.http import require_http_methods
+from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL
 from django.http import JsonResponse
-from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification, AnnotationReport
-from business.models.paper_annotation import FileAnnotation
+from django.views.decorators.http import require_http_methods
+
+from business.models import User, Paper, PaperScore, CommentReport, FirstLevelComment, SecondLevelComment, Notification, \
+    AnnotationReport, UserDocument, DocumentNote
 from business.models.auto_check_record import AutoCheckRecord
 from business.models.auto_check_risk import AutoRiskRecord
 from business.models.auto_check_undo import AutoUndoRecord
+from business.models.auto_note_check_record import AutoNoteCheckRecord
+from business.models.auto_note_check_risk import AutoNoteRiskRecord
+from business.models.paper_annotation import FileAnnotation
 from business.models.paper_note import FileNote
 from business.utils import reply
 from business.utils.download_paper import downloadPaper
-from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL, USER_DOCUMENTS_PATH, USER_DOCUMENTS_URL
-
 from scripts.aliyun_test import auto_comment_detection
+from scripts.text_translate_test import connect as text_translate_tool
 
 if not os.path.exists(BATCH_DOWNLOAD_PATH):
     os.makedirs(BATCH_DOWNLOAD_PATH)
@@ -176,6 +180,8 @@ def comment_paper(request):
                 if if_success:
                     auto_record = AutoCheckRecord(comment_id_1=comment, comment_level=1, labels=labels, reason=reason)
                     auto_record.save()
+
+                    safe = True
                     if len(labels) == 0 or labels.isspace():
                         comment.visibility = True
                         auto_record.security = True
@@ -183,6 +189,7 @@ def comment_paper(request):
                         auto_record.save()
                     else:
                         # 将不安全审核记录到表中
+                        safe = False
                         risk_record = AutoRiskRecord(check_record=auto_record)
                         risk_record.save()
                 else:
@@ -207,12 +214,15 @@ def comment_paper(request):
                     auto_record = AutoCheckRecord(comment_id_2=comment.comment_id, comment_level=2, labels=labels,
                                                   reason=reason)
                     auto_record.save()
+
+                    safe = True
                     if len(labels) == 0 or labels.isspace():
                         comment.visibility = True
                         auto_record.security = True
                         comment.save()
                         auto_record.save()
                     else:
+                        safe = False
                         # 将不安全审核记录到表中
                         risk_record = AutoRiskRecord(auto_record)
                         risk_record.save()
@@ -223,7 +233,10 @@ def comment_paper(request):
 
             paper.comment_count += 1
             paper.save()
-            return JsonResponse({'message': '评论成功', 'is_success': True})
+            if safe:
+                return JsonResponse({'message': '评论成功', 'is_success': True})
+            else:
+                return JsonResponse({'message': '评论存在不适合展示的内容：' + json.loads(reason)['riskTips'] if 'riskTips' in reason else labels, 'is_success': False})
         else:
             return JsonResponse({'error': '用户或文献不存在', 'is_success': False}, status=400)
     else:
@@ -437,9 +450,8 @@ def save_paper_note(request):
     保存用户的笔记和批注
     '''
     data = json.loads(request.body)
-    print("*******************************************************")
-    print(data)
     params = data.get('params')
+
     x = params.get('x')
     y = params.get('y')
     width = params.get('width')
@@ -457,6 +469,27 @@ def save_paper_note(request):
     note = FileNote(user_id=user, paper_id=paper, x=x, y=y, width=width, height=height, pageNum=pageNum,
                     comment=comment, username=username, isPublic=isPublic)
     note.save()
+
+    # 启动自动审核程序
+    if_success, status_code, labels, reason = auto_comment_detection(comment)
+
+    if if_success:
+        auto_record = AutoNoteCheckRecord(note=note, labels=labels, reason=reason)
+        auto_record.save()
+
+        safe = True
+        if len(labels) == 0 or labels.isspace():
+            note.visibility = True
+            auto_record.security = True
+            note.save()
+            auto_record.save()
+        else:
+            # 将不安全审核记录到表中
+            safe = False
+            risk_record = AutoNoteRiskRecord(check_record=auto_record)
+            risk_record.save()
+            return reply.fail(msg='存在非绿色内容')
+
     if isPublic:
         # 将笔记公开
         annotation = FileAnnotation(note=note, user_id=user, paper_id=paper)
@@ -483,6 +516,7 @@ def get_paper_annotation(request):
     获得公开批注
     '''
     paper_id = request.GET.get('paper_id')
+    print(paper_id)
 
     data = {
         'annotations': []
@@ -490,7 +524,11 @@ def get_paper_annotation(request):
 
     paper = Paper.objects.filter(paper_id=paper_id).first()
 
-    annotation_list = FileAnnotation.objects.filter(paper_id=paper)
+    print(paper)
+
+    annotation_list = FileAnnotation.objects.filter(paper_id=paper, visibility=True)
+
+    print(annotation_list)
 
     for annotation in annotation_list:
         note = annotation.note
@@ -517,7 +555,32 @@ def get_paper_annotation(request):
             'date': date
         })
 
-    return reply.success(data=data, msg="成功获取公开批注")
+    username = request.session.get('username')
+    note_list = FileNote.objects.filter(paper_id=paper, username=username,  isPublic=False)
+    for note in note_list:
+        x = note.x
+        y = note.y
+        width = note.width
+        height = note.height
+        pageNum = note.pageNum
+        comment = note.comment
+        isPublic = note.isPublic
+        id = note.note_id
+        date = note.date
+        data['annotations'].append({
+            'x': x,
+            'y': y,
+            'width': width,
+            'height': height,
+            'pageNum': pageNum,
+            'comment': comment,
+            'userName': username,
+            'isPublic': isPublic,
+            'id': id,               # id为note_id
+            'date': date
+        })
+
+    return reply.success(data=data, msg="成功获取批注")
 
 
 @require_http_methods('POST')
@@ -553,9 +616,11 @@ def report_paper_annotation(request):
     举报批注
     '''
     data = json.loads(request.body)
+    print(data)
     username = request.session.get('username')
     note_id = data.get('annotation_id')
     reason = data.get('reason')
+    print(reason)
     user = User.objects.filter(username=username).first()
 
     note = FileNote.objects.filter(note_id=note_id).first()
@@ -589,9 +654,9 @@ def save_document_note(request):
 
     user = User.objects.filter(username=username).first()
 
-    paper = Paper.objects.filter(paper_id=paper_id).first()
+    document = UserDocument.objects.filter(document_id=paper_id).first()
 
-    note = FileNote(user_id=user, paper_id=paper, x=x, y=y, width=width, height=height, pageNum=pageNum,
+    note = DocumentNote(user=user, document=document, x=x, y=y, width=width, height=height, pageNum=pageNum,
                     comment=comment, username=username)
     note.save()
 
@@ -603,10 +668,11 @@ def save_document_note(request):
         'pageNum': pageNum,
         'comment': comment,
         'userName': username,
+        'isPublic': True,
         'id': note.note_id
     }
 
-    return reply.success(data=data, msg="成功保存笔记或批注")
+    return reply.success(data=data, msg="成功保存笔记")
 
 
 @require_http_methods("GET")
@@ -614,15 +680,15 @@ def get_document_note(request):
     '''
     获得笔记
     '''
-    paper_id = request.GET.get('paper_id')
+    document_id = request.GET.get('document_id')
 
     data = {
-        'notes': []
+        'annotations': []
     }
 
-    paper = Paper.objects.filter(paper_id=paper_id).first()
+    document = UserDocument.objects.filter(document_id=document_id).first()
 
-    note_list = FileNote.objects.filter(paper_id=paper)
+    note_list = DocumentNote.objects.filter(document=document)
 
     for note in note_list:
         x = note.x
@@ -632,7 +698,6 @@ def get_document_note(request):
         pageNum = note.pageNum
         comment = note.comment
         username = note.username
-        isPublic = note.isPublic
         id = note.note_id
         date = note.date
         data['annotations'].append({
@@ -643,7 +708,7 @@ def get_document_note(request):
             'pageNum': pageNum,
             'comment': comment,
             'userName': username,
-            'isPublic': isPublic,
+            'isPublic': True,
             'id': id,
             'date': date
         })
@@ -657,9 +722,9 @@ def delete_document_note(request):
     删除笔记
     '''
     data = json.loads(request.body)
-    note_id = data.get('note_id')
+    note_id = data.get('annotation_id')
 
-    note = FileNote.objects.filter(node_id=note_id).first()
+    note = DocumentNote.objects.filter(note_id=note_id).first()
 
     if not note:
         return reply.fail(
@@ -676,3 +741,26 @@ def delete_document_note(request):
         },
         msg="删除笔记成功"
     )
+
+
+@require_http_methods("GET")
+def translate_abstract(require):
+    paper_id = require.GET.get('paper_id')
+
+    paper = Paper.objects.filter(paper_id=paper_id).first()
+
+    if paper is None:
+        return reply.fail(msg="未找到该论文")
+
+    abstract = paper.abstract
+
+    translated_abstract = text_translate_tool(abstract)
+
+    data = {
+        "translatedSummary": translated_abstract[0],
+    }
+
+    print("data:" + str(data))
+
+    return reply.success(data=data, msg="成功获取摘要翻译结果")
+

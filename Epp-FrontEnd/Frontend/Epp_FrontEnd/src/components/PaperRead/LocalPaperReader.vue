@@ -14,8 +14,7 @@
           </el-form>
           <span slot="footer">
               <el-button @click="showCommentModal = false">取 消</el-button>
-              <el-button type="primary" @click="submitComment('private')">私有批注</el-button>
-              <el-button type="primary" @click="submitComment('public')">共有批注</el-button>
+              <el-button type="primary" @click="submitComment('public')">添加批注</el-button>
           </span>
         </el-dialog>
       </el-col>
@@ -35,11 +34,11 @@
           <!-- 这里放置评论展示与删除的，目前筛选还没实现，预计筛选后，用一个新的annotation数组来保存筛选后的注释，然后渲染到页面上,并且从数据库拿到的所有评论和筛选后的注释分别储存，方便随时切换 -->
           <!-- 新增的选择器和确认按钮 -->
         <div style="margin-bottom: 20px;">
-          <el-select v-model="filterType" placeholder="筛选批注" @change="filterComments">
+          <!-- <el-select v-model="filterType" placeholder="筛选批注" @change="filterComments">
             <el-option label="全部" value="all"></el-option>
             <el-option label="我的批注" value="mine"></el-option>
             <el-option label="他人批注" value="others"></el-option>
-          </el-select>
+          </el-select> -->
           <el-select v-model="displayType" placeholder="显示类型" @change="filterComments">
             <el-option label="全部显示" value="all"></el-option>
             <el-option v-for="pageNum in allPageNumbers" :key="pageNum" :label="'第 ' + pageNum + ' 页'" :value="pageNum"></el-option>
@@ -48,22 +47,30 @@
           <div class="comment-container">
             <div v-for="annotation in annotations" :key="annotation.id">
               <div class="annotation">
-                <div class="annotation-User">
-                  <!-- <p class="annotation-time">{{ annotation.date|| '刚刚' }}</p> -->
-                  <p class="annotation-time" style="white-space: pre-line;">
-                    {{ formatDate(annotation.date) || '刚刚' }}
-                  </p>
-                  <p>{{ annotation.userName }}</p>
-                </div>
-                <div class="annotation-content">
-                  <p>{{ annotation.comment }}</p>
+                <div class="annotation-main">
+                  <div class="annotation-avatar">
+                    {{ annotation.userName.charAt(0).toUpperCase() }}
+                  </div>
+                  <div class="annotation-body">
+                    <div class="annotation-header">
+                      <p class="annotation-username">{{ annotation.userName }}</p>
+                      <p class="annotation-time">{{ formatDate(annotation.date) || '刚刚' }}</p>
+                    </div>
+                    <div class="annotation-content">
+                      <p>{{ annotation.comment }}</p>
+                    </div>
+                  </div>
                 </div>
                 <div class="annotation-actions">
-                  <div v-if="annotation.userName === currentUser">
-                    <el-button type="text" @click="deleteAnnotation(annotation.id)">删除</el-button>
-                  </div>
-                  <div v-else>
-                    <el-button type="text" @click="reportAnnotation(annotation.id)">举报</el-button>
+                  <div class="action-buttons">
+                    <el-button type="text" class="annotation-jump" @click="scrollToPage(annotation.pageNum,annotation.y)">定位</el-button>
+
+                    <div v-if="annotation.userName === currentUser">
+                      <el-button type="text" class="danger-button" @click="deleteAnnotation(annotation.id)">删除</el-button>
+                    </div>
+                    <div v-else>
+                      <el-button type="text" class="danger-button" @click="reportAnnotation(annotation.id)">举报</el-button>
+                    </div>
                   </div>
                   <el-dialog title="举报批注" :visible.sync="showReport" width="50%" @close="closeReport">
                     <el-form>
@@ -143,6 +150,7 @@ export default {
       allAnnotations: [], // 保存所有注释，每次渲染时从服务器获取即可，格式下面有样例
       pdfInstance: null, // PDF.js 实例
       containerOffsetTop: 0, // PDF 容器的顶部偏移
+      containerOffsetLeft: 0, // PDF 容器的左侧偏移
       showReadAssistant: true, // 是否显示阅读助手
       currentUser: localStorage.getItem('username'), // 当前用户
       filterType: 'all', // 筛选类型
@@ -155,13 +163,16 @@ export default {
       isTranslated: false, // 是否翻译过
       showReport: false, // 是否显示举报框
       pendingAnnotationId: null, // 正在举报的批注ID
-      reportReason: '' // 新举报理由
+      reportReason: '', // 新举报理由
+      isFetchPaperSuccess: false, // 是否获取成功
+      isLoadPdfSuccess: false // 是否加载PDF成功
     }
   },
   created () {
+    this.fileReadingID = this.$route.query.fileReadingID
     this.loadPDFJS() // 动态加载PDF.js库，即使pdfurl修改，也不需要重新加载
     this.fetchPaperPDF()
-    this.fileReadingID = this.$route.query.fileReadingID
+    // 上述两个都加载好，才能进行初始化PDF查看器，已经在上面两个里面添加了对应的判断
   },
   methods: {
     fetchPaperPDF () {
@@ -171,7 +182,10 @@ export default {
           this.pdfUrl = this.originalUrl
           //   this.pdfUrl = '../../../static/Res3ATN -- Deep 3D Residual Attention Network for Hand Gesture  Recognition in Videos.pdf'
           console.log('论文PDF为', this.pdfUrl)
-          this.initPDFViewer()
+          this.isFetchPaperSuccess = true
+          if (this.isLoadPdfSuccess) {
+            this.initPDFViewer()
+          }
         })
         .catch((error) => {
           console.log('请求论文PDF失败 ', error)
@@ -185,6 +199,10 @@ export default {
         console.log('PDF.js 加载成功') // 添加这行
         window.pdfjsLib.GlobalWorkerOptions.workerSrc =
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js'
+        this.isLoadPdfSuccess = true // PDF.js加载成功
+        if (this.isFetchPaperSuccess) {
+          this.initPDFViewer()
+        }
       }
       script.onerror = () => {
         console.error('PDF.js 加载失败') // 添加错误处理
@@ -202,14 +220,48 @@ export default {
       container.innerHTML = '' // 清空容器
       container.style.position = 'relative' // 设为相对定位
       container.style.overflow = 'auto' // 添加滚动支持
-      window.pdfjsLib.getDocument(this.pdfUrl).promise
+      // window.pdfjsLib.getDocument(this.pdfUrl).promise
+      //   .then(pdf => {
+      //     this.pdfInstance = pdf
+      //     this.renderAllPages(pdf, container)
+      //     this.loadAnnotations() // 加载已有注释,同时顺便渲染一下
+      //   })
+      //   .catch(error => {
+      //     console.error('PDF加载失败:', error)
+      //   })
+      // 1. 配置全局PDF.js选项（推荐放在应用初始化时）
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js'
+
+      // 2. 加载PDF文档（含中文支持配置）
+      window.pdfjsLib.getDocument({
+        url: this.pdfUrl,
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/cmaps/', // 关键：中文CMAP
+        cMapPacked: true,
+        useSystemFonts: false, // 禁用系统字体回退
+        disableFontFace: false // 启用@font-face
+      }).promise
         .then(pdf => {
           this.pdfInstance = pdf
           this.renderAllPages(pdf, container)
-          this.loadAnnotations() // 加载已有注释,同时顺便渲染一下
+          this.loadAnnotations()
+          // 可选：检查字体嵌入情况（调试用）
+          // pdf.getPage(1).then(page => {
+          //   page.getTextContent().then(textContent => {
+          //     console.log('文档字体情况:', textContent.styles)
+          //   })
+          // })
         })
         .catch(error => {
           console.error('PDF加载失败:', error)
+          // 友好错误提示（根据实际UI框架调整）
+          if (error.name === 'MissingPDFException') {
+            alert('PDF文件不存在或路径错误')
+          } else if (error.name === 'InvalidPDFException') {
+            alert('PDF文件已损坏')
+          } else {
+            alert('PDF加载失败，请确保文件使用标准字体嵌入')
+          }
         })
       // 监听用户框选事件
       container.addEventListener('mousedown', this.handleMouseDown)
@@ -241,10 +293,11 @@ export default {
       if (this.isSelecting) return
       this.isSelecting = true
       const container = document.getElementById('pdf-viewer-container')
-      this.startX = event.clientX
+      this.startX = event.clientX + container.scrollLeft // 修正 scrollLeft
       this.startY = event.clientY + container.scrollTop // 修正 scrollTop
 
       this.containerOffsetTop = container.getBoundingClientRect().top
+      this.containerOffsetLeft = container.getBoundingClientRect().left
 
       this.selectionBox = document.createElement('div')
       this.selectionBox.style.position = 'absolute'
@@ -257,14 +310,14 @@ export default {
       if (!this.isSelecting) return
       const container = document.getElementById('pdf-viewer-container')
 
-      const width = event.clientX - this.startX
+      const width = event.clientX + container.scrollLeft - this.startX
       const height = event.clientY + container.scrollTop - this.startY // 修正 scrollTop
 
-      this.selectionBox.style.left = `${this.startX}px`
+      this.selectionBox.style.left = `${this.startX - this.containerOffsetLeft}px`
       this.selectionBox.style.top = `${this.startY - this.containerOffsetTop}px`
       this.selectionBox.style.width = `${Math.abs(width)}px`
       this.selectionBox.style.height = `${Math.abs(height)}px`
-      // this.selectionBox.style.left = `${Math.round(this.startX)}px`
+      // this.selectionBox.style.left = `${Math.round(this.startX - this.containerOffsetLeft)}px`
       // this.selectionBox.style.top = `${Math.round(this.startY - this.containerOffsetTop)}px`
       // this.selectionBox.style.width = `${Math.round(Math.abs(width))}px`
       // this.selectionBox.style.height = `${Math.round(Math.abs(height))}px`
@@ -437,7 +490,7 @@ export default {
       }).catch(error => {
         console.error('保存注释失败', error)
         this.$message({
-          message: '添加批注失败',
+          message: error.response.data.error || '保存注释失败',
           type: 'error'
         })
       })
@@ -451,6 +504,13 @@ export default {
         console.log(comment, userName, isPublic, id)
         this.renderAnnotation(x, y, width, height, pageNum)
       })
+
+      // 添加窗口调整大小事件监听器
+      window.addEventListener('resize', this.handleResize)
+    },
+    // 处理窗口调整大小的事件
+    handleResize () {
+      this.renderAnnotations() // 重新渲染注释
     },
     // 从数据库加载所有已有评论，并渲染到页面上，可以分别renderAnnotation,也可以直接renderAnnotations
     // 这个只在开始调用一次，避免和数据库交互太多，影响性能。
@@ -609,55 +669,141 @@ export default {
       if (!date) return ''
       const [d, t] = date.split('T')
       return `${d}\n${t.slice(0, 8)}` // 只保留到秒
+    },
+    scrollToPage (pageNum, y) {
+      const container = document.getElementById('pdf-viewer-container')
+      const canvas = container.querySelector(`canvas[data-page-num="${pageNum}"]`)
+      if (!canvas) return
+
+      // 获取目标canvas元素的顶部位置
+      const targetTop = Math.max(0, canvas.offsetTop + y - 20)
+
+      // 平滑滚动到目标位置
+      container.scroll({
+        top: targetTop,
+        behavior: 'smooth'
+      })
     }
   }
 }
 </script>
 
 <style scoped>
+.comment-container {
+  overflow-y: auto;
+  height: calc(100vh - 220px);
+  padding: 10px;
+  background-color: #f4f4f5;
+}
+
 .annotation {
+  background-color: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* 主体部分：头像 + 内容 */
+.annotation-main {
+  display: flex;
+  gap: 14px;
+}
+
+/* 左侧头像 */
+.annotation-avatar {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  border-radius: 50%;
+  background-color: #409EFF;
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 中间部分：用户名 + 时间 + 评论内容 */
+.annotation-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部信息栏：用户名和时间 */
+.annotation-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  margin-bottom: 4px;
 }
 
-.annotation-User {
-  /* margin-bottom: 4px;              和评论内容之间留一点垂直间距 */
-  line-height: 1.2;/* 1.4倍的字体行高 */
+.annotation-username {
+  margin: 0;
+  font-weight: 600;
+  font-size: 15px;
+  color: #333;
 }
+
 .annotation-time {
-  font-size: 13px;                 /* 时间字体小一点，降低视觉优先级 */
-  color: #888;                     /* 灰色字体，不突兀 */
-  margin: 0;                       /* 去掉浏览器默认上下 margin */
-}
-.annotation-User p {
-  margin: 0;                       /* 去除默认 margin，防止上下挤开太远 */
-  font-weight: 500;               /* 让用户名略粗一点，看起来清晰 */
-}
-
-.annotation-content {
-  flex-grow: 1;
-}
-
-.annotation-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.annotation-content p {
+  font-size: 12px;
+  color: #999;
   margin: 0;
 }
-.comment-container {
-  overflow-y: auto;
-  height: calc(100vh - 50px - 20px - 150px);
-  /* 100vh - 顶部导航栏按钮高度 - 顶部按钮 - 预留空间150px（可大可小,应该是前面漏减了，这里必须多减点) */
-  /* */
-  /* flex-grow: 1 */
+
+/* 评论内容 */
+.annotation-content p {
+  font-size: 14px;
+  color: #444;
+  margin: 6px 0 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 操作按钮区域 */
+.annotation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 跳转按钮简洁风格 */
+.annotation-jump {
+  font-size: 13px;
+  color: #409EFF;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  line-height: 1; /* 与 el-button 保持一致 */
+}
+
+.annotation-jump:hover {
+  text-decoration: underline;
+}
+
+/* 红色按钮统一样式（删除/举报） */
+.danger-button {
+  color: #f56c6c !important;
+  font-size: 13px;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  line-height: 1; /* 与 el-button 保持一致 */
+}
+
+.danger-button:hover {
+  background-color: #fde2e2;
 }
 
 .special-button {

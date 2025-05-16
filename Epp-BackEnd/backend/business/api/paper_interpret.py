@@ -321,6 +321,7 @@ def get_paper_url(request):
     paper = Paper.objects.get(paper_id=paper_id)
     print('title:' + paper.title)
     paper_local_url = get_paper_local_url(paper)
+    print('local_url:' + paper_local_url)
     if paper_local_url is None:
         print('文献下载失败，请检查网络或联系管理员')
         return reply.fail(msg="文献下载失败，请检查网络或联系管理员")
@@ -904,3 +905,95 @@ def clear_conversation(request):
     with open(fr.conversation_path, 'w') as f:
         json.dump({"conversation": []}, f, indent=4)
     return reply.success(msg="清除对话历史成功")
+
+
+import concurrent.futures
+import time
+# 定义获取API回复的函数
+def fetch_api_reply(api_query):
+    if not api_query:
+        return '', []
+    
+    # 调用实际的API函数
+    api_reply, docs_from_api = get_api_reply(api_query)
+    print(api_reply)
+    print("多智能体：已获取API专家回答")
+    return api_reply, docs_from_api
+
+# 定义获取搜索引擎回复的函数
+def fetch_search_reply(search_query):
+    if not search_query:
+        return '', []
+    
+    # 调用实际的搜索函数
+    search_reply, docs_from_search = get_search_reply(search_query)
+    print(search_reply)
+    print("多智能体：已获取搜索引擎专家回答")
+    return search_reply, docs_from_search
+
+# 定义获取LLM回复的函数
+def fetch_llm_reply(conversation_history, llm_query, tmp_kb_id):
+    if not llm_query:
+        return '', [], []
+    
+    print(f"会话历史: {conversation_history}")
+    
+    # 调用实际的LLM函数
+    llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
+    print(llm_reply)
+    print("多智能体：已获取原生LLM专家回答")
+    return llm_reply, origin_docs, question_reply
+
+# 添加main函数作为入口点
+def threee_api_answer():
+    # 示例数据
+    conversation_history = [{"角色": "用户", "内容": "请分析这篇论文的创新点"}]
+    tmp_kb_id = "test_kb_id_123"
+    
+    # 定义子任务
+    subtasks = {
+        "api": "查询蛋白质相互作用数据",
+        "search": "2023年人工智能最新研究进展",
+        "llm": "分析这篇论文的创新点"
+    }
+    
+    # 使用多线程执行三个任务
+    start_time = time.time()  # 记录开始时间
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        # 提交API任务
+        api_future = executor.submit(fetch_api_reply, subtasks.get("api"))
+        
+        # 提交搜索任务
+        search_future = executor.submit(fetch_search_reply, subtasks.get("search"))
+        
+        # 提交LLM任务
+        llm_future = executor.submit(fetch_llm_reply, 
+                                     conversation_history, 
+                                     subtasks.get("llm"), 
+                                     tmp_kb_id)
+        
+        # 获取API结果
+        api_reply, docs_from_api = api_future.result()
+        
+        # 获取搜索结果
+        search_reply, docs_from_search = search_future.result()
+        
+        # 获取LLM结果
+        llm_reply, origin_docs, question_reply = llm_future.result()
+    
+    end_time = time.time()  # 记录结束时间
+    
+    # 打印最终结果
+    print(f"\n==== 最终结果（总耗时: {end_time - start_time:.2f}秒） ====")
+    print("API回复:", api_reply)
+    print("搜索回复:", search_reply)
+    print("LLM回复:", llm_reply)
+    print("\n引用文档:")
+    print("API:", docs_from_api)
+    print("搜索:", docs_from_search)
+    print("LLM:", origin_docs)
+    print("\n建议后续问题:")
+    for idx, question in enumerate(question_reply, 1):
+        print(f"{idx}. {question}")
+    return api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs, question_reply

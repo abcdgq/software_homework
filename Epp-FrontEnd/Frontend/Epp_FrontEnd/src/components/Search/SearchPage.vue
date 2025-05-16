@@ -17,7 +17,8 @@
         </el-row>
       </el-col>
       <div class="hot_title">
-        <img src="../../assets/hotpaper.png" alt="热门文献推荐" />
+        <img v-if="isPrivateHot" src="../../assets/recommendPage/personalRecommendation.png" alt="个性化推荐" />
+        <img v-else src="../../assets/recommendPage/topRecommendation.png" alt="热门文献推荐" />
       </div>
       <!-- 推荐文献表格 -->
       <el-row>
@@ -132,10 +133,13 @@ export default {
         })
     },
     fetchPrivateRecommend () {
+      this.recommendations = []
+      this.loading = true
       // TODO
       axios
         .get(this.$BASE_API_URL + '/paperPrivateRecommend')
         .then(response => {
+          console.log('paperPrivateRecommend', response.data)
           this.recommendations = response.data.papers
           this.loading = false
         })

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Sidebar from '@/components/Personal/PersonalNavbar.vue'
+import Sidebar from '@/components/Personal/PersonalNavBar.vue'
 import PersonalInfo from '@/components/Personal/PersonalInfo.vue'
 import AiConversations from '@/components/Personal/PersonalChat.vue'
 import SearchRecords from '@/components/Personal/PersonalSearch.vue'

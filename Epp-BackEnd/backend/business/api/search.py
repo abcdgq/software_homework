@@ -8,6 +8,7 @@ import re
 
 import Levenshtein
 from django.views.decorators.http import require_http_methods
+from business.models.problem import problem_record
 
 # def insert_search_record_2_kb(search_record_id, tmp_kb_id):
 #     search_record_id = str(search_record_id)
@@ -424,25 +425,29 @@ def get_user_search_history(request):
 #         content: '回复内容'
 #     }
     
-#     TODO:
-#         1. 从Request中获取对话内容
-#         2. 根据最后一条user的对话回答进行关键词触发，分析属于哪种对话类型
-#             - 如果对话类型为'query'
-#                 1. 使用向量检索从数据库中获取文献信息 5篇
-#                 2. 将文献信息整理为json，作为papers属性
-#                 3. 将文献信息进行整理作为content属性
-#             - 如果对话类型为'dialog'
-#                 1. 大模型正常推理就可以了
-#         3. 把聊天记录存在本地
-#         4. 返回json对象,存入到数据库，见backend/business/models/search_record.py
-#     """
-#     import os
-#     username = request.session.get('username')
-#     if username is None:
-#         username = 'sanyuba'
-#     data = json.loads(request.body)
-#     message = data.get('message')
-#     search_record_id = data.get('search_record_id')
+    # TODO:
+    #     1. 从Request中获取对话内容
+    #     2. 根据最后一条user的对话回答进行关键词触发，分析属于哪种对话类型
+    #         - 如果对话类型为'query'
+    #             1. 使用向量检索从数据库中获取文献信息 5篇
+    #             2. 将文献信息整理为json，作为papers属性
+    #             3. 将文献信息进行整理作为content属性
+    #         - 如果对话类型为'dialog'
+    #             1. 大模型正常推理就可以了
+    #     3. 把聊天记录存在本地
+    #     4. 返回json对象,存入到数据库，见backend/business/models/search_record.py
+    # """
+    # import os
+    # username = request.session.get('username')
+    # if username is None:
+    #     username = 'sanyuba'
+    # data = json.loads(request.body)
+    # message = data.get('message')
+    # search_record_id = data.get('search_record_id')
+
+    # problem_obj, created = problem_record.objects.get_or_create(content=message)
+    # problem_obj.number = problem_obj.number + 1 if not created else 1  # 简洁写法
+    # problem_obj.save()
 
 #     kb_id = get_tmp_kb_id(search_record_id)
 #     # kb_id = 0
@@ -750,7 +755,7 @@ def do_string_search(search_content, max_results=10):
         query |= Q(title__icontains=term)
     # 执行查询，获取字符串检索的并集结果
     results = Paper.objects.filter(query)
-    print(results)
+    # print(results)
     # 计算编辑距离并排序
     results_with_distance = []
     for result in results:
@@ -1011,16 +1016,40 @@ def vector_query(request):
     
     ### TODO 构建知识库 ###
     
-    try:
-        tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
-        insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
-    except Exception as e:
-        print("构建知识库失败")
-        return reply.fail(msg="构建知识库失败")
+    # try:
+    #     tmp_kb_id = build_abs_kb_by_paper_ids([paper.paper_id for paper in filtered_papers], search_record_id)
+    #     insert_search_record_2_kb(search_record.search_record_id, tmp_kb_id)
+    # except Exception as e:
+    #     print("构建知识库失败")
+    #     return reply.fail(msg="构建知识库失败")
 
     print("向量检索完成")
     # 'keywords': keywords
     return JsonResponse({"paper_infos": filtered_papers_list, 'ai_reply': ai_reply, 'search_record_id' : search_record.search_record_id}, status=200)
+
+
+@require_http_methods('POST')
+def vector_query_build_kb(request):
+    '''
+        {
+            'paperIDs',
+            'searchRecordID'
+        }
+    '''
+    data = json.loads(request.body)
+    paper_id_list = data['paperIDs']
+    search_record_id = data['searchRecordID']
+
+    try:
+        tmp_kb_id = build_abs_kb_by_paper_ids(paper_id_list, search_record_id)
+        insert_search_record_2_kb(search_record_id, tmp_kb_id)
+    except Exception as e:
+        print("构建知识库失败")
+        return reply.fail(msg="构建知识库失败")
+
+    return reply.success(msg="成功构建知识库")
+
+
 
 @require_http_methods(["GET"])
 def restore_search_record(request):

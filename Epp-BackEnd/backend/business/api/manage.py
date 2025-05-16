@@ -20,7 +20,7 @@ import datetime
 from pathlib import Path
 from collections import defaultdict, Counter
 from business.models import User, Paper, Admin, CommentReport, Notification, UserDocument, UserDailyAddition, \
-    Subclass, UserVisit, SearchRecord
+    Subclass, UserVisit, SearchRecord, AnnotationReport, FileNote, auto_check_record, AutoCheckRecord, AutoUndoRecord
 from business.models.auto_check_risk import AutoRiskRecord
 from business.utils import reply, ai_hot_promptword
 import business.utils.system_info as system_info
@@ -480,6 +480,7 @@ def record_visit(request):
     """ 记录用户访问 """
     # 需要用户鉴权
     print("******recordvisit******")
+    print(request.session.items())
     username = request.session.get('username')
     print("username:    " + str(username))
     user = User.objects.filter(username=username).first()
@@ -488,7 +489,18 @@ def record_visit(request):
         print("no user")
         return reply.fail(msg="请先正确登录")
 
-    ip_address = request.META.get('REMOTE_ADDR')
+    # print(request.META.items())
+    # x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    # if x_forwarded_for:
+    #     ip_address = x_forwarded_for.split(',')[0].strip()  # 提取第一个 IP
+    # else:
+    #     ip_address = request.META.get('REMOTE_ADDR')  # 直接获取（可能为 127.0.0.1）
+    if 'REMOTE_ADDR' in request.META:
+        ip_address = request.META.get('REMOTE_ADDR')
+    # if 'HTTP_X_REAL_IP' in request.META:
+    #     ip_address = request.META.get('HTTP_X_REAL_IP')
+    
+    
     now = datetime.datetime.now()
     if now > now.replace(minute=30, second=0, microsecond=0):
         start_of_hour = now.replace(minute=30, second=0, microsecond=0)
@@ -546,7 +558,7 @@ def user_active_option(request):
     mode = request.GET.get('mode', '1')  # 默认模式1
     if mode not in ('1', '2', '3'):
         return reply.fail(msg="非法mode参数")
-
+    mode = '3'
     now = timezone.now()
     periods = [
         (0, 3, '00:00-03:00'),
@@ -619,10 +631,11 @@ def user_active_option(request):
         if mode == '1':
             value = day_total
         elif mode == '2':
-            value = week_avg
+            # value = week_avg
+            value = week_total
         elif mode == '3':
-            value = month_avg
-
+            # value = month_avg
+            value = month_total
         data['value'].append(value)
         data['name'].append(label)
 
@@ -696,91 +709,291 @@ def hot_searchword_statistic(request):
 
     return reply.success(data=data, msg="获取高频检索词成功")
 
-
+from business.models import problem_record
+@require_http_methods(["GET"])
+def get_top_problems(request):
+    """
+    返回出现次数最多的前10条热门问题
+    """
+    # 按出现次数降序排列，取前10条
+    top_problems = problem_record.objects.order_by("-number")[:10]
+    
+    # 转换为列表格式：[{"content": "问题内容", "number": 次数}, ...]
+    data = []
+    for problem in top_problems:
+        data.append({
+            "content": problem.content,
+            "number": problem.number
+        })
+    
+    return reply.success(data=data, msg="获取热门问题成功")
 @require_http_methods('GET')
 def auto_comment_report_list(request):
+    mode = int(request.GET.get('mode'))
+    date = request.GET.get('date', default=None)
+    page_num = int(request.GET.get('page_num', default=1))
+    page_size = int(request.GET.get('page_size', default=15))
+
+    if mode == 1:
+        records = AutoCheckRecord.objects.filter(date__date=date) if date else \
+            AutoCheckRecord.objects.all()
+        records = records.order_by('-date')
+    elif mode == 2:
+        records = AutoRiskRecord.objects.filter(check_record__date__date=date) if date else AutoRiskRecord.objects.all()
+        records = records.order_by('check_record__date')
+    elif mode == 3:
+        records = AutoUndoRecord.objects.all()
+        # records = records.order_by('check_record__date')
+    else:
+        return reply.fail(msg="mode参数有误")
+
+    paginator = Paginator(records, page_size)
+
+    try:
+        contacts = paginator.page(page_num)
+    except PageNotAnInteger:
+        contacts = paginator.page(1)
+    except EmptyPage:
+        contacts = paginator.page(paginator.num_pages)
 
     data = {
-        'total': 0,
-        'content': [
-            # {
-            #     'id': 9,
-            #     'comment': {
-            #         'date': '2024-04-29 22:58:41',
-            #         'content': '测试评论'
-            #     },
-            #     'user': {
-            #         'user_id': '063eccd4-76b3-4755-84c0-eef9baf16c04',
-            #         'user_name': 'Ank'
-            #     },
-            #     'date': '',         # 审核时间
-            #     'isPassed': True,   # 是否通过
-            #     'reason': {         # 原因
-            #         'riskTips': [],
-            #         'riskWords': []
-            #     }
-            # }
-        ]
+        "total": len(records),
+        "content": []
     }
+    # 返回数据：包含序号和UUID
+    if mode == 1:
 
-    auto_record_list = AutoRiskRecord.objects.values_list('check_record', flat=True)
-    for record in auto_record_list:
-        comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
-        date = comment.date
-        content = comment.text
-        user_id = comment.user_id
-        auto_check_record = {
-                                'id': record.check_record_id,
-                                'comment': {
-                                    'date': date.strftime("%Y-%m-%d %H:%M:%S"),
-                                    'content': content
-                                },
-                                'user': {
-                                    'user_id': user_id,
-                                    'user_name': User.objects.filter(user_id=user_id).first().username
-                                },
-                                'date': record.date.strftime("%Y-%m-%d %H:%M:%S"),  # 审核时间
-                                'isPassed': record.security,                        # 是否通过
-                                'reason': {                                         # 原因
-                                    'riskTips': record.reason['riskTips'],
-                                    'riskWords': record.reason['riskWords']
-                                }
-                            }
-        data['content'].append(auto_check_record)
-        data['total'] = data['total'] + 1
+        for record in contacts:
 
-    return reply.success(data=data, msg="成功获取自动审核中存在问题的评论")
+            comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
+            obj = {
+                "id": str(record.check_record_id),
+                "comment": {
+                    "date": comment.date.strftime("%Y-%m-%d %H:%M:%S"),
+                    "content": comment.text
+                },
+                "user": {
+                    "user_id": comment.user_id.user_id,
+                    "user_name": comment.user_id.username
+                },
+                "date": record.date.strftime("%Y-%m-%d %H:%M:%S"),
+                "isPassed": record.security,
+                "reason": json.loads(record.reason)['riskTips'] if 'riskTips' in record.reason else ""
+            }
+            data['content'].append(obj)
+        return reply.success(data=data, msg="所有审核记录获取成功")
+    elif mode == 2:
+
+        for record in records:
+            if not record.check_record.security:
+                record = record.check_record
+                comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
+                obj = {
+                    "id": str(record.check_record_id),
+                    "comment": {
+                        "date": comment.date.strftime("%Y-%m-%d %H:%M:%S"),
+                        "content": comment.text
+                    },
+                    "user": {
+                        "user_id": comment.user_id.user_id,
+                        "user_name": comment.user_id.username
+                    },
+                    "date": record.date.strftime("%Y-%m-%d %H:%M:%S"),
+                    "isPassed": record.security,
+                    "reason": json.loads(record.reason)['riskTips'] if 'riskTips' in record.reason else ""
+                }
+                data['content'].append(obj)
+
+        return reply.success(data=data, msg="不安全评论审核记录获取成功")
+    elif mode == 3:
+        # data = {
+        #     "total": len(records),
+        #     "records": [
+        #         {
+        #             'serial_number': (page_num - 1) * page_size + idx + 1,  # 全局连续序号
+        #             'record_id': str(record.undo_record_id),  # 实际主键
+        #         }
+        #         for idx, record in enumerate(contacts)
+        #     ]
+        # }
+        return reply.success(data=data, msg="审核失败记录获取成功")
+    else :
+        return reply.fail(msg="mode错误")
 
 
 @require_http_methods('GET')
 def auto_comment_report_detail(request):
-    review_id = request.body.get('review_id')
-    report = auto_check_record.objects.filter(check_record_id=review_id).first()
-    comment = report.comment_id_1 if report.comment_level == 1 else report.comment_id_2
-
+    review_id = request.GET.get('review_id')
+    record = AutoCheckRecord.objects.filter(check_record_id=review_id).first()
+    comment = record.comment_id_1 if record.comment_level == 1 else record.comment_id_2
+    user = comment.user_id
+    paper = comment.paper_id
     data = {
         'id': review_id,
         'comment': {
             'comment_id': comment.comment_id,
             'user': {
-                'user_id': comment.user_id,
-                'user_name': User.objects.filter(user_id=comment.user_id).first().username
+                'user_id': user.user_id,
+                'user_name': user.username
             },
             'paper': {
-                'paper_id': comment.paper_id,
-                'title': Paper.objects.filter(paper_id=comment.paper_id).first().title
+                'paper_id': paper.paper_id,
+                'title': paper.title
             },
-            'date': comment.date,
+            'date': comment.date.strftime("%Y-%m-%d %H:%M:%S"),
             'content': comment.text,
             'visibility': comment.visibility
         },
-        'comment_level': report.comment_level,
-        'date': report.date,
-        'isPassed': report.security,
-        'reason': {
-            'riskTips': record.reason['riskTips'],
-            'riskWords': record.reason['riskWords']
-        }
+        'comment_level': record.comment_level,
+        'date': record.date.strftime("%Y-%m-%d %H:%M:%S"),
+        'isPassed': record.security,
+        "reason": json.loads(record.reason)['riskTips'] if 'riskTips' in record.reason else ""
     }
 
     return reply.success(data=data, msg="成功获取自动审核详细信息")
+
+def delete_annotation(annotation_id):
+    note_id = annotation_id  # 由于后端提供的是note_id，前端返回的也是note_id
+
+    note = FileNote.objects.filter(note_id=note_id).first()
+
+    if not note:
+        return
+    note.delete()
+
+@require_http_methods('POST')
+def judge_annotation_report(request):
+    """ 批注举报审核意见 """
+    data = json.loads(request.body)
+    report_id = data.get('report_id')
+    text = data.get('text')
+    acceptReport = data.get('acceptReport')
+
+    # 获取对应批注举报和评论
+    annotation_report = AnnotationReport.objects.filter(report_id=report_id).first()
+    if not annotation_report:
+        return reply.fail(msg="批注举报信息不存在")
+    annotation = annotation_report.annotation
+    # 校对审核信息
+    if text == annotation_report.judgment:
+        return reply.fail(msg="请输入有效的审核信息")
+
+    # 保存审核信息，通知被举报批注所有者
+    if acceptReport:
+        # 经核实，批注违规,删除
+        Notification(user_id=annotation.user_id, title="您的批注被举报了！",
+                     content=f"您在 {annotation.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 被其他用户举报，根据EPP平台管理规定，检测到您的批注确为不合规，该批注现已删除。\n请注意遵守平台批注规范！"
+                     ).save()
+        annotation.visibility = False
+        annotation.save()
+    else:
+        # 经核实，批注不违规
+        Notification(user_id=annotation.user_id, title="您的批注已恢复正常！",
+                     content=f"您在 {annotation.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 被平台重新审核后判定合规，因此已恢复正常。\n对您带来的不便，我们表示万分抱歉！"
+                     ).save()
+    # 通知举报者
+    if annotation_report.judgment != text:
+        annotation_report.judgment = text
+        if annotation_report.processed:
+            # 重新审核
+            if acceptReport:
+                Notification(user_id=annotation_report.user, title="您的举报已被重新审核",
+                         content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台重新审核。\n以下是新的审核意见：举报成功！{text}").save()
+            else:
+                Notification(user_id=annotation_report.user, title="您的举报已被重新审核",
+                             content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台重新审核。\n以下是新的审核意见：举报失败！{text}").save()
+        else:
+            # 首次审核
+            if acceptReport:
+                Notification(user_id=annotation_report.user, title="您的举报已被审核",
+                         content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台审核。\n以下是审核意见：举报成功！{text}").save()
+            else:
+                Notification(user_id=annotation_report.user, title="您的举报已被审核",
+                             content=f"您在 {annotation_report.date.strftime('%Y-%m-%d %H:%M:%S')} 对论文《{annotation.paper_id.title}》的批注内容 \"{annotation.note.comment}\" 的举报已被平台审核。\n以下是审核意见：举报失败！{text}").save()
+    annotation_report.processed = True
+    annotation_report.save()
+    return reply.success(msg="批注举报审核成功")
+
+
+def annotation_report_list(request):
+    """ 批注举报列表 """
+    mode = int(request.GET.get('mode'))
+    date = request.GET.get('date', default=None)
+    page_num = int(request.GET.get('page_num', default=1))
+    page_size = int(request.GET.get('page_size', default=15))
+
+    if mode == 1:
+        reports = AnnotationReport.objects.filter(processed=False, date__date=date) if date else \
+            AnnotationReport.objects.filter(processed=False)
+    elif mode == 2:
+        reports = AnnotationReport.objects.filter(processed=True, date__date=date) if date else \
+            AnnotationReport.objects.filter(processed=True)
+    else:
+        return reply.fail(msg="mode参数有误")
+
+    reports = reports.order_by('-date')
+    paginator = Paginator(reports, page_size)
+
+    try:
+        contacts = paginator.page(page_num)
+    except PageNotAnInteger:
+        contacts = paginator.page(1)
+    except EmptyPage:
+        contacts = paginator.page(paginator.num_pages)
+
+    # 返回数据：包含序号和UUID
+    data = {
+        "total": len(reports),
+        "reports": [
+            {
+                'serial_number': (page_num - 1) * page_size + idx + 1,  # 全局连续序号
+                'report_id': str(report.report_id),  # 实际主键
+                'annotation': {
+                    "date": report.annotation.date,
+                    "content": report.annotation.note.comment
+                },
+                'user': report.user.simply_desc(),
+                'date': report.date.strftime("%Y-%m-%d %H:%M:%S"),
+                'content': report.content
+            }
+            for idx, report in enumerate(contacts)
+        ]
+    }
+    return reply.success(data=data, msg="举报信息获取成功")
+
+
+@require_http_methods('GET')
+def annotation_report_detail(request):
+    """ 批注举报信息详情 """
+    report_id = request.GET.get('report_id')
+    report = AnnotationReport.objects.filter(report_id=report_id).first()
+    if report:
+        data = {
+            'annotation': {
+                "annotation_id": report.annotation.annotation_id,
+                "user": report.annotation.user_id.simply_desc(),
+                "paper": report.annotation.paper_id.simply_desc(),
+                "date": report.annotation.date.strftime(
+                    "%Y-%m-%d %H:%M:%S"),
+                "note": {
+                    "note_id": report.annotation.note.note_id,
+                    "x": report.annotation.note.x,
+                    "y": report.annotation.note.y,
+                    "width": report.annotation.note.width,
+                    "height": report.annotation.note.height,
+                    "pageNum": report.annotation.note.pageNum,
+                    "comment": report.annotation.note.comment,
+                    "username": report.annotation.note.username,
+                    "isPublic": report.annotation.note.isPublic
+                }
+            },
+            'user': report.user.simply_desc(),
+            'date': report.date.strftime("%Y-%m-%d %H:%M:%S"),
+            'content': report.content,
+            'judgment': report.judgment,
+            'invisibility': not report.annotation.visibility,
+            'processed': report.processed,
+        }
+        return reply.success(data=data, msg="举报详情信息获取成功")
+    else:
+        return reply.fail(msg="举报信息不存在")

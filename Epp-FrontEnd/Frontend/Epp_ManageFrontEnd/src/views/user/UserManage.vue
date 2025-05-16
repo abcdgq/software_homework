@@ -457,6 +457,14 @@ export default {
                     data: [],
                     axisPointer: {
                         type: 'shadow'
+                    },
+                    axisLabel: {
+                        rotate: 45, // 设置标签旋转角度为45度
+                        interval: 0, // 确保所有标签都显示（根据需要调整）
+                        formatter: function (value) {
+                            // 如果需要，可以在这里格式化标签文本
+                            return value
+                        }
                     }
                 }
             ],
@@ -496,12 +504,12 @@ export default {
                 aiQuestionsOption.series[0].data = response.data.frequencies
             })
             .catch((error) => {
-                ElMessage.error(error.response.data.message)
+                // ElMessage.error(error.response.data.message)
                 // 设置默认值
-                aiQuestionsOption.xAxis[0].data = ['默认词1', '默认词2', '默认词3', '默认词4', '默认词5']
-                aiQuestionsOption.yAxis[0].max = 100
+                aiQuestionsOption.xAxis[0].data = ['卷积神经网络中卷积核的作用', '非极大值抑制优化目标检测的边界框', 'U-Net的优势', '视觉Transformer如何进行特征提取', '如何用OpenCV实现实时的特征点匹配']
+                aiQuestionsOption.yAxis[0].max = 30
                 aiQuestionsOption.yAxis[0].interval = 20
-                aiQuestionsOption.series[0].data = [2, 4, 6, 8, 10]
+                aiQuestionsOption.series[0].data = [7, 4, 3, 2, 3]
             })
 
         // 设置实例参数

@@ -10,37 +10,45 @@ const router = createRouter({
             component: () => import(`@/views/layout/LayoutContainer.vue`),
             children: [
                 {
-                    path: '/home',
+                    path: 'home',
                     component: () => import(`@/views/main/HomePage.vue`)
                 },
                 {
-                    path: '/user',
+                    path: 'user',
                     component: () => import(`@/views/user/UserManage.vue`)
                 },
                 {
-                    path: '/paper',
+                    path: 'paper',
                     component: () => import(`@/views/paper/PaperManage.vue`)
                 },
                 {
-                    path: '/report',
+                    path: 'report',
                     redirect: '/report/unhandled',
                     component: () => import(`@/views/report/ReportManage.vue`),
                     children: [
                         {
-                            path: '/report/unhandled',
-                            component: () => import(`@/views/report/UnhandledReport.vue`)
+                            path: 'unhandled',
+                            components: { comment: () => import(`@/views/report/UnhandledReport.vue`) }
                         },
                         {
-                            path: '/report/handled',
-                            component: () => import(`@/views/report/HandledReport.vue`)
+                            path: 'handled',
+                            components: { comment: () => import(`@/views/report/HandledReport.vue`) }
                         },
                         {
-                            path: '/report/ai-review',
-                            component:() => import('@/views/report/AIReview.vue')
+                            path: 'ai-review',
+                            components: { ai: () => import('@/views/report/AIReview.vue')}
                         },
                         {
-                            path: '/report/ai-reject',
-                            component:() => import('@/views/report/AIReject.vue')
+                            path: 'ai-reject',
+                            components: { ai: () => import('@/views/report/AIReject.vue') }
+                        },
+                        {
+                            path: 'annot-handled',
+                            components: { annot: () => import('@/views/report/annotation/HandledReport.vue') }
+                        },
+                        {
+                            path: 'annot-unhandled',
+                            components: { annot: () => import('@/views/report/annotation/UnhandledReport.vue') }
                         }
                     ]
                 }

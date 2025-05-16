@@ -30,65 +30,66 @@
         </div>
 
         <!-- 大模型服务器相关信息 -->
-        <div class="module-server" v-loading="loading.moduleServerLoading">
-            <div class="header">模型服务器</div>
-            <div class="container">
-                <div class="hardware-left">
-                    <el-card v-for="gpu in moduleServerInfo.gpu_info" :key="gpu.id" class="gpu-card" shadow="hover">
-                        <div class="gpu-card-content">
-                            <h3>{{ gpu.name }}</h3>
-                            <el-row>
-                                <el-col :span="8" class="info-item">
-                                    <el-icon><i-ep-cpu></i-ep-cpu></el-icon>
-                                    <strong>负载：</strong> {{ gpu.load }}%
-                                </el-col>
-                                <el-col :span="8" class="info-item">
-                                    <el-icon><i-ep-sunrise></i-ep-sunrise></el-icon>
-                                    <strong>温度：</strong> {{ gpu.temperature }}°C
-                                </el-col>
-                            </el-row>
-                            <el-row>
-                                <el-col :span="8" class="info-item">
-                                    <el-icon><i-ep-files></i-ep-files></el-icon>
-                                    <strong>显存总量：</strong> {{ gpu.memory_total }} MB
-                                </el-col>
-                                <el-col :span="8" class="info-item">
-                                    <el-icon><i-ep-check></i-ep-check></el-icon>
-                                    <strong>可使用显存：</strong> {{ gpu.memory_free }} MB
-                                </el-col>
-                                <el-col :span="8" class="info-item">
-                                    <el-icon><i-ep-box></i-ep-box></el-icon>
-                                    <strong>已使用显存：</strong> {{ gpu.memory_used }} MB ({{
-                                        usedMemoryPercentage(gpu)
-                                    }}%)
-                                </el-col>
-                            </el-row>
-                        </div>
-                    </el-card>
-                </div>
-                <div class="hardware-right">
-                    <div class="cpu-info">
-                        <div id="module-server-cpu" style="height: 80%"></div>
+<!--        <div class="module-server" v-loading="loading.moduleServerLoading">-->
+<!--            <div class="header">模型服务器</div>-->
+<!--            <div class="container">-->
+<!--                <div class="hardware-left">-->
+<!--                    <el-card v-for="gpu in moduleServerInfo.gpu_info" :key="gpu.id" class="gpu-card" shadow="hover">-->
+<!--                        <div class="gpu-card-content">-->
+<!--                            <h3>{{ gpu.name }}</h3>-->
+<!--                            <el-row>-->
+<!--                                <el-col :span="8" class="info-item">-->
+<!--                                    <el-icon><i-ep-cpu></i-ep-cpu></el-icon>-->
+<!--                                    <strong>负载：</strong> {{ gpu.load }}%-->
+<!--                                </el-col>-->
+<!--                                <el-col :span="8" class="info-item">-->
+<!--                                    <el-icon><i-ep-sunrise></i-ep-sunrise></el-icon>-->
+<!--                                    <strong>温度：</strong> {{ gpu.temperature }}°C-->
+<!--                                </el-col>-->
+<!--                            </el-row>-->
+<!--                            <el-row>-->
+<!--                                <el-col :span="8" class="info-item">-->
+<!--                                    <el-icon><i-ep-files></i-ep-files></el-icon>-->
+<!--                                    <strong>显存总量：</strong> {{ gpu.memory_total }} MB-->
+<!--                                </el-col>-->
+<!--                                <el-col :span="8" class="info-item">-->
+<!--                                    <el-icon><i-ep-check></i-ep-check></el-icon>-->
+<!--                                    <strong>可使用显存：</strong> {{ gpu.memory_free }} MB-->
+<!--                                </el-col>-->
+<!--                                <el-col :span="8" class="info-item">-->
+<!--                                    <el-icon><i-ep-box></i-ep-box></el-icon>-->
+<!--                                    <strong>已使用显存：</strong> {{ gpu.memory_used }} MB ({{-->
+<!--                                        usedMemoryPercentage(gpu)-->
+<!--                                    }}%)-->
+<!--                                </el-col>-->
+<!--                            </el-row>-->
+<!--                        </div>-->
+<!--                    </el-card>-->
+<!--                </div>-->
 
-                        <div style="height: 15%; text-align: center">CPU 使用情况</div>
-                    </div>
-                    <div class="memory-info">
-                        <el-progress
-                            style="width: 90%; margin: 5% auto; height: 10%"
-                            :text-inside="true"
-                            :stroke-width="18"
-                            :percentage="moduleServerMemUtilization"
-                            status="warning"
-                        />
-                        <div style="text-align: center">
-                            内存使用情况：
-                            {{ (moduleServerInfo.memory_info.used_memory / (1024 * 1024 * 1024)).toFixed(2) }}GB /
-                            {{ (moduleServerInfo.memory_info.total_memory / (1024 * 1024 * 1024)).toFixed(2) }}GB
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!--                <div class="hardware-right">-->
+<!--                    <div class="cpu-info">-->
+<!--                        <div id="module-server-cpu" style="height: 80%"></div>-->
+
+<!--                        <div style="height: 15%; text-align: center">CPU 使用情况</div>-->
+<!--                    </div>-->
+<!--                    <div class="memory-info">-->
+<!--                        <el-progress-->
+<!--                            style="width: 90%; margin: 5% auto; height: 10%"-->
+<!--                            :text-inside="true"-->
+<!--                            :stroke-width="18"-->
+<!--                            :percentage="moduleServerMemUtilization"-->
+<!--                            status="warning"-->
+<!--                        />-->
+<!--                        <div style="text-align: center">-->
+<!--                            内存使用情况：-->
+<!--                            {{ (moduleServerInfo.memory_info.used_memory / (1024 * 1024 * 1024)).toFixed(2) }}GB /-->
+<!--                            {{ (moduleServerInfo.memory_info.total_memory / (1024 * 1024 * 1024)).toFixed(2) }}GB-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
     </div>
 </template>
 

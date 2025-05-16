@@ -40,6 +40,10 @@
                             {{ isSummaryVisible ? '隐藏摘要' : '翻译摘要' }}
                         </el-button>
                     </el-row>
+                    <el-divider />
+                    <el-row>
+                      <further-reading :paperId="this.paper_id" />
+                    </el-row>
                 </el-container>
 
                 <!-- 评分部分 -->
@@ -182,6 +186,7 @@
 import axios from 'axios'
 import ReportModal from './ReportModal.vue'
 import {translateAbstract} from '../../api/Paper'
+import FurtherReading from './FurtherReading.vue'
 export default {
   props: {
     paper_id: {
@@ -190,6 +195,7 @@ export default {
     }
   },
   components: {
+    FurtherReading,
     'report-modal': ReportModal
   },
   computed: {
@@ -487,17 +493,16 @@ export default {
     },
 
     async toggleTranslation () { // 显示隐藏翻译
-      if (!this.isSummaryVisible) {
-        if (!this.isTranslated) { // 还没有翻译过
-          await translateAbstract(this.paper_id)
-            .then((response) => {
-              this.translatedSummary = response.data
-              this.isTranslated = true
-            })
-            .catch((error) => {
-              console.error('翻译失败', error)
-            })
-        }
+      if (!this.isTranslated) { // 还没有翻译过
+        await translateAbstract(this.paper_id)
+          .then((response) => {
+            this.translatedSummary = response.translatedSummary
+            this.isTranslated = true
+            console.log(response)
+          })
+          .catch((error) => {
+            console.error('翻译失败', error)
+          })
       }
 
       this.isSummaryVisible = !this.isSummaryVisible

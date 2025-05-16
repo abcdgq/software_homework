@@ -21,6 +21,7 @@ def login(request):
         if user:
             print(user.avatar.url)
             request.session['username'] = user.username
+            print('login_username:' + request.session['username'])
             expired_time = request.session.get_expiry_date()
             return JsonResponse(
                 {'message': "登录成功", 'expired_time': expired_time, 'ULogin_legal': True, 'user_id': user.user_id,

@@ -51,7 +51,7 @@
                         show-word-limit
                     />
                     <div style="margin-top: 20px">
-                        <span>屏蔽评论</span>
+                        <span>删除评论</span>
                         <el-switch
                             v-model="judgment.unvisibility"
                             style="margin-left: 10px; --el-switch-on-color: #13ce66; --el-switch-off-color: #d0d0d0"
@@ -193,7 +193,6 @@ export default {
 :deep(.el-descriptions__label) {
     width: 20% !important;
 }
-
 .button {
     display: block;
     width: 30%;

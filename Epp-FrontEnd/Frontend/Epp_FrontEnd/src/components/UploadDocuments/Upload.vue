@@ -12,7 +12,7 @@
     >
       <img src="../../assets/icon/chooseFile.svg" alt="Upload Icon" class="upload-icon" />
       <div class="upload-text">选择文件</div>
-      <div class="upload-support">仅支持pdf格式，文件大小不得超过5MB</div>
+      <div class="upload-support">仅支持pdf格式，文件大小不得超过3MB</div>
       <input id="file-upload" type="file" @change="handleFileUpload" accept=".pdf" ref="fileInput" style="display: none;">
       <span class="filename">{{ fileName }}</span>
       <el-button type="primary" @click.stop="uploadDocumentClick">
@@ -38,11 +38,11 @@ export default {
   methods: {
     handleFileUpload (event) {
       const file = event.target.files[0]
-      const maxSizeInMB = 5
+      const maxSizeInMB = 3
       const maxSizeInBytes = maxSizeInMB * 1024 * 1024
 
       if (file.size > maxSizeInBytes) {
-        this.$message.error('文件大小不得超过5MB')
+        this.$message.error('文件大小不得超过3MB')
         this.$refs.fileInput.value = '' // 清空文件输入
         return
       }
@@ -74,7 +74,7 @@ export default {
         console.log(error)
         this.$notify({
           title: '失败',
-          message: '本地文件上传失败！',
+          message: '上传失败，服务器限制，最好不超过2MB！',
           type: 'error'
         })
       }
@@ -103,10 +103,10 @@ export default {
       const files = event.dataTransfer.files
       if (files.length > 0) {
         const file = files[0]
-        const maxSizeInMB = 5
+        const maxSizeInMB = 3
         const maxSizeInBytes = maxSizeInMB * 1024 * 1024
         if (file.size > maxSizeInBytes) {
-          this.$message.error('文件大小不得超过5MB')
+          this.$message.error('文件大小不得超过3MB')
           this.$refs.fileInput.value = '' // 清空文件输入
           return
         }

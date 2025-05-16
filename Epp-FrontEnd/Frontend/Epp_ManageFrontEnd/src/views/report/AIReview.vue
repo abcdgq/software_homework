@@ -41,14 +41,14 @@
             <el-table-column label="是否通过">
                 <template v-slot="scope">
                     <div class="table-text">
-                        {{ scope.isPassed }}
+                        {{ scope.row.isPassed }}
                     </div>
                 </template>
             </el-table-column>
             <el-table-column label="原因">
                 <template v-slot="scope">
                     <div class="table-text">
-                        {{ scope.row.reason}}
+                        {{ scope.row.reason }}
                     </div>
                 </template>
             </el-table-column>
@@ -75,13 +75,11 @@
 
 <script>
 import { getAIReviewAll } from '@/api/aiReview.js'
-import ReportDetail from './ReportDetail.vue'
 import { ElMessage } from 'element-plus'
 import AIReviewDetail from "@/views/report/AIReviewDetail.vue";
 export default {
     components: {
         AIReviewDetail,
-        ReportDetail
     },
     data() {
         return {
@@ -124,6 +122,8 @@ export default {
                         total: response.data.total,
                         content: response.data.content
                     }
+                    console.log(response)
+                    console.log(response.data)
                 })
                 .catch((error) => {
                     ElMessage.error(error.response.data.message)

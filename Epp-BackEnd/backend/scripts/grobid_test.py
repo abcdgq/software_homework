@@ -11,7 +11,7 @@ def getXml(input_file_path, output_dir, i):
     url = f"http://{server_ip}:8070/api/processFulltextDocument"
     # filename = "outputf"
     params = dict(input = open(str(input_file_path), 'rb'))
-    response = requests.post(url, files=params, timeout=300)
+    response = requests.post(url, files=params, timeout=3000000)
     # print(response.text)
     # output_path = os.path.join(output_dir, filename + str(i+1) + ".xml")
     # print("output: ", output_path)

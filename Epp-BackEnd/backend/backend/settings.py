@@ -68,6 +68,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:10516',
     'http://127.0.0.1:10516',
     'https://epp.buaase.cn',
+    'http://114.116.205.43',
+    'http://114.116.205.43:80'
 ]
 
 CORS_ALLOW_METHODS = (
@@ -134,6 +136,12 @@ DATABASES = {
     }
 }
 
+MIGRATION_MODULES = {
+    # 格式：'app_name': 'custom_migration_module_path'
+    # 'business': 'migrations.business',  # 将 business 应用的迁移文件存到 shared_migrations/business
+    'business': 'business.migrations',
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -166,6 +174,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = '/var/www/project/software_homework/Epp-BackEnd/backend/static'
 MEDIA_URL = '/resource/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'resource')
 

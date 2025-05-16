@@ -65,6 +65,8 @@ export default {
         }
       } catch (error) {
         console.log('error')
+        console.log(error)
+        console.log('error again')
         if (this.isLogin) {
           this.message = '登录失败，请重新输入'
         } else {

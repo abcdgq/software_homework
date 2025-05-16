@@ -103,7 +103,7 @@
     </el-col>
     <el-col :span="8" style="height: 100vh; position: sticky; top: 55px">
       <ai-assistant v-if="aiReply.length > 0" :aiReply="aiReply" :paperIds="paperIds" :searchRecordID="searchRecordID"
-        :restoreHistory="restoreHistory" @find-paper="searchPaperByAssistant" />
+        :restoreHistory="restoreHistory" :isLoading="aiLoading"  @find-paper="searchPaperByAssistant" />
     </el-col>
   </el-col>
 </template>
@@ -142,7 +142,8 @@ export default {
       selectedPapers: [],
       checkedPapers: {},
       isDialogSearch: false,
-      defaultSearchContent: ''
+      defaultSearchContent: '',
+      aiLoading: true
     }
   },
   methods: {
@@ -187,6 +188,10 @@ export default {
     },
     async fetchPapers () {
       console.log('Fetching papers...')
+      console.log({
+        searchType: this.$route.query.searchType,
+        searchContent: this.$route.query.search_content
+      })
       const loadingInstance = this.$loading({
         lock: true,
         text: 'Loading...',
@@ -194,7 +199,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       })
       await axios.post(this.$BASE_API_URL + '/search/vectorQuery', { 'search_content': this.$route.query.search_content, 'search_type': this.$route.query.searchType })
-        .then((response) => {
+        .then(async (response) => {
           console.log('response is ...')
           this.papers = response.data.paper_infos
           // 添加ai回答的逻辑
@@ -204,9 +209,30 @@ export default {
           this.searchRecordID = response.data.search_record_id
           this.defaultSearchContent = this.$route.query.search_content
           loadingInstance.close()
+          await this.buidKB()
         })
         .catch((error) => {
           console.error('语义检索失败:', error)
+        })
+      // axios.post(this.$BASE_API_URL + '/search/vectorQueryBuildKB', { 'paperIDs': this.paperIds, 'searchRecordId': this.searchRecordID })
+      //   .then((response) => {
+      //     console.log('论文循征成功, ', response.data.msg)
+      //   })
+      //   .catch((error) => {
+      //     console.error('知识库构建失败:', error)
+      //   })
+    },
+    async buidKB () {
+      this.aiLoading = true
+      await axios.post(this.$BASE_API_URL + '/search/vectorQueryBuildKB', { 'paperIDs': this.paperIds, 'searchRecordId': this.searchRecordID })
+        .then((response) => {
+          console.log('论文循征成功, ', response.data.msg)
+          this.aiLoading = false
+        })
+        .catch((error) => {
+          console.error('知识库构建失败:', error)
+          this.aiLoading = false // 错误时停止，不然我前端都没法测试
+          this.loadingText = '知识库构建失败，请稍后再试'
         })
     },
     async fetchPapersFromHistory () {
@@ -280,7 +306,16 @@ export default {
     },
     getSummaryReportStatus (reportID) {
       console.log('报告ID是', reportID)
+      let pollCount = 0
+      const MAX_POLL_COUNT = 300 // 10min（因为每2秒一次）
       let intervalID = setInterval(() => {
+        pollCount++
+        // 检查是否超过最大次数
+        if (pollCount > MAX_POLL_COUNT) {
+          this.$message.error('生成报告超时，请稍后手动刷新查看')
+          clearInterval(intervalID)
+          return
+        }
         axios.get(this.$BASE_API_URL + '/summary/getSummaryStatus?report_id=' + reportID)
           .then(response => {
             if (response.data.status === '生成成功') {
@@ -295,7 +330,7 @@ export default {
             console.error('查询状态失败:', error)
             clearInterval(this.intervalID) // 错误时停止轮询
           })
-      }, 1000) // 每秒查询一次
+      }, 2000) // 每2秒查询一次
     },
     downloadPapers () {
       if (this.selectedPapers.length === 0) {
