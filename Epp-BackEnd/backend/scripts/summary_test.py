@@ -2,18 +2,17 @@
 
 import json
 import openai
-openai.api_base = "https://api.deepseek.com"
-openai.api_key = 'sk-f6a474403f6746ed9542367e4b4590b2'
-model = "deepseek-chat"
 
 def queryDeepSeek(message):
+    openai.api_base = "https://api.deepseek.com"
+    openai.api_key = 'sk-f6a474403f6746ed9542367e4b4590b2'
     print("输入:")
     print(message)
     print("输入长度:" + str(len(message)))
     history=[]
     history.append({"role": "user", "content": message})
     response = openai.ChatCompletion.create(
-            model=model,
+            model="deepseek-chat",
             messages=history,
             stream=False
     )
@@ -21,6 +20,19 @@ def queryDeepSeek(message):
     print("输出:")
     print(res)
     return res
+
+def queryKimi(message):
+    openai.api_base = "https://api.moonshot.cn/v1"
+    openai.api_key = 'sk-Nc04xpjdSvfg9q0iJQMO0nXO7iuIAhyvTo4TpbFIzVCq0bnh'
+    history=[]
+    user_input=message
+    history.append({"role": "user", "content": user_input})
+    response = openai.ChatCompletion.create(
+            model="moonshot-v1-128k",
+            messages=history,
+            stream=False
+    )
+    return response.choices[0].message.content
 
 def generate_theme_and_directions(papers):
     prompt = f"""{papers}
@@ -39,6 +51,44 @@ def generate_theme_and_directions(papers):
         print("解析2成功")
     print(json_format)
     return json_format
+
+def generate_introduction(theme, directions, papers):
+    prompt = f"""撰写综述引言，需包含以下要素：     
+        1.领域重要性 
+        2.问题发展脉络
+        3. 现有方法分类（基于提供文献的内容和提供的研究方向分类进行生成）       
+        4. 本综述贡献       
+    综述主题：{theme}
+    研究方向分类：{directions}   
+    文献内容：{papers}          
+    内容要求：     
+        第一段：领域背景+研究价值     
+        第二段：历史发展（分阶段说明）     
+        第三段：根据提供的文献内容详细阐述综述的几个研究方向    
+        第四段：本综述贡献
+    格式要求：以段落的格式返回结果，遵循综述写作规范。不要列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。"""
+    result = queryKimi(prompt)
+    print(result)
+    return result
+
+def generate_future_view(theme):
+    prompt=f"""根据综述的主题{theme}生成对该主题的未来展望
+				要求：
+                1.从以下三个维度进行预测：技术趋势、应用场景、开放问题
+                2.以段落的格式返回结果，遵循综述写作规范。注意不要列举，不要列举，不要用：进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。"""
+    result = queryKimi(prompt)
+    print(result)
+    return result
+
+def generate_field_summary(theme, papers):
+    prompt=f"""目前生成的综述的主题为{theme}。现在我们要生成综述的结论部分，请根据提供的论文题目和摘要生成整合这些论文的贡献并生成综述的结论：{papers}
+			   要求：
+                1.用”理论创新→方法进步→应用价值→问题与不足→未来展望“模型进行呈现
+                2.最后用比喻总结（如：该领域如同...正处于...阶段）
+                3.以段落的格式返回结果，遵循综述写作规范。注意不要列举，不要列举，不要用：进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。"""
+    result = queryKimi(prompt)
+    print(result)
+    return result
 
 def generate_summary(papers):
     generate_theme_and_directions(papers)
