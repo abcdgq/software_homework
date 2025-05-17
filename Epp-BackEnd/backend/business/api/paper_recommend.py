@@ -286,7 +286,10 @@ def get_unique_recommendation(request):
 
 @require_http_methods("GET")
 def get_related_paper(request):
+    print("------------------------------------------------")
+    print(request.session.items())
     username = request.session.get('username')
+    print('recommend username:' + username)
     user = User.objects.filter(username=username).first()
     collected_papers_list = user.collected_papers.all()
 
@@ -298,13 +301,15 @@ def get_related_paper(request):
         'papers': []
     }
 
-    papers = get_filtered_paper(title, 5)
+    # papers = get_filtered_paper(title, 5)
+    papers = do_string_search(title, 5)
     for p in papers:
         data['papers'].append({
-            'id': p.paper_id,
+            'id': str(p.paper_id),
             'title': p.title,
             'summary': '无',
             'collected': p in collected_papers_list
         })
-
+    print("data:")
+    print(data)
     return reply.success(data=data, msg='获取成功')

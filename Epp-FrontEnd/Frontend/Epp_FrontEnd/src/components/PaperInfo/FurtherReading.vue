@@ -41,7 +41,8 @@
     </el-card>
 </template>
 <script>
-import {collectPaper, fetchFurtherReadingPapers} from '../../api/Paper'
+import {collectPaper} from '../../api/Paper.js'
+import {fetchFurtherReadingPapers} from '../../request/userRequest.js'
 
 export default {
     props: {
@@ -86,7 +87,15 @@ export default {
             this.loading = true
             await fetchFurtherReadingPapers(this.paperId)
                 .then((response) => {
-                    this.papers = response.data
+                    console.log(response.data)
+                    this.papers = response.data.papers.map((paper) => {
+                        return {
+                            id: paper.id,
+                            title: paper.title,
+                            summary: paper.summary,
+                            collected: false
+                        }
+                    })
                 })
                 .catch((error) => {
                     console.log(error)
