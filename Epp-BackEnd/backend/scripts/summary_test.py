@@ -4,22 +4,23 @@ import json
 import openai
 import time
 
-def queryDeepSeek(message):
+def queryDeepSeek(message, syshint=None, model="deepseek-chat"):
     start_time = time.time()
     openai.api_base = "https://api.deepseek.com"
     openai.api_key = 'sk-f6a474403f6746ed9542367e4b4590b2'
     print("输入:\n", message)
     print("输入长度:" + str(len(message)))
     history=[]
+    if syshint:
+        history.append({"role": "system", "content": syshint})
     history.append({"role": "user", "content": message})
     response = openai.ChatCompletion.create(
-            model="deepseek-chat",
+            model=model,
             messages=history,
             stream=False
     )
     res = response.choices[0].message.content
-    # print("输出:")
-    # print(res)
+    # print("输出:", res)
     print("单次回答用时(ds):", time.time() - start_time)
     return res
 
@@ -38,6 +39,21 @@ def queryKimi(message):
     )
     print("单次回答用时(km):", time.time() - start_time)
     return response.choices[0].message.content
+
+queryApplication = None
+
+def getQueryApplication(theme):
+    def query(message, model="deepseek-chat"):
+        return queryDeepSeek(
+            syshint=f"""
+            你是{theme}领域的专家，用户提供了有关这个领域的几篇论文，现在希望你通过
+            为这几篇论文生成综述的方式，来了解这些论文的内容以及与该领域的关系。
+            综述的结构为：引言、研究方向的详细分析、研究的不足与局限、解决方法、未来展望、结论。
+            """.lstrip(),
+            message=message,
+            model=model,
+        )
+    return query
 
 def generate_theme_and_directions(papers):
     prompt = f"""{papers}
@@ -58,7 +74,7 @@ def generate_theme_and_directions(papers):
     return json_format
 
 def generate_introduction(theme, directions, papers):
-    prompt = f"""撰写综述引言，需包含以下要素：     
+    prompt = f"""现在撰写综述引言，需包含以下要素：     
         1.领域重要性 
         2.问题发展脉络
         3. 现有方法分类（基于提供文献的内容和提供的研究方向分类进行生成）       
@@ -72,7 +88,7 @@ def generate_introduction(theme, directions, papers):
         第三段：根据提供的文献内容详细阐述综述的几个研究方向    
         第四段：本综述贡献
     格式要求：以段落的格式返回结果，遵循综述写作规范。不要列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。"""
-    result = queryKimi(prompt)
+    result = queryApplication(prompt)
     print("引言：\n", result)
     return result
 
@@ -81,7 +97,7 @@ def generate_detailed_directions(directions, papers):
     result = ""
     for direction in directions:
         result += f"## {direction}\n"
-        prompt=f"""撰写{direction}研究方向的详细分析，请从提供的论文中提取符合这一研究方向的论文进行后续生成。
+        prompt=f"""现在撰写{direction}研究方向的详细分析，请从提供的论文中提取符合这一研究方向的论文进行后续生成。
                    提供的论文及内容如下{papers} 
                 详细分析需包含：
                     1.技术发展脉络:起源, 关键发展节点,当前进展
@@ -92,16 +108,26 @@ def generate_detailed_directions(directions, papers):
                     2.注意不要列举，不要列举，不要列举，以段落的格式回答，不要用"："进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。
                 返回格式要求：
                     以json格式返回，返回格式：{{"技术发展脉络": "xxx", "论文中给出的方法的实现细节": "xxx", "提供的论文中符合这一研究方向的论文之间方法的对比": "xxx"}}
+                    ，注意请不要用json块（```json```）包裹。
                 """
-        result_in_json = queryKimi(prompt)
-        r = json.loads(result_in_json)
+        result_in_json = queryApplication(prompt)
+        try:
+            r = json.loads(result_in_json)
+            print("解析成功")
+        except Exception as e:
+            print(e)
+            print("解析失败")
+            print(result_in_json)
+            result_in_json = result_in_json.replace("```json", "").replace("```", "")
+            r = json.loads(result_in_json)
+            print("解析2成功")
         result += r["技术发展脉络"] + "\n" + r["论文中给出的方法的实现细节"] + "\n" + r["提供的论文中符合这一研究方向的论文之间方法的对比"] + "\n"
     print("研究方向: \n", result)
     return result
 
 def generate_deficiencies(theme, directions, papers):
     prompt = f"""{papers} \n
-你是一名专业的论文分析与文献综述写作专家，请基于“{theme}”领域下关于研究方向{directions}的研究进展，结合以上论文信息，系统分析当前研究的不足与局限：
+现在请基于“{theme}”领域下关于研究方向{directions}的研究进展，结合以上论文信息，系统分析当前研究的不足与局限：
 
 要求生成包含以下要素的段落化文本：
 1. 指出该研究方向尚未突破的核心矛盾（需结合领域主题）
@@ -121,13 +147,13 @@ def generate_deficiencies(theme, directions, papers):
 4. 使用"特别是考虑到...需求时"等领域关联表述
 5. 避免通用描述，突出领域特殊性
 """
-    result = queryDeepSeek(prompt)
+    result = queryApplication(prompt)
     print("存在不足：\n", result)
     return result
 
 def generate_solution(theme, directions, deficiencies):
     prompt = f"""{deficiencies} \n
-你是一名专业的论文分析与文献综述写作专家,请基于{theme}中{directions}的已有不足分析（见上），结合领域发展需求与前沿技术动态，提出具有突破潜力的解决方案。
+现在生成综述的解决方案部分，请基于{theme}中{directions}的已有不足分析（见上），结合领域发展需求与前沿技术动态，提出具有突破潜力的解决方案。
 
 注意：
 生成的文本中不要出现markdown格式（如#，**等）。
@@ -156,26 +182,26 @@ def generate_solution(theme, directions, deficiencies):
 禁用项目符号，保持段落连贯性
 总字数控制在对标不足分析部分的120%
 """
-    result = queryDeepSeek(prompt)
+    result = queryApplication(prompt)
     print("结论1：\n", result)
     return result
 
 def generate_future_view(theme):
-    prompt=f"""根据综述的主题{theme}生成对该主题的未来展望
+    prompt=f"""现在生成未来展望部分，请根据综述的主题{theme}生成对该主题的未来展望
 				要求：
                 1.从以下三个维度进行预测：技术趋势、应用场景、开放问题
                 2.以段落的格式返回结果，遵循综述写作规范。注意不要列举，不要列举，不要用：进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。"""
-    result = queryKimi(prompt)
+    result = queryApplication(prompt)
     print("结论2: \n", result)
     return result
 
 def generate_field_summary(theme, papers):
-    prompt=f"""目前生成的综述的主题为{theme}。现在我们要生成综述的结论部分，请根据提供的论文题目和摘要生成整合这些论文的贡献并生成综述的结论：{papers}
+    prompt=f"""现在生成结论，目前生成的综述的主题为{theme}。现在我们要生成综述的结论部分，请根据提供的论文题目和摘要生成整合这些论文的贡献并生成综述的结论：{papers}
 			   要求：
                 1.用”理论创新→方法进步→应用价值→问题与不足→未来展望“模型进行呈现
                 2.最后用比喻总结（如：该领域如同...正处于...阶段）
                 3.以段落的格式返回结果，遵循综述写作规范。注意不要列举，不要列举，不要用：进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。"""
-    result = queryKimi(prompt)
+    result = queryApplication(prompt)
     print("结论3：\n", result)
     return result
 
@@ -185,16 +211,184 @@ def generate_conclusion(theme, directions, papers, deficiencies):
     field_summary = generate_field_summary(theme, papers)
     return f"## 弥补不足\n{solution}\n## 未来展望\n{future_view}\n## 领域综述\n{field_summary}\n"
 
+def optimize(msg):
+    prompt = f"""以下是综述的全文或部分内容，请按照要求进行优化： {msg}          
+                 优化要求：    
+                    1.添加过渡句（检查段落首尾衔接，添加如"值得注意的是..."等连接词）     
+                    2.术语统一
+                    3.插入领域权威的评论 
+                    4.修改文中语病或表达不通顺的地方，使语句符合综述报告的风格 
+                    5.优化后的输出结果长度控制在原文长度的105%以上
+                 输出要求：
+                    按照原文结构，不要输出与综述报告无关的语句
+                禁止修改：  
+                - 原有技术细节     
+                - 对比分析结论     
+                - 文献引用关系"""
+    result = queryApplication(prompt, "deepseek-reasoner")
+    print("优化结果：\n", result)
+    return result
+
 def generate_summary(papers):
-    themes = generate_theme_and_directions(papers)
+    hints = {
+        "theme_and_directions":"""{papers}
+                                你是一名文献综述写作专家，以上是一些格式为[Title+Abstract]的论文，
+                                现在需要你根据这些论文，总结这些论文的研究主题（要求为某特定领域，10字左右），并给出该主题下的主要研究方向分类（2-3个），
+                                以json格式返回（包括theme与directions，其中theme为字符串，directions为字符串列表）。
+                                例如{{"theme": "xxx","directions": ["d1","d2","d3"]}}，注意请不要用json块（```json```）包裹。""".lstrip(),
+        "introduction":"""现在撰写综述引言，需包含以下要素：     
+                            1.领域重要性 
+                            2.问题发展脉络
+                            3. 现有方法分类（基于提供文献的内容和提供的研究方向分类进行生成）       
+                            4. 本综述贡献       
+                        综述主题：{theme}
+                        研究方向分类：{directions}   
+                        文献内容：{papers}          
+                        内容要求：     
+                            第一段：领域背景+研究价值     
+                            第二段：历史发展（分阶段说明）     
+                            第三段：根据提供的文献内容详细阐述综述的几个研究方向    
+                            第四段：本综述贡献
+                        格式要求：以段落的格式返回结果，遵循综述写作规范。不要列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。""".lstrip(),
+        "detailed_directions":"""现在撰写{direction}研究方向的详细分析，请从提供的论文中提取符合这一研究方向的论文进行后续生成。
+                                 提供的论文及内容如下{papers} 
+                                 详细分析需包含：
+                                    1.技术发展脉络:起源, 关键发展节点,当前进展
+                                    2.论文中给出的方法的实现细节：核心创新点，技术实现路径，适用场景
+                                    3.提供的论文中符合这一研究方向的论文之间方法的对比
+	                             要求：
+                                    1.以段落的格式返回结果，遵循综述写作规范。
+                                    2.注意不要列举，不要列举，不要列举，以段落的格式回答，不要用"："进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。
+                                 返回格式要求：
+                                    以json格式返回，返回格式：{{"技术发展脉络": "xxx", "论文中给出的方法的实现细节": "xxx", "提供的论文中符合这一研究方向的论文之间方法的对比": "xxx"}}
+                                    ，注意请不要用json块（```json```）包裹。""".lstrip(),
+        "deficiencies":"""{papers} \n
+                        现在请基于“{theme}”领域下关于研究方向{directions}的研究进展，结合以上论文信息，系统分析当前研究的不足与局限：
+
+                        要求生成包含以下要素的段落化文本：
+                        1. 指出该研究方向尚未突破的核心矛盾（需结合领域主题）
+                        2. 暴露与研究方向紧密相关的方法论缺陷（如实验设计未考虑领域特性）
+                        3. 揭示制约本方向发展的数据短板（如缺乏领域适配数据集）
+                        4. 分析理论框架与领域需求的不匹配
+                        5. 评估该方向实际应用转化的特殊障碍
+
+                        注意：
+                        生成的文本中不要出现markdown格式（如#，**等）
+                        不要出现项目符号，不要出现分点数字。
+
+                        输出规范：
+                        1. 以"当前研究在{{领域主题}}的{{研究方向}}方面..."开头
+                        2. 保持3-5个实质性观点，每观点含现象+证据+影响
+                        3. 优先呈现阻碍研究方向发展的关键瓶颈
+                        4. 使用"特别是考虑到...需求时"等领域关联表述
+                        5. 避免通用描述，突出领域特殊性""".lstrip(),
+        "solution":"""{deficiencies} \n
+                    现在生成综述的解决方案部分，请基于{theme}中{directions}的已有不足分析（见上），结合领域发展需求与前沿技术动态，提出具有突破潜力的解决方案。
+
+                    注意：
+                    生成的文本中不要出现markdown格式（如#，**等）。
+
+                    生成要求：
+                    解决方案层级
+                    优先方法论革新（占50%内容）
+                    其次数据增强策略（30%）
+                    最后理论/应用创新（20%）
+
+                    内容要素
+                    每个方案需包含：
+                    ▸ 具体措施（需提及技术载体）
+                    ▸ 理论依据
+                    ▸ 实施路径
+                    ▸ 预期突破点
+
+                    领域适配性
+                    使用"针对{{领域特性}}，可采取..."的领域定制表述
+                    至少1个方案需整合输入的趋势技术
+
+                    输出规范：
+                    以"为突破现有局限，本领域亟需..."开头
+                    每方案用"首先/其次/特别需要"等逻辑连接词串联
+                    禁用项目符号，保持段落连贯性
+                    总字数控制在对标不足分析部分的120%""".lstrip(),
+        "future_view":"""现在生成未来展望部分，请根据综述的主题{theme}生成对该主题的未来展望
+				要求：
+                1.从以下三个维度进行预测：技术趋势、应用场景、开放问题
+                2.以段落的格式返回结果，遵循综述写作规范。注意不要列举，不要列举，不要用：进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。""".lstrip(),
+        "field_summary":"""现在生成结论，目前生成的综述的主题为{theme}。现在我们要生成综述的结论部分，请根据提供的论文题目和摘要生成整合这些论文的贡献并生成综述的结论：{papers}
+			   要求：
+                1.用”理论创新→方法进步→应用价值→问题与不足→未来展望“模型进行呈现
+                2.最后用比喻总结（如：该领域如同...正处于...阶段）
+                3.以段落的格式返回结果，遵循综述写作规范。注意不要列举，不要列举，不要用：进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。""".lstrip(),
+        "optimize":"""以下是综述的全文或部分内容，请按照要求进行优化： {msg}          
+                        优化要求：    
+                            1.添加过渡句（检查段落首尾衔接，添加如"值得注意的是..."等连接词）     
+                            2.术语统一
+                            3.插入领域权威的评论 
+                            4.修改文中语病或表达不通顺的地方，使语句符合综述报告的风格 
+                            5.优化后的输出结果长度控制在原文长度的105%以上
+                        输出要求：
+                            按照原文结构，不要输出与综述报告无关的语句
+                        禁止修改：  
+                        - 原有技术细节     
+                        - 对比分析结论     
+                        - 文献引用关系""".lstrip()
+    }
+
+    res = queryDeepSeek(hints["theme_and_directions"].format(papers=papers))
+    try:
+        themes = json.loads(res)
+        print("解析成功")
+    except:
+        print("解析失败")
+        res = res.replace("```json", "").replace("```", "")
+        themes = json.loads(res)
+        print("解析2成功")
+    print("已获取themes\n")
     theme = themes["theme"]
     directions = themes["directions"]
-    introduction = generate_introduction(theme, directions, papers)
-    detailed_directions = generate_detailed_directions(directions, papers)
-    deficiencies = generate_deficiencies(theme, directions, papers)
-    conclusion = generate_conclusion(theme, directions, papers, deficiencies)
-    summary = f"# {theme}" + "\n# 引言\n" + introduction + "\n# 研究方向\n" + detailed_directions
-    summary += "\n##存在的不足\n" + deficiencies + "\n# 结论\n" + conclusion
+
+    global queryApplication
+    queryApplication = getQueryApplication(theme)
+
+    introduction = queryApplication(hints["introduction"].format(theme=theme, directions=directions, papers=papers))
+    print("introduction生成完成")
+    detailed_directions = ""
+    for direction in directions:
+        detailed_directions += f"## {direction}\n"
+        result_in_json = queryApplication(hints["detailed_directions"].format(direction=direction, papers=papers))
+        try:
+            r = json.loads(result_in_json)
+            print("解析成功")
+        except Exception as e:
+            print(e)
+            print("解析失败")
+            print(result_in_json)
+            result_in_json = result_in_json.replace("```json", "").replace("```", "")
+            r = json.loads(result_in_json)
+            print("解析2成功")
+        detailed_directions += r["技术发展脉络"] + "\n" + r["论文中给出的方法的实现细节"] + "\n" + r["提供的论文中符合这一研究方向的论文之间方法的对比"] + "\n"
+    print("directions生成完成")
+    deficiencies = queryApplication(hints["deficiencies"].format(papers=papers,theme=theme, directions=directions))
+    print("dediciences生成完成")
+    solution = queryApplication(hints["solution"].format(deficiencies=deficiencies,theme=theme,directions=directions))
+    print("solution生成完成")
+    future_view = queryApplication(hints["future_view"].format(theme=theme))
+    print("future_view生成完成")
+    field_summary = queryApplication(hints["field_summary"].format(theme=theme, papers=papers))
+    print("field_summary生成完成")
+    conclusion = "\n# 结论\n" + f"## 弥补不足\n{solution}\n## 未来展望\n{future_view}\n## 领域综述\n{field_summary}\n"
+    print("conclusion生成完成")
+    unoptimized_summary = f"# {theme}" + "\n# 引言\n" + introduction + "\n# 研究方向\n" + detailed_directions
+    unoptimized_summary += "\n## 存在的不足\n" + deficiencies + conclusion
+    
+    summary = ""
+    if len(unoptimized_summary) > 32000: #过长分块优化
+        summary += queryApplication(hints["optimize"].format(msg=introduction))
+        summary += queryApplication(hints["optimize"].format(msg=detailed_directions))
+        summary += queryApplication(hints["optimize"].format(msg=deficiencies))
+        summary += queryApplication(hints["optimize"].format(msg=conclusion))
+    else:
+        summary = queryApplication(hints["optimize"].format(msg=unoptimized_summary))
     return summary
 
 if __name__ == "__main__":
