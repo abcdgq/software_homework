@@ -71,6 +71,28 @@ def generate_introduction(theme, directions, papers):
     print(result)
     return result
 
+def generate_detailed_directions(directions, papers):
+    import json
+    result = ""
+    for direction in directions:
+        prompt=f"""撰写{direction}研究方向的详细分析，请从提供的论文中提取符合这一研究方向的论文进行后续生成。
+                   提供的论文及内容如下{papers} 
+                详细分析需包含：
+                    1.技术发展脉络:起源, 关键发展节点,当前进展
+                    2.论文中给出的方法的实现细节：核心创新点，技术实现路径，适用场景
+                    3.提供的论文中符合这一研究方向的论文之间方法的对比
+	            要求：
+                    1.以段落的格式返回结果，遵循综述写作规范。
+                    2.注意不要列举，不要列举，不要列举，以段落的格式回答，不要用"："进行列举，不要用markdown格式，不要使用**，不要输出与结果无关的内容。
+                返回格式要求：
+                    以json格式返回，返回格式：{{"技术发展脉络": "xxx", "论文中给出的方法的实现细节": "xxx", "提供的论文中符合这一研究方向的论文之间方法的对比": "xxx"}}
+                """
+        result_in_json = queryKimi(prompt)
+        r = json.loads(result_in_json)
+        result += r["技术发展脉络"] + "\n" + r["论文中给出的方法的实现细节"] + "\n" + r["提供的论文中符合这一研究方向的论文之间方法的对比"] + "\n"
+    print(result)
+    return result
+
 def generate_future_view(theme):
     prompt=f"""根据综述的主题{theme}生成对该主题的未来展望
 				要求：
