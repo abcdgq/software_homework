@@ -130,7 +130,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)',
         target: '.read-assistant' // 指定加载动画的目标
       })
-      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', { 'paper_id': this.paperID, 'file_type': 2 }, {timeout: 1000})
+      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', { 'paper_id': this.paperID, 'file_type': 2 })
         .then((response) => {
           if (response.status === 200) {
             this.fileReadingID = response.data.file_reading_id
@@ -158,9 +158,10 @@ export default {
         target: '.read-assistant' // 指定加载动画的目标
       })
       console.log('恢复研读对话的id, ', this.fileReadingID)
-      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', { 'file_reading_id': this.fileReadingID }, {timeout: 1000})
+      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', { 'file_reading_id': this.fileReadingID })
         .then((response) => {
           const history = response.data.conversation_history.conversation
+          console.log('history is...', history)
           for (const message of history) {
             const sender = message.role === 'user' ? 'user' : 'ai'
             const text = message.role === 'user' ? message.content : this.md.render(message.content)
