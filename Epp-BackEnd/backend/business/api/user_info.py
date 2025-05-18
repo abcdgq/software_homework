@@ -354,8 +354,7 @@ def get_summary_report(request):
         return reply.fail(msg="请先正确登录")
 
     report_id = request.GET.get('report_id')
-    data = json.loads(request.body)
-    type = data.get('type', None)
+    type = request.GET.get('type')
     if type == 'summary':
         # 多篇论文综述
         report = SummaryReport.objects.filter(report_id=report_id, user_id=user).first()

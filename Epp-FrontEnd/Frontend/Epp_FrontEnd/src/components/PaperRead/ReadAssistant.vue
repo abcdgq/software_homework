@@ -161,6 +161,7 @@ export default {
       await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', { 'file_reading_id': this.fileReadingID })
         .then((response) => {
           const history = response.data.conversation_history.conversation
+          console.log('history is...', history)
           for (const message of history) {
             const sender = message.role === 'user' ? 'user' : 'ai'
             const text = message.role === 'user' ? message.content : message.content
