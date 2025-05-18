@@ -1,264 +1,193 @@
 {
     "metadata": {
-        "title": "VLMAE: Vision-Language Masked Autoencoder",
+        "title": "Location-Sensitive Visual Recognition with Cross-IOU Loss",
         "authors": [
             {
-                "name": "Sunan He",
+                "name": "Kaiwen Duan",
                 "affiliations": [
                     {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
-            },
-            {
-                "name": "Taian Guo",
-                "affiliations": [
-                    {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
-            },
-            {
-                "name": "Tao Dai",
-                "affiliations": [
-                    {
-                        "name": "College of Computer Science and Software Engineering",
-                        "type": "department"
-                    },
-                    {
-                        "name": "Shenzhen University",
+                        "name": "University of Chinese Academy of Sciences",
                         "type": "institution"
                     }
                 ]
             },
             {
-                "name": "Ruizhi Qiao",
+                "name": "Lingxi Xie",
                 "affiliations": [
                     {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
+                        "name": "Huawei Inc",
+                        "type": "institution"
                     }
                 ]
             },
             {
-                "name": "Chen Wu",
+                "name": "Honggang Qi",
                 "affiliations": [
                     {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
+                        "name": "University of Chinese Academy of Sciences",
+                        "type": "institution"
                     }
                 ]
             },
             {
-                "name": "Xiujun Shu",
+                "name": "Song Bai",
                 "affiliations": [
                     {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
+                        "name": "Huazhong University of Science and Technology",
+                        "type": "institution"
                     }
                 ]
             },
             {
-                "name": "Bo Ren",
+                "name": "Qingming Huang",
                 "affiliations": [
                     {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
+                        "name": "University of Chinese Academy of Sciences",
+                        "type": "institution"
+                    }
+                ]
+            },
+            {
+                "name": "Qi Tian",
+                "affiliations": [
+                    {
+                        "name": "Huawei Inc",
+                        "type": "institution"
                     }
                 ]
             }
         ],
-        "abstract": "Image and language modeling is of crucial importance for vision-language pre-training (VLP), which aims to learn multi-modal representations from large-scale paired imagetext data. However, we observe that most existing VLP methods focus on modeling the interactions between image and text features while neglecting the information disparity between image and text, thus suffering from focal bias. To address this problem, we propose a vision-language masked autoencoder framework (VLMAE). VLMAE employs visual generative learning, facilitating the model to acquire finegrained and unbiased features. Unlike the previous works, VLMAE pays attention to almost all critical patches in an image, providing more comprehensive understanding. Extensive experiments demonstrate that VLMAE achieves better performance in various vision-language downstream tasks, including visual question answering, image-text retrieval and visual grounding, even with up to 20% pre-training speedup."
+        "abstract": "Object detection, instance segmentation, and pose estimation are popular visual recognition tasks which require localizing the object by internal or boundary landmarks. This paper summarizes these tasks as locationsensitive visual recognition and proposes a unified solution named location-sensitive network (LSNet). Based on a deep neural network as the backbone, LSNet predicts an anchor point and a set of landmarks which together define the shape of the target object. The key to optimizing the LSNet lies in the ability of fitting various scales, for which we design a novel loss function named cross-IOU loss that computes the cross-IOU of each anchor-landmark pair to approximate the global IOU between the prediction and ground-truth. The flexibly located and accurately predicted landmarks also enable LSNet to incorporate richer contextual information for visual recognition. Evaluated on the MS-COCO dataset, LSNet set the new state-of-theart accuracy for anchor-free object detection (a 53.5% box AP) and instance segmentation (a 40.2% mask AP), and shows promising performance in detecting multi-scale human poses. Code is available at"
     },
     "sections": {
         "Introduction": [
             {
                 "title": "Introduction",
                 "content": [
-                    "In recent years, with the prevalence of self-supervised learning and transformer-based models in both natural language processing and computer vision (Devlin et al. 2018;Dosovitskiy et al. 2020), we have witnessed rapid development in vision-language representation learning. In multi-modal tasks, such as visual question answering and image-text retrieval, where the model needs to comprehend and aggregate visual-textual information, vision-language pre-training (VLP) plays a fundamental role.",
-                    "Early VLP methods (Lu et al. 2019;Li et al. 2020;Chen et al. 2020) rely on a well-trained but heavy object detector on the input image for visual proposal feature extraction, followed by a cross-model encoder for visual-textual interaction. To eliminate the heavy object detector, some recent methods (Huang et al. 2021;Kim, Son, and Kim 2021;Wang et al. 2021) resort to vision dictionary with a lightweight visual embedder or modality experts networks for better trade-off between efficiency and performance of downstream tasks. Very recently, ALBEF (Li et al. 2021  By contrast, our VLMAE produces better results (in green) with a universal focus over the whole image.",
-                    "tures, facilitating the aggregation of multi-modal information. TCL (Yang et al. 2022) further leverages cross-modal and intra-modal self-supervision simultaneously to obtain multi-modal interactions more easily, leading to the most recent state-of-the-art performance. Despite impressive performance of ALBEF and TCL, such methods may focus on specific objects of interest from training data, while neglecting other critical objects (see Figure 1), thus leading to focal bias problem. This is mainly due to the information disparity between image and text. For example, as shown in Figure 1, the corresponding training text of the top row figure is \"The chair is purple\", which only describes parts of the image. The image encoder needs to pay more attention to the text-relevant area to facilitate the alignment between image and text while neglecting some irrelevant regions. However, for VLP models, without any textual prior, the image feature should be task-agnostic, and all critical objects in an image should be attended to. To alleviate such bias, in this work, we introduce a generative task of pixel-level reconstruction, relying on a comprehensive understanding of the image.",
-                    "Pixel-level image reconstruction with the encoderdecoder paradigm is prevalent in representation learning (Vincent et al. 2008;Kingma and Welling 2013). Recently, with asymmetric encoder-decoder architecture, masked autoencoders (MAE) (He et al. 2022) exhibits high generalizability and remarkable performance in vision tasks. The simple but insightful pre-training strategy, i.e., masking a very high portion of random patches, exploits image redundancy and forces the model to acquire comprehensive understanding of the image. Inspired by MAE, we adopt the masking-then-predicting paradigm and introduce a pixel-level reconstruction task for alleviating the focal bias problem.",
-                    "In this paper, we propose a novel VLP framework called Vision-Language Masked AutoEncoder (VLMAE), which is composed of two uni-modal encoders to extract visual and textual features, an image decoder for pixel-level reconstruction, and a fusion learner to aggregate the multi-modal features. VLMAE employs image-text contrastive learning and visual generative learning simultaneously. Contrastive learning promotes the alignment of image-text pairs and enables the model to obtain global semantic representations, and generative learning facilitates the model to acquire more comprehensive and fine-grained understanding. We propose Regional Masked Image Modeling (RMIM) loss to refine the image-text alignment and facilitate fusion of multi-modal features. To enhance the model's representation ability, we further propose the Image Feature Reconstruction (IFR) task, which requires the model to predict masked patch features based on visible patch inputs. Meanwhile, the masking design for the image patches in VLMAE reduces pretraining cost significantly.",
-                    "Our main contributions can be summarized as: age and text embeddings separately with dual uni-modal encoders (Radford et al. 2021;Andonian, Chen, and Hamid 2022). Recent methods model the vision-language interaction with contrastive loss on massive noisy paired imagetext data crawled from Internet. Despite thire simplicity, they achieve remarkable performance in cross-modal retrieval tasks with high efficiency. However, these methods do not perform well in more complex multi-modal downstream tasks, such as visual question answering and visual reasoning, which require the aggregation of visual-textual information and reasoning capabilities. They lack the capability to model more complicated interactions between the two modalities, which is indispensable for multi-modal reasoning. The second category adopts a transformer-based multimodal fusion encoder to model the interactions between images and texts (Kim, Son, and Kim 2021;Li et al. 2021;Zeng, Zhang, and Li 2021). These models achieve superior performance for downstream vision-language reasoning or classification tasks, thanks to the interaction modeling capability of the deep fusion encoder. Earlier methods rely on a pre-trained object detector for visual region feature extraction, which observably slows down the inference procedure.",
-                    "Latter methods endeavor to remove the heavy object detector for high inference efficiency. Among them, SOHO (Huang et al. 2021) adopts a vision dictionary to extract compact visual features from the whole image, while ViLT (Kim, Son, and Kim 2021) uses lightweight image and text tokenizers instead of separate uni-modal encoders to achieve faster inference speed. While these methods of the second category aggregate the multi-modal feature effectively, they ignore the importance of image-text alignment, hindering the interaction between the visual and textual modalities. To address this disadvantage, ALBEF (Li et al. 2021) proposes to align the visual and textual representations with contrastive learning before fusing them in the fusion encoder with cross-modal attention. Besides, ALBEF adopts pseudo-targets produced by a momentum model to conduct momentum distillation for better noise resistance capability when learning from the noisy web data. VLMO (Wang et al. 2021) further introduces Mixture-of-Modality-Experts (MOME) Transformer and stage-wise pre-training strategy, leading to better performance in downstream tasks with prominent efficiency. TCL (Yang et al. 2022) also shares the similar aligningbefore-fusing spirit of ALBEF but leverages cross-modal and intra-modal self-supervision simultaneously to enhance multi-modal interactions, achieving the most recent stateof-the-art performance. Though effective, previous visionlanguage pre-training methods with contrastive learning rely on modeling global semantic interactions and aim to maximize image-text mutual information, resulting in the focal bias problem. Motivated by recent generative methods in visual self-supervised learning (He et al. 2022;Chen et al. 2022), we propose to introduce pixel-level reconstruction task to VLP. To restore the image, the model needs to pay attention to almost all patches instead of only salient regions. With such masking-then-predicting paradigm, our model provides more comprehensive understanding of the image and achieves superior performance in downstream multi-modal tasks with significant pre-training cost reduction."
+                    "Object recognition is a fundamental task in computer vision. Beyond image classification [16] that depicts an image using a single semantic label, there exist other recognition tasks that not only predict the class of the object but also localize it using fine-scaled information. In this paper, we consider three popular examples including object detection [19,36], instance segmentation [19,13], and human pose estimation [1,36]. We notice that, despite the fact that the rapid progress of deep learning [32] has introduced"
                 ]
             }
         ],
         "RelatedWork": [
             {
-                "title": "Introduction",
+                "title": "Related Work",
                 "content": [
-                    "In recent years, with the prevalence of self-supervised learning and transformer-based models in both natural language processing and computer vision (Devlin et al. 2018;Dosovitskiy et al. 2020), we have witnessed rapid development in vision-language representation learning. In multi-modal tasks, such as visual question answering and image-text retrieval, where the model needs to comprehend and aggregate visual-textual information, vision-language pre-training (VLP) plays a fundamental role.",
-                    "Early VLP methods (Lu et al. 2019;Li et al. 2020;Chen et al. 2020) rely on a well-trained but heavy object detector on the input image for visual proposal feature extraction, followed by a cross-model encoder for visual-textual interaction. To eliminate the heavy object detector, some recent methods (Huang et al. 2021;Kim, Son, and Kim 2021;Wang et al. 2021) resort to vision dictionary with a lightweight visual embedder or modality experts networks for better trade-off between efficiency and performance of downstream tasks. Very recently, ALBEF (Li et al. 2021  By contrast, our VLMAE produces better results (in green) with a universal focus over the whole image.",
-                    "tures, facilitating the aggregation of multi-modal information. TCL (Yang et al. 2022) further leverages cross-modal and intra-modal self-supervision simultaneously to obtain multi-modal interactions more easily, leading to the most recent state-of-the-art performance. Despite impressive performance of ALBEF and TCL, such methods may focus on specific objects of interest from training data, while neglecting other critical objects (see Figure 1), thus leading to focal bias problem. This is mainly due to the information disparity between image and text. For example, as shown in Figure 1, the corresponding training text of the top row figure is \"The chair is purple\", which only describes parts of the image. The image encoder needs to pay more attention to the text-relevant area to facilitate the alignment between image and text while neglecting some irrelevant regions. However, for VLP models, without any textual prior, the image feature should be task-agnostic, and all critical objects in an image should be attended to. To alleviate such bias, in this work, we introduce a generative task of pixel-level reconstruction, relying on a comprehensive understanding of the image.",
-                    "Pixel-level image reconstruction with the encoderdecoder paradigm is prevalent in representation learning (Vincent et al. 2008;Kingma and Welling 2013). Recently, with asymmetric encoder-decoder architecture, masked autoencoders (MAE) (He et al. 2022) exhibits high generalizability and remarkable performance in vision tasks. The simple but insightful pre-training strategy, i.e., masking a very high portion of random patches, exploits image redundancy and forces the model to acquire comprehensive understanding of the image. Inspired by MAE, we adopt the masking-then-predicting paradigm and introduce a pixel-level reconstruction task for alleviating the focal bias problem.",
-                    "In this paper, we propose a novel VLP framework called Vision-Language Masked AutoEncoder (VLMAE), which is composed of two uni-modal encoders to extract visual and textual features, an image decoder for pixel-level reconstruction, and a fusion learner to aggregate the multi-modal features. VLMAE employs image-text contrastive learning and visual generative learning simultaneously. Contrastive learning promotes the alignment of image-text pairs and enables the model to obtain global semantic representations, and generative learning facilitates the model to acquire more comprehensive and fine-grained understanding. We propose Regional Masked Image Modeling (RMIM) loss to refine the image-text alignment and facilitate fusion of multi-modal features. To enhance the model's representation ability, we further propose the Image Feature Reconstruction (IFR) task, which requires the model to predict masked patch features based on visible patch inputs. Meanwhile, the masking design for the image patches in VLMAE reduces pretraining cost significantly.",
-                    "Our main contributions can be summarized as: age and text embeddings separately with dual uni-modal encoders (Radford et al. 2021;Andonian, Chen, and Hamid 2022). Recent methods model the vision-language interaction with contrastive loss on massive noisy paired imagetext data crawled from Internet. Despite thire simplicity, they achieve remarkable performance in cross-modal retrieval tasks with high efficiency. However, these methods do not perform well in more complex multi-modal downstream tasks, such as visual question answering and visual reasoning, which require the aggregation of visual-textual information and reasoning capabilities. They lack the capability to model more complicated interactions between the two modalities, which is indispensable for multi-modal reasoning. The second category adopts a transformer-based multimodal fusion encoder to model the interactions between images and texts (Kim, Son, and Kim 2021;Li et al. 2021;Zeng, Zhang, and Li 2021). These models achieve superior performance for downstream vision-language reasoning or classification tasks, thanks to the interaction modeling capability of the deep fusion encoder. Earlier methods rely on a pre-trained object detector for visual region feature extraction, which observably slows down the inference procedure.",
-                    "Latter methods endeavor to remove the heavy object detector for high inference efficiency. Among them, SOHO (Huang et al. 2021) adopts a vision dictionary to extract compact visual features from the whole image, while ViLT (Kim, Son, and Kim 2021) uses lightweight image and text tokenizers instead of separate uni-modal encoders to achieve faster inference speed. While these methods of the second category aggregate the multi-modal feature effectively, they ignore the importance of image-text alignment, hindering the interaction between the visual and textual modalities. To address this disadvantage, ALBEF (Li et al. 2021) proposes to align the visual and textual representations with contrastive learning before fusing them in the fusion encoder with cross-modal attention. Besides, ALBEF adopts pseudo-targets produced by a momentum model to conduct momentum distillation for better noise resistance capability when learning from the noisy web data. VLMO (Wang et al. 2021) further introduces Mixture-of-Modality-Experts (MOME) Transformer and stage-wise pre-training strategy, leading to better performance in downstream tasks with prominent efficiency. TCL (Yang et al. 2022) also shares the similar aligningbefore-fusing spirit of ALBEF but leverages cross-modal and intra-modal self-supervision simultaneously to enhance multi-modal interactions, achieving the most recent stateof-the-art performance. Though effective, previous visionlanguage pre-training methods with contrastive learning rely on modeling global semantic interactions and aim to maximize image-text mutual information, resulting in the focal bias problem. Motivated by recent generative methods in visual self-supervised learning (He et al. 2022;Chen et al. 2022), we propose to introduce pixel-level reconstruction task to VLP. To restore the image, the model needs to pay attention to almost all patches instead of only salient regions. With such masking-then-predicting paradigm, our model provides more comprehensive understanding of the image and achieves superior performance in downstream multi-modal tasks with significant pre-training cost reduction."
+                    "Deep neural networks have been widely applied for visual recognition tasks. Among them, image classification [16] is the fundamental task that facilitates the design of powerful network backbones [25,60,20]. Beyond image-level description, there exist fine-scaled tasks, including object detection, instance segmentation, and pose estimation, which focus on depicting different aspects of the object. For example, the bounding boxes locate objects simply and efficiently but lack the details, while masks and keypoints reflect the shape and pose of the objects but usually need the bounding boxes to locate object firstly. According to the different properties of different tasks, many representative methods have been developed.",
+                    "The object detection methods can be roughly categorized into anchor-based and anchor-free. The anchor-based methods detect objects by placing a pre-defined set of anchor boxes, predicting the class and score for each anchor, and finally regressing the preserved boxes tightly around the objects. The representative methods include Fast R-CNN [21], Faster RCNN [49], R-FCN [14], SSD [38], Reti-naNet [35], Cascade R-CNN [4], etc. On another line, the anchor-free methods usually represent an object as a combination of geometry. Among them, CornerNet [30] and DeNet [55] generated a bounding box by predicting a pair of corner keypoints, and CenterNet (keypoint triplets) [17] and CPNDet [18] applied semantic information within the objects to filter out the incorrect corner pairs. FCOS [52], RepPoints [61], FoveaBox [29], SAPD [68], CenterNet (objects as points) [66], YOLO [47], etc., defined a bounding box by placing a single point (called anchor point) within the object and predicting its distances to the object boundary.",
+                    "For instance segmentation, there are mainly two kinds of methods, namely, the pixel-based and the contour-based methods. The pixel-based methods consider the segmentation problem as predicting the class of each single pixel. One of the representative work is Mask R-CNN [24], which first predicted the bounding box to help locating the objects, and then used pixel-wise classification to determine the object mask. The contour-based methods instead represent an object by the contour. They often start with a set points that are roughly located around the object boundary, and the points gradually get closer to the object boundary under iteration. The early representative methods are the snake series [27,11,23,12] and the recent efforts include using deep neural network [22] and the idea of anchor-free to improve the features, such as DeepSnake [44] and PolarMask [59].",
+                    "There are two mainstreams for human pose estimation, namely, the bottom-up methods [3,10,26,39,5] and topdown methods [66,54,58,37]. The bottom-up methods first detect the human parts and then locates the keypoints in each object, while the top-down first locates all the keypoints in the human body and then composes the individual parts into a person. The keypoints are often sparsely distributed in an image and thus are difficult to be accurately located. A practical solution is to detect the keypoints in a high-resolution feature map, called heatmap [40,10,10]. However, applying the heatmap makes the optimization hard and introduces a complex post-processing operation. CenterNet [66] proposes a neat and simple method, which only predicts a center heatmap and the keypoints are obtained by regressing the vector from the center within objects to the keypoints.",
+                    "This paper particularly focuses on the anchor-free methods for visual recognition. These methods originated from object detection and have drawn a lot of attention recently. They do not rely on the pre-defined anchor boxes to locate objects but by points and distance. Therefor, the anchor-free methods enjoy the ability to extend into any directions. This offers the researchers a possibility to unify the visual recognition tasks. Recent trends have spent effort in extending the anchor-free methods in object detection into other tasks, e.g., PolarMask [59] tries to extend the anchor-free into instance segmentation, while Center-Net [66] applies it into the pose estimation. Compared with our framework, both of them have limitations, which we will give a detailed discussion in section 3.2."
                 ]
             }
         ],
         "Methodology": [
             {
-                "title": "Masked Image Modeling",
-                "content": [
-                    "Inspired by Masked Language Modeling (MLM) (Devlin et al. 2018) in NLP, Masked Image Modeling (MIM) is adopted in visual pre-training and has shown impressive results in downstream visual tasks. Existing MIM works can be classified into two categories. Methods in the first category predict discrete tokens generated by VQ-VAE (Van Den Oord, Vinyals et al. 2017) or its variants, such as BEiT (Bao, Dong, and Wei 2021), mc-BEiT (Li et al. 2022) and PeCo (Dong et al. 2021). Methods of the second category adopt masking strategies to exploit the redundancy nature of images for visual pre-training. MaskFeat (Wei et al. 2022) randomly masks a portion of video sequence and regresses Histograms of Oriented Gradients (HOG) features of masked regions. MAE (He et al. 2022) and SimMIM (Xie et al. 2022) predict pixel RGB values directly to promote image pre-training, achieving even better performance than complicatedly designed token classification methods.",
-                    "Most recently, several concurrent works explore the masked token/patch prediction task for vision-language pretraining. M3AE (Geng et al. 2022) randomly masks the unified sequence of image patches and text tokens, and encodes the visible image patches into embeddings with the same dimension as the language embeddings to perform joint training of the two modalities. Due to the lack of alignment and interaction between the two modalities during pretraining, it is hard to apply directly to various multi-modal downstream tasks. VLC (Gui et al. 2022) initializes the vision backbone from the pre-trained MAE model, thus avoiding supervised training, and performs intra-modal reconstruction via masked image/language modeling. However, the performance in downstream tasks can be sub-optimal due to the lack of elaborate arrangements between MIM and other proxy tasks. Meanwhile, VLC suffers from severe pre-training burden due to the large image input size (e.g., 384) and full patches input. In comparison, our VL-MAE adopts a simple yet effective design to simultaneously employ image-text contrastive learning and visual generative learning, achieving SOTA performance with less pretraining cost."
-                ]
-            },
-            {
-                "title": "Methodology",
+                "title": "Our Approach",
                 "content": []
             },
             {
-                "title": "Observation",
+                "title": "Location-Sensitive Visual Recognition",
                 "content": [
-                    "As image-text dataset plays a fundamental role in visionlanguage pre-training tasks, we first explore the prevalent pre-training datasets. Concretely, we calculate the similarity between image and text embedding extracted by a pretrained CLIP model (Radford et al. 2021). Figure 2 shows the distribution of similarity and samples from different intervals. In low relevance interval, texts only depict the background or \"unsalient\" regions, and in medium relevance interval, texts describe the \"salient\" objects but ignore some details. For contrastive learning based methods (Li et al. 2021;Yang et al. 2022), this information disparity between Shadow of tree and leaves on pavement.",
-                    "Closed brown wooden door."
+                    "Visual recognition tasks start with an image, X. Image classification aims to assign a class label c for the entire image, yet there are more challenging tasks for finescaled recognition. These tasks often focus on the instances (i.e., individual objects) in the image and depict the object properties from different aspects. Typical examples include object detection that uses a rectangular box that tightly cover the object, instance segmentation that finds out each pixel that belongs to the object, and human pose estimation that localizes the landmarks of the object (i.e., human keypoints). We use b ∈ R 4 , s ∈ [0, 1] W ×H , and k ∈ R K×2 to indicate the target of these tasks, where W and H are the image width and height, and K is the number of keypoints.",
+                    "An important motivation of our work is that, although these tasks differ from each other in the form of description, they share the common requirement that the model should be sensitive to the location of the anchor and/or landmarks. Throughout the remaining part of this paper, we refer to these tasks as location-sensitive visual recognition and design a unified framework for them."
                 ]
             },
             {
-                "title": "Low Relevance",
+                "title": "LSNet: A Unified Framework",
                 "content": [
-                    "The cow is black and white.",
-                    "Street signs on a metal pole."
+                    "The proposed location-sensitive network (LSNet) starts with a backbone (e.g., the ResNet [25], ResNeXt [60], etc.) that extracts features from the input image. We denote the process using x = f (X). Next, an anchor point and a few landmarks are predicted on top of x, denoted as p = g(x).",
+                    "Here we define p ∈ R (N +1)×2 where N is the number of landmarks, p 0 ∈ Rfoot_1 is the anchor point, and",
+                    "As a unified framework, the key is to relate the prediction targets (i.e., b ∈ R 4 , s ∈ [0, 1] W ×H , and k ∈ R K×2 as aforementioned) to p. For object detection, this is done by finding an extreme point (a pixel that belongs to the object and is tangent to the bounding box) on each edge of the bounding boxfoot_0 , i.e., N = 4. For instance segmenta-tion, we locate a fixed number (e.g., 36 in the experiments, N = 36) of landmarks along the contour and thus use the formed polygon to approximate the shape of the object 2 . For human pose estimation, we follow the definition of the dataset to learn a fixed number of keypoints, e.g., in the MS-COCO dataset, N = 17.",
+                    "Figure 2 shows the pipeline of LSNet. It belongs to the category of anchor-free methods, i.e., there is no need to pre-define a set of anchor boxes for localizing the object. LSNet is partitioned into two stages, where the first stage predicts an anchor point from the FPN head and relates it with a set of landmarks, and the second stage composes the landmarks into an object with the desired geometry (e.g., a bounding box). To facilitate accurate localization, we use the ATSS assigner [64] to assign more anchor points for each object and extract features with deformable convolution (DCN) upon the predicted landmarks. The entire model is an end-to-end trainable learnable function.",
+                    "LSNet receives two sources of supervision for localization and classification, elaborated in Sections 3.3 and 3.4, respectively. The localization loss is added to both stages, where the major contribution is a unified loss that fits the properties of different tasks, and the classification loss is added to the second stage upon the DCN features.",
+                    "LSNet extends the border of anchor-free methods for location-sensitive visual recognition. We briefly review two counterparts. (i) CenterNet predicted horizontal or vertical offsets beyond the anchor point for object detection. This limits its ability in finding the extreme points and extracting discriminative features, yet it cannot perform instance segmentation. (ii) PolarMask used a polar coordinate system for instance segmentation, making it difficult to process the situation that a ray intersects the object multiple times at some direction. In comparison, LSNet easily handles the challenging scenarios and report superior performance (see the experimental part, section 4)."
                 ]
             },
             {
-                "title": "Medium Relevance",
+                "title": "Cross IOU Loss",
                 "content": [
-                    "Red sling backs with apples.",
-                    "Cat sitting inside open umbrella.",
-                    "High Relevance image and text may cause the focal bias problem because image encoder tends to pay more attention to the text-relevant area for better alignment between visual and textual embedding. Therefore, we introduce generative learning to alleviate such bias during the pre-training phase."
+                    "The unified framework raises new challenges to the supervision of localization, because the function needs to consider both the global and local properties of the object. To clarify, we notice that the evaluation of object detection and instance segmentation judges if an object is correctly recognized by the global IOU between the prediction and the ground-truth, while pose estimation measures the accuracy by each individual keypoint.",
+                    "To this end, we design the cross-IOU loss as the unified supervision.",
+                    "The loss is defined upon the predicted and ground-truth objects, and we use p , where p = (p x , p y ), to denote the corresponding ground-truth of the anchor point and landmarks. In the left part, C3-C5 denote the feature maps in the backbone that are connected to the feature pyramid [34], and P3-P7 denote the FPN layers used for final prediction. LSNet is partitioned into two stages. In the first stage, we predict a set of offset vectors that relate the anchor point to the extreme points under the supervision of the cross-IOU loss. In the second stage, the predicted vectors are used as the offsets of the deformable convolution (DCN) [15] to extract complementary visual features around the extreme points. These features are used for refining the localization and predicting the object class.",
+                    "We compute the offset from the anchor point to the landmarks in a cross-coordinate system, i.e., q n = (p n,x -p 0,x ) -, (p n,x -p 0,x ) + , (p n,y -p 0,y ) -, (p n,y -p 0,y )",
+                    "for n = 1, 2, . . . , N , where (a)",
+                    "-and (a)",
+                    "+ denotes max{-a, 0} and max{a, 0}, respectively. Finally, we write the cross-IOU loss as:",
+                    "where |•| 1 indicates the 1 -norm. In other words, the cross-IOU function rewards the components (q n and q n ) of similar length (in which case the prediction and the groundtruth maximally overlap) and penalizes the components on different directions. Based on the Eqn (1), we define the cross-IOU loss as",
+                    "Obviously, when p n = p n for all n, we have L cIOU = 0 as expected 3 .",
+                    "The cross-IOU loss brings a direct benefit that it fits different scales of features without the need of specific parameter tuning. This alleviates the difficulty of integrating multi-scale information, e.g., using the feature pyramid [34]. In comparison, the smooth-1 loss [21] is sensitive to the scale of vector (e.g., the loss value tends to be large when the feature resolution is large) and neglects the relationship between the components that are from the same vector. Moreover, by approximating the IOU using individual components, the cross-IOU loss is flexibly transplanted to instance segmentation and human pose estimation, unlike the original IOU loss [63] that is difficult to compute on polygons (for segmentation) and undefined for discrete keypoints (for pose estimation)."
                 ]
             },
             {
-                "title": "Model Architecture",
-                "content": [
-                    "The overall architecture of our VLMAE model is illustrated in Figure 3. VLMAE contains an image encoder g(•) and a text encoder h(•) to extract uni-modal features. An image decoder is introduced to reconstruct masked patches, and the fusion learner aggregates the vision-language features for multi-modal tasks. Similar to previous works (Li et al. 2021;Yang et al. 2022), for each encoder, we maintain a momentum counterpart ĝ(•), ĥ(•) and update their parameters following θ ĝ = mθ ĝ + (1 -m)θ g ."
-                ]
+                "title": "FPN layers",
+                "content": []
             },
             {
-                "title": "Feature Extraction",
+                "title": "Pyramid DCN",
                 "content": [
-                    "Given an image I, we split it into non-overlapping patches and project them into a sequence of patch embeddings,",
-                    ", where N is the number of patches. Following MAE (He et al. 2022), we randomly divide the patches into visible patches x vis"
-                ]
-            },
-            {
-                "title": "Regional Mask Image Modeling",
-                "content": [
-                    "Unlike MAE (He et al. 2022), we aim to reconstruct the invisible patches with both image and text features to facilitate multi-modal information fusion. Concretely,we concatenate the masked visual representations v cls , v vis 1 , . . . , v vis N -M and text representations {w cls , w 1 , . . . , w L } and feed them into the image decoder. Specifically, for the text with bounding box annotation, we propose to apply a regional reconstruction loss to facilitate the aggregation of multi-modal features. Formally, the reconstruction loss is defined as:",
-                    "where D is the pre-training dataset and T is the input text. I vis denotes the visible patches and I msk denotes the masked patches in text-relevant region. For text without bounding box annotation, we treat the whole image as text-relevant region. The objective f mim calculates the mean squared error (MSE) between the reconstructed and original images at the pixel level."
-                ]
-            },
-            {
-                "title": "Image Feature Reconstruction",
-                "content": [
-                    "Because only parts of image patches are fed into the image encoder while the remaining patches are invisible, it causes information insufficiency. In order to enhance the representation ability of the model, we propose the image feature reconstruction task, which requires the image encoder to reconstruct the global feature generated by momentum image encoder. Concretely, we take the output [CLS] embedding vcls of momentum image encoder ĝ(•), which is given by the complete image, as the target feature. The reconstruction loss is denoted as",
-                    "The reconstruction objective f r is L1 loss in practice."
-                ]
-            },
-            {
-                "title": "Image-Text Contrastive Learning",
-                "content": [
-                    "To further fuse the vision and language representations, we introduce common vision-language pre-training tasks, namely, image-text contrastive learning (ITC), image-text matching (ITM), and masked language modeling (MLM).",
-                    "To facilitate the alignment among the features of image and its corresponding texts, we introduce contrastive learning between image feature v cls and text feature w cls . The similarity function is formatted as s(I, T ) = φ v (v cls ) φw ( ŵcls ) and s(T, I) = φ w (w cls ) φv (v cls ), where φ(•) is a linear projection. Given a batch of imagetext pairs, the image-text and text-image similarities are:",
-                    "where B is the batchsize and τ is a learnable temperature parameter. The image-text contrastive loss is defined as:",
-                    ") where H(; ) is the cross-entropy. y i2t and y t2i are ground truth logits which are guided by momentum distillation following previous work (Li et al. 2021)."
-                ]
-            },
-            {
-                "title": "Image-Text Matching",
-                "content": [
-                    "As a widely used training objective in VLP, ITM aims to determine whether a pair of image and text is matched. Concretely, we take the output [CLS] embedding of fusion learner as the multi-modal representation to predict the correspondence between image and text. The objective L itm is defined as: where p itm is the predicted probability. y itm is the grounding truth which evaluates to 1 iff that the input image and text are matched."
-                ]
-            },
-            {
-                "title": "Masked Language Modeling",
-                "content": [
-                    "Following BERT (Devlin et al. 2018), MLM aims to predict the masked words based on visual and textual features. We randomly mask out 15% tokens in an input sentence. Each token is replaced with the [MASK] token, a random word, or left unchanged, with the probability of 80%, 10% and 10%, respectively. Denote masked text input as T msk , the L mlm is formatted as:",
-                    "where p msk is the predicted probability of the masked token and y msk is the ground truth distribution.",
-                    "The training objective of VLMAE is summarized as follows:"
+                    "To enhance discriminative information for recognition, we use deformable convolution (DCN) [15,70] to extract features from the landmarks. The standard DCN has 9 off-sets, while the number of offsets is 4, 36, and 17 for detection, segmentation, and pose estimation, respectively. In the latter two cases, to avoid redundant features extracted from close areas, we sample 9 landmarks uniformly from the candidates. We further build the feature extraction module upon the feature pyramid [34]. The offsets are adjusted to different stages by accordingly rescaling the vectors.",
+                    "We name the proposed method Pyramid-DCN, and illustrate it in Figure 3. As shown in experiments, both feature extraction from the landmarks and using the pyramid structure improve recognition accuracy."
                 ]
             }
         ],
         "Experiments": [
             {
+                "title": "Experiments",
+                "content": []
+            },
+            {
+                "title": "Dataset and Evaluation Metrics",
+                "content": [
+                    "We evaluate our framework on the MS-COCO 2017 dataset [36], which is a popular, large-scale object detection, segmentation, and human pose dataset. For object detection and segmentation, it contains over 118K training images, 5K validation images and 20K test-dev images covering 80 object categories. For human pose, the person instance is labeled with 17 keypoints, containing over 57K training images with 150K person instances, 5K validation images and 20K test-dev images.",
+                    "The average precision (AP) metric is applied to characterize the performance of our method as well as other competitors. There are subtle differences in the definition of AP for different tasks. For object detection, AP is calculated the average precision under different bounding box IOU thresholds(from 0.5 to 0.95), while the bounding box IOU is replaced with the mask IOU in instance segmentation. In the human pose task, AP is calculated based on the object keypoint similarity (OKS), which reflects the distance between the predicted keypoints and the annotations."
+                ]
+            },
+            {
                 "title": "Implementation Details",
                 "content": [
-                    "In VLMAE, we apply a 12-layer ViT-B/16 (Dosovitskiy et al. 2020) as our image encoder, which is initialized by Im-ageNet 1K pre-trained weights. Following (He et al. 2022), we take a 4-layer transformer with 512 dim as our image decoder. The text encoder is implemented by the first 6 layers of BERT base and the last 6 layers are taken as the fusion learner. During the pre-training stage, we train the model for 30 epochs with a total batch size of 512 on 8 GPUs. We utilize AdamW (Loshchilov and Hutter 2017) optimizer with weight decay of 0.02. The learning rate is warmed-up to 1e-4 in the first 1000 iterations and decayed to 1e-5 following a cosine schedule. Following (Li et al. 2021;Yang et al. 2022), we crop the image into 256 × 256 and apply random color jittering, random grayscale conversion, random Gaussian Blur, random horizontal flip, and RandAugment (Cubuk et al. 2020) on it. During the fine-tuning stage, we increase the image resolution to 384 × 384."
+                    "We use ResNet [25], ResNeXt [60] and Res2Net [20] with the weights pre-trained on ImageNet [16] as our backbones, respectively. The feature pyramid network (FPN) [34] is applied to deal with objects with different scales. For object detection, we set four vectors for each object to learn to find the four extreme points (top, left, bottom, right). We refer to ExtremeNet [67] to obtain extreme point annotations from the object mask 4 . For instance segmentation and human pose estimation, we set 36 vectors for each instance to regress the location of contour points and 17 vectors to regress the 17 keypoints.",
+                    "Training and Inference. We train our framework on eight NVIDIA Tesla-V100 GPUs with two images on each GPU. The initial learning rate is set as 0.01, the weight decay as 0.0001 and momentum as 0.9. In the ablation study, we use a ResNet-50 [25] pre-trained on ImageNet [16] as the backbone, and fine-tune the model for 12 epochs using a single-scale of [800, 1333] and augment the training images with random horizontal flipping. The learning rate decays by a factor of 10 at after the 8th and 11th epochs, respectively. We also use stronger backbones and longer training epochs (24 epochs for object detection, 30 epochs for instance segmentation and 60 epochs for human pose with the learning rate decayed by a factor of 10 after the 16th, 22nd, and 50th epochs, respectively) and multi-scale input images (from [400, 1333] to [960, 1333]) to further improve the recognition accuracy. In the first stage, we only select the anchor point closest to the center of the object as a positive sample. In the second stage, we use the ATSS [64] assigner to assign the anchor points for each object. The overall loss function is",
+                    "where L cls and L vector denote the Focal loss [35] and our cross-IOU loss, respectively. We set the balancing coefficients, β and γ, to be 1.0 and 2.0 in the experiments. During the inference, both the single-scale testing and multi-scale testing strategy are applied. We use the scale of [800, 1333] for single-scale testing. For the multi-scale testing, we refer to ATSS [64] to set the image scales. We also use the nonmaximum suppression (NMS) strategy with a threshold of 0.6 to remove the redundant results."
                 ]
             },
             {
-                "title": "Downstream Tasks",
+                "title": "Object Detection",
                 "content": [
-                    "Image-Text Retrieval Image-Text Retrieval consists of two subtasks, namely, image-to-text retrieval (TR) and text-to-image retrieval (IR). We evaluate our model on Flickr30K (Plummer et al. 2015) and COCO (Lin et al. 2014) dataset. In testing data, Flickr30K contains 1K images and 5K texts, and COCO contains 5K images and 25K texts. Following the same protocol as ALBEF (Li et al. 2021), we conduct experiments on the fine-tuning and zero-shot settings. In the fine-tuning setting, we fine-tune our pre-trained model on training data and test it on validation/test data.",
-                    "In the zero-shot setting, following (Li et al. 2021;Yang et al. 2022), we fine-tune the model on COCO and test it on Flickr30k.",
-                    "Visual Question Answering (VQA) In the visual question answering (Goyal et al. 2017) task, given an image and a text question, the model is expected to understand features of both modals and provide a textual answer. Following the same setting in (Li et al. 2021), we treat this task as a generation problem and introduce an answer decoder on top of the fusion learner. Given the multi-model features, the answer decoder is required to generate the answer from 3192 candidates.",
-                    "Visual Entailment (SNLI-VE) visual entailment (Xie et al. 2019) task requires the model to judge the relation between an image and a text is entailment, neutral, or contradictory. Following the same setting in (Li et al. 2021), we consider this task as a three-way classification problem and generate the prediction using an MLP on the representation of [CLS] token of the text decoder.",
-                    "Visual Reasoning (NLVR2) In visual reasoning (Suhr et al. 2018) task, given an image-text pair, the model aims to predict whether a text describes a pair of images. Following (Li et al. 2021), we evaluate our model on NLVR2 dataset, which consists of 107,292 image-text examples, and extend the model to suit paired images input.",
-                    "Visual Grounding (VG) In visual grounding task, the model aims to localize the region in an image corresponding to a specific textual description. Following (Li et al. 2021), we study this task on weakly-supervised setting and evaluate our model on RefCOCO+ (Yu et al. 2016) dataset. Concretely, we fine-tune the pre-trained model with image-text pairs without any bounding box annotations. During inference, we generate heatmaps by Grad-CAM (Selvaraju et al. 2017) and rank the proposals generated by MAttNet (Yu et al. 2018) based on these heatmaps."
+                    "Comparisons to SOTA. We evaluate the detection accuracy of LSNet on the MS-COCO test-dev set, the results are shown in Table 1. As Table 1 shows, our method is an anchor-free detector, with a backbone of ResNet-50, LSNet achieves a box AP of 44.8% with 12.7 FPS, which has been competitive with other detectors that equipped with deeper backbones. When equipped with stronger backbones, LSNet performs even better. This benefits from our proposed cross-IOU loss. It helps the LSNet to locate the landmarks with high accuracy, the rich global information contained in the landmarks further promote the cross-IOU loss to regress the landmarks more accurately. With the additional corner point verification (CPV) [9] and multi-scale testing [64], LSNet achieves a box AP of 53.5%, which outperforms all the anchor-free detectors as we know.",
+                    "Cross-IOU Loss for Vector Regression. To evaluate the performance of cross-IOU loss, we design four contrast experiments on the MS COCO [36] validation set, which are (i) the GIOU loss [50] (a variant of the IOU loss) for rectangle bounding box regression, (ii) the smooth-1 loss for rect- LSNet surpasses all competitors in the anchor-free group. The abbreviations are: 'R' -ResNet [25], 'X' -ResNeXt [60], 'HG' -Hourglass network [40], 'R2' -Res2Net [20], 'CPV' -corner point verification [9], 'MS train ' -multi-scale training, ' †' -multi-scale testing [64].  angle bounding box regression, (iii) the smooth-1 loss for extreme bounding box regression, and (iv) the cross-IOU loss for extreme bounding box regression, respectively. All the experiments are done in the first stage in our framework (shown in Figure 2) with ResNet-50 [25] as the backbone, and we train the model for each experiment for 12 epochs. Table 2 summarizes the results. We can see that the smooth- Table 3: The detection accuracy (%) of using different features. PA, PD, and PP denote using the anchor point features along, anchor point features with the single-scale extreme point features, and with the pyramid extreme point features, respectively.",
+                    "boxes, respectively. This reveals that it is more difficult to regress an angled vector than a straight vector. By contrast, the cross-IOU loss performs much better than the smooth-",
+                    "Figure 4: The detection classification loss and average IOU with respect to the number of elapsed epochs. 'DCN feat', 'point feat' and 'extreme feat' denote the features adaptively learned by the DCN kernel, the features at the anchor points and extreme points, respectively. 'Smooth', 'GIOU' and 'Ours' denote the smooth-1 loss, the GIOU loss [50], and the cross-IOU loss, respectively. tion of the cross-IOU loss and landmark feature extraction significantly boosts recognition accuracy.",
+                    "Landmark Features Improve Precision. The landmarks (in particular, the extreme points in the detection task) are often related to discriminative appearance features, which may benefit visual recognition. To confirm this, we investigate different settings by using the anchor point features alone and integrating the anchor point features with either DCN or extreme point features, respectively. We still report the detection accuracy with all other settings remaining the same as in the previous experiments (studying the cross IOU loss). The results are shown in Figure 4. For the smooth-1 loss and the GIOU loss, we regress the rectangle bounding boxes, and the DCN features are extracted by the adaptively learned DCN kernel; for the cross-IOU loss, we use two sets of vectors both of which regress the extreme bounding boxes -the first set is trained to predict the extreme points and extract the extreme features, and we use the extreme features along with the anchor point features to train the second set from scratch. As shown in Figure 4, both the extreme and DCN features boost the classification accuracy. Recall that the prior experiments suggested the usefulness of the extreme features are useful for localization, combining the current results, we verify that the features around the landmarks are discriminative and thus benefit visual recognition.",
+                    "Pyramid DCN Improves Precision. We further equip the LSNet with the pyramid DCN to extract the multi-scale features around the landmarks. Table 3 shows our method achieves an AP of 36.2% with the features extracted by the Pyramid DCN, which outperforms the AP with single-scale features by a margin of 0.7%."
                 ]
             },
             {
-                "title": "Evaluation on Image-Text Retrieval",
+                "title": "Instance Segmentation",
                 "content": [
-                    "We first evaluate our model on image-text retrieval task, which is the most common downstream task in visionlanguage pre-training. Image Retrieval Text Retrieval Image Retrieval R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10 OSCAR 4M 70.0 91. Table 2: Performance comparison of fine-tuned image-text retrieval on Flickr30K and COCO datasets.",
-                    "Method TR IR R@1 R@5 R@10 R@1 R@5 R@10 ALBEF 90. on fine-tuned and zero-shot settings, respectively. In finetuned image-text retrieval, our model surpasses the previous state-of-the-art TCL (Yang et al. 2022) on MSCOCO dataset, reaching 77.3% and 59.6% in terms of TR@1 and IR@1, respectively. On Flickr30k dataset, VLMAE has a comparable performance with TCL and outperforms previous work ALBEF (Li et al. 2021). In the zero-shot setting, VLMAE surpasses TCL on text retrieval subtask but has an inferior performance on image retrieval. We speculate that this is because, compared with other methods (Li et al. 2021)"
+                    "Comparisons to SOTA. We show the instance segmentation inference results evaluated on the MS-COCO test-dev set [36] on Table 4. LSNet achieves a mask AP of 38.0% and 40.2% using the single-scale and multi-scale testing protocols, respectively, surpassing all published contourbased methods to the best of our knowledge, and the accuracy is even competitive among the pixel-based approaches.",
+                    "Comparisons with PolarMask [59]. It is interesting to further compare our method with PolarMask, the previous best contour-based approach for instance segmentation. The major difference is that PolarMask assumed the entire object boundary to be seen by the anchor point, but this may not be the case especially for some complicated objects. Once the ray along some direction intersects with the border more than once, the method considered only one and thus in-  curred accuracy loss (a typical example is the 'motorcycle' contour in Figure 5). In our approach, this issue is solved by ranking the landmarks more flexibly, being compatible to complicated shapes. The Number of Landmarks. LSNet represents each instance using a polygon. Using a larger number of landmarks improves the upper-bound of accuracy, but can also incur heavy computational costs and cause the landmark prediction module difficult to be optimized. To choose a proper number of landmarks, we refer to the ground-truth masks of the MS-COCO validation set and quantize each mask into a polygon that best describes it. We find that using 18, 36, and 72 landmarks achieves APs of 89.0%, 97.4%, and 99.2%, respectively, and we consider N = 36 to be a nice tradeoff."
                 ]
             },
             {
-                "title": "Evaluation on Visual Grounding",
+                "title": "Human Pose Estimation",
                 "content": [
-                    "As shown in Table 5, VLMAE surpasses the previous stateof-the-art ALBEF (Li et al. 2021) by a large margin, reaching 71.6% and 50.7% accuracy on Test data. Similar to the finding in CAE (Chen et al. 2022), we argue that the reconstruction of pixels in an image makes the model focus on almost every patch instead of only the salient region, resulting in better performance on location tasks (see Section 4.8 and Figure 4)."
+                    "Comparisons to SOTA. Unlike most of the human pose estimation methods that predict the keypoints using the heatmaps, LSNet predicts the keypoints using regression only. In the experiment, we use the object bounding boxes ('obj-box') and keypoint-boxes ('kps-box') to assign training samples, respectively. We will give a detailed discussion of the difference between the two methods in the Appendix B. On the MS-COCO test-dev set, LSNet reports an AP of 55.7% w/ obj-box and 59.0% w/ kps-box, respectively, which outperform CenterNet-reg [66] with the Hourglass-104 backbone. However, LSNet does not perform as well as the heatmap-based methods, and we analyze the reason as follows.",
+                    "Error Analysis. We can observe that the LSNet struggles particularly in the high OKS regimes, e.g., compared to Pose-AE [39], the deficit of AP 50 (for LSNet w/ obj-box) is 3.3% while that of AP 75 grows to 9.0%. Note that using keypoint regression is not as accurate as using the heatmaps for refinement, and thus LSNet is less sensitive in the pixellevel prediction. However, the AP metric of pose estimation is largely impacted by this factor. To show this, we artificially add an average deviation of 1, 2, and 3 pixels to the prediction results of CenterNet-jd [66] (with a backbone of Hourglass-104). The AP on the MS-COCO validation set is significantly reduced from 64.0% (corresponding to the test AP of 63.0% in Table 5) to 61.1%, 53.4%, and 44.0%, respectively.",
+                    "On the other hand, we use the heatmaps produced by CenterNet-jd (Hourglass-104) to refine the prediction of LSNet w/ obj-box. As a result, the AP on the MS-COCO validation set is improved from 56.5% (corresponding to the test AP of 55.7% in Table 5) to 60.7%. This suggests that LSNet still needs further manipulation of high-resolution features towards higher pixel-level accuracy. The Benefit of LSNet. Despite the relatively weak pixellevel localization, LSNet (w/ obj-box) enjoys the ability of perceiving multi-scale human instances, many of which are not annotated in the dataset. Some examples are shown in the right side of the Table 5. Since the ground-truth is not available to evaluate the impact, we refer to the heatmaps of CenterNet-jd (Hourglass-104) to deliberately remove these 'false positives'. Consequently, AP is further improved from 60.7% to 63.0%, comparable with the heatmap-based methods, though the improvement seems less meaningful."
                 ]
             },
             {
-                "title": "Ablation Study",
+                "title": "Qualitative results for LSNet",
                 "content": [
-                    "In this section, we conduct ablation studies on image-text retrieval task to validate the effectiveness of the newly proposed RMIM and IFR. Table 6 shows the results on both MSCOCO and Flickr30k datasets. We consider the VLMAE trained with only ITC, ITM, and MLM loss as our baseline model. With the addition of MIM loss, model achieves better performance on both IR and TR tasks. We argue that the reconstruction of pixels can facilitate the model to capture more comprehensive feature of the image. Moreover, introducing regional MIM loss further improves the model performance, which can be attributed to better image-text align-  We also explore the effect of the mask ratio, which is a trade-off between training efficiency and model performance. Table 7 shows the results with different mask ratios. Compared with ImageNet (Russakovsky et al. 2015) dataset, the content of images in vision-language pretraining datasets is more complicated. We argue that a too large mask ratio (e.g., 75%) may cause severe information loss, leading to a performance drop. In practice, we choose a 50% mask ratio to balance training efficiency and performance."
-                ]
-            },
-            {
-                "title": "Qualitative Assessment",
-                "content": [
-                    "To demonstrate the effectiveness of our model, following ALBEF (Li et al. 2021), we visualize the cross-attention maps in visual grounding task. As shown in Figure 4, compared with ALBEF, VLMAE can identify the relevant region more precisely and pay attention to the whole relevant area."
-                ]
-            },
-            {
-                "title": "Investigation About Focal Bias",
-                "content": [
-                    "To demonstrate that VLMAE can alleviate the focal bias problem, we explore the attention weights between the [CLS] token and the patch tokens of the image encoder. Results are shown in Figure 5. Since the text in pre-training dataset only depicts parts of the image (e.g., \"A bridge over the small river\"), ALBEF neglects other irrelevant regions (e.g., \"River bank\"). However, thanks to generative learning, VLMAE pays attention to most patches and provides"
-                ]
-            },
-            {
-                "title": "Pre-training Efficiency",
-                "content": [
-                    "To demonstrate the efficiency of our proposed method, in Table 8, we compare VLMAE with previous works (Li et al. 2021;Yang et al. 2022)"
+                    "We show some visualized results of LSNet in Figure 5, inlcuding object detection, instance segmentation and human pose estimation. Please refer to the appendix for more qualitative results."
                 ]
             }
         ],
         "Conclusion": [
             {
-                "title": "Conclusion",
+                "title": "Conclusions",
                 "content": [
-                    "In this paper, we propose a vision-language masked autoencoder framework (VLMAE). VLMAE utilizes an asymmetric encoder-decoder architecture, consisting of a fusion learner for aggregating multi-modal information and a lightweight image decoder for reconstructing pixels. Due to its simple yet effective design, VLMAE can successfully handle the focal bias problem in pre-training, providing a more comprehensive understanding of the image. Moreover, VLMAE utilizes Regional Masked Image Modeling to stabilize pixel-level reconstruction and Image Feature Reconstruction to improve the model's representation ability. Extensive experiments on various downstream vision-language benchmarks demonstrate that VLMAE surpasses existing state-of-the-art methods while prominently alleviating the training cost in the pre-training stage.",
-                    "Another view of the new flower bed near the garage area remember it was all gravel.",
-                    "Nothing says fun like a girl in pink leotards on a pink tall bike wielding a sword that's on fire.",
-                    "An olive tree in your bathroom turns it into a Mediterranean spa.",
-                    "Pickup truck outside the bar in red hook.",
-                    "Oldest wooden bridge in the world Luzern.",
-                    "A new graduate by the clock tower at Otago university.",
-                    "It must be great being a gardener in Hastings the flower beds are beautifully kept.",
-                    "The 42-foot long slate wall is a monument to the first amendment built by the Thomas Jefferson Center for free expression.",
-                    "This was the kitchen in the house we rented at nags head north Carolina back in the summer of 04 great vacation.",
-                    "Coffee table and small peace lily indoor plant with vase as shown below.",
-                    "Neutral bedroom + black floor + lush tree California home by Nickey Kehoe.",
-                    "Icelandic girl jumping into Ohrid lake in Macedonia."
+                    "This paper unifies three location-sensitive visual recognition tasks (object detection, instance segmentation, and human pose estimation) using the location-sensitive network (LSNet). The key module that supports the framework is a novel cross-IOU loss that is friendly to receiving supervision from multiple scales. Equipped with a pyramid DCN, LSNet achieves the state-of-the-art performance on anchor-free detection and segmentation. This work suggests that using keypoints to define and localize objects is a promising direction, and we hope to extend our approach to achieve a stronger ability of generalization."
                 ]
             }
         ]

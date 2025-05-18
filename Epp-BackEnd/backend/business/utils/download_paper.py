@@ -1,7 +1,10 @@
+import re
+
 import requests
 from backend.settings import PAPERS_PATH
 import os
 from urllib.parse import urlparse, urlunparse  # 用于安全处理URL
+
 
 if not os.path.exists(PAPERS_PATH):
     os.makedirs(PAPERS_PATH)
@@ -11,50 +14,8 @@ def downloadPaper(url, filename):
     """
     下载文献到服务器
     """
-    # path = os.path.join(PAPERS_PATH, filename) if filename.endswith('.pdf') else os.path.join(PAPERS_PATH, filename + '.pdf')
-    # if os.path.exists(path):
-    #     return path
-    # response = requests.get(url)
-    # if response.status_code == 200:
-    #     print(filename)
-    #     if not filename.endswith('.pdf'):
-    #         filepath = os.path.join(PAPERS_PATH, filename + '.pdf')
-    #     else:
-    #         filepath = os.path.join(PAPERS_PATH, filename)
-    #     with open(filepath, 'wb') as f:
-    #         f.write(response.content)
-    #     return filepath
-    # else:
-    #     print('下载失败')
-    #     return None
-    
-    # # 确保路径存在
-    # os.makedirs(PAPERS_PATH, exist_ok=True)
-
-    # # 处理文件名
-    # if not filename.endswith('.pdf'):
-    #     filename += '.pdf'
-    # path = os.path.join(PAPERS_PATH, filename)
-
-    # # 检查文件是否已存在
-    # if os.path.exists(path):
-    #     return path
-
-    # try:
-    #     # 流式下载（避免超时和内存问题）
-    #     response = requests.get(url, stream=True, timeout=30)
-    #     response.raise_for_status()  # 检查 HTTP 错误
-
-    #     with open(path, 'wb') as f:
-    #         for chunk in response.iter_content(chunk_size=8192):
-    #             if chunk:
-    #                 f.write(chunk)
-    #     return path
-    # except requests.exceptions.RequestException as e:
-    #     print(f'下载失败: {e}')
-    #     return None
-    
     # 安全处理URL（移除末尾斜杠）
+    url = re.sub(r'^http://', 'https://', url, flags=re.IGNORECASE)
     parsed_url = urlparse(url)
     cleaned_url = urlunparse(
         (
@@ -66,6 +27,8 @@ def downloadPaper(url, filename):
             parsed_url.fragment
         )
     )
+    print("cleaned_url:")
+    print(cleaned_url)
  
     # 处理文件名（自动添加.pdf扩展名）
     if not filename.lower().endswith('.pdf'):
@@ -90,7 +53,7 @@ def downloadPaper(url, filename):
  
             # 写入文件（分块下载）
             with open(save_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
+                for chunk in response.iter_content(chunk_size=1024*1024):
                     if chunk:  # 过滤keep-alive块
                         f.write(chunk)
         return save_path
