@@ -300,6 +300,7 @@ def create_abstract_report(request):
     print('下载完毕')
 
     from business.models.abstract_report import AbstractReport
+    print(title)
     report_path = os.path.join(settings.USER_REPORTS_PATH, str(title) + '.md')
     print(report_path)
 
@@ -354,6 +355,8 @@ def create_abstract_report(request):
 
         ## 先创建一个知识库
         ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path, user_id=user)
+        ar.title = '综述' + str(ar.report_id)
+        ar.save()
         upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
         local_path = local_path[1:] if local_path.startswith('/') else local_path
         print(local_path)

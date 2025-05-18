@@ -31,7 +31,8 @@ class AbstractReport(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     file_local_path = models.CharField(max_length=255)
     report_path = models.CharField(max_length=255, unique=True)
-    date = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=255)
+    date = models.DateTimeField(auto_now=True)
     status = models.CharField(
         max_length=2,
         choices=STATUS_CHOICES,
