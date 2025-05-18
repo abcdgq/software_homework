@@ -108,7 +108,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)',
         target: '.read-assistant'
       })
-      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', {'document_id': this.paperID, 'file_type': 1}, { timeout: 1000 })
+      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', {'document_id': this.paperID, 'file_type': 1})
         .then((response) => {
           if (response.status === 200) {
             this.fileReadingID = response.data.file_reading_id
@@ -152,7 +152,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)',
         target: '.read-assistant' // 指定加载动画的目标
       })
-      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', {'file_reading_id': this.fileReadingID}, { timeout: 1000 })
+      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', {'file_reading_id': this.fileReadingID})
         .then((response) => {
           const history = response.data.conversation_history.conversation
           for (const message of history) {

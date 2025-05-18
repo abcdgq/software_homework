@@ -130,7 +130,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)',
         target: '.read-assistant' // 指定加载动画的目标
       })
-      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', { 'paper_id': this.paperID, 'file_type': 2 }, {timeout: 1000})
+      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', { 'paper_id': this.paperID, 'file_type': 2 })
         .then((response) => {
           if (response.status === 200) {
             this.fileReadingID = response.data.file_reading_id
@@ -158,12 +158,12 @@ export default {
         target: '.read-assistant' // 指定加载动画的目标
       })
       console.log('恢复研读对话的id, ', this.fileReadingID)
-      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', { 'file_reading_id': this.fileReadingID }, {timeout: 1000})
+      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', { 'file_reading_id': this.fileReadingID })
         .then((response) => {
           const history = response.data.conversation_history.conversation
           for (const message of history) {
             const sender = message.role === 'user' ? 'user' : 'ai'
-            const text = message.role === 'user' ? message.content : this.md.render(message.content)
+            const text = message.role === 'user' ? message.content : message.content
             this.chatMessages.push({ sender: sender, text: text, loading: false })
           }
           this.$message({
@@ -253,9 +253,8 @@ export default {
           cur++
           await this.delay(50)
         }
-        loadingMessage.text = this.md.render(loadingMessage.text)
+        // loadingMessage.text = this.md.render(loadingMessage.text)
         this.answerFinished = true
-        alert('AI回答: ' + answer)
       }
     },
     delay (ms) {
@@ -388,7 +387,6 @@ export default {
       }
 
       const text = message.text
-      // alert('text is...', text)
       const highlights = message.highlights.sort((a, b) => a.start - b.start)
       let result = ''
       let cur = 0
