@@ -12,11 +12,11 @@
             />
         </div>
 
-        <el-collapse-transition>
+        <el-collapse v-loading="loading">
             <div v-show="!collapsed">
                 <el-empty v-if="papers.length === 0 && !loading" description="暂无推荐文献"/>
                 <div v-else>
-                    <el-row gutter="60">
+                    <el-row :gutter="40">
                         <el-col
                             v-for="(paper, index) in papers"
                             :key="index"
@@ -47,12 +47,12 @@
                     </el-row>
                 </div>
             </div>
-        </el-collapse-transition>
+        </el-collapse>
     </el-card>
 </template>
 <script>
-import {collectPaper} from '../../api/Paper.js'
-import {fetchFurtherReadingPapers} from '../../request/userRequest.js'
+import { collectPaper } from '../../api/Paper.js'
+import { fetchFurtherReadingPapers } from '../../api/Paper'
 
 export default {
     props: {
@@ -97,17 +97,20 @@ export default {
             this.loading = true
             await fetchFurtherReadingPapers(this.paperId)
                 .then((response) => {
-                    console.log(response.data)
-                    this.papers = response.data.papers.map((paper) => {
-                        return {
-                            id: paper.id,
-                            title: paper.title,
-                            summary: paper.summary,
-                            collected: false
-                        }
-                    })
+                    console.log("fetch further reading papers succeeded")
+                    console.log(response.papers)
+                    // this.papers = response.data.papers.map((paper) => {
+                    //     return {
+                    //         id: paper.id,
+                    //         title: paper.title,
+                    //         summary: paper.summary,
+                    //         collected: false
+                    //     }
+                    // })
+                    this.papers = response.papers
                 })
                 .catch((error) => {
+                    console.log("fetch furtherReading papers error")
                     console.log(error)
                 })
             this.loading = false
@@ -115,6 +118,11 @@ export default {
     },
     created() {
         this.fetchPapers()
+    },
+    watch: {
+        paperId() {
+            this.fetchPapers()
+        }
     }
 }
 </script>
