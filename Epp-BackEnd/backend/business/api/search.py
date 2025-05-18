@@ -749,10 +749,41 @@ def do_string_search(search_content, max_results=10):
     pattern = r'[,\s!?.]+'
     search_terms = re.split(pattern, search_content)
     search_terms = [token for token in search_terms if token]
-
+    print(search_terms)
     query = Q()
     for term in search_terms:
         query |= Q(title__icontains=term)
+
+    print(query)
+    # 执行查询，获取字符串检索的并集结果
+    results = Paper.objects.filter(query)
+    print(results)
+    # 计算编辑距离并排序
+    results_with_distance = []
+    for result in results:
+        distance = Levenshtein.distance(result.title, search_content)
+        print(distance)
+        results_with_distance.append((distance, result))
+    print(results_with_distance)
+    # 按编辑距离排序
+    results_with_distance.sort(key=lambda x: x[0])
+
+    # 返回排序后的结果
+    sorted_results = [result for distance, result in results_with_distance]
+    print("--------------------------------------------------")
+    print(sorted_results[:max_results])
+    return sorted_results[:max_results]  # 返回前10篇相似度最高的文章
+
+def do_similar_string_search(search_content, max_results=10):
+    pattern = r'[,\s!?.]+'
+    search_terms = re.split(pattern, search_content)
+    search_terms = [token for token in search_terms if token]
+    print(search_terms)
+    query = Q()
+    for term in search_terms:
+        query |= Q(title__icontains=term)
+
+    print(query)
     # 执行查询，获取字符串检索的并集结果
     results = Paper.objects.filter(query)
     # print(results)

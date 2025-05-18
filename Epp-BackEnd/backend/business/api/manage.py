@@ -479,10 +479,10 @@ def server_status(request):
 def record_visit(request):
     """ 记录用户访问 """
     # 需要用户鉴权
-    print("******recordvisit******")
-    print(request.session.items())
+    # print("******recordvisit******")
+    # print(request.session.items())
     username = request.session.get('username')
-    print("username:    " + str(username))
+    # print("username:    " + str(username))
     user = User.objects.filter(username=username).first()
     # user = User.objects.filter(username="22371427").first()
     if not user:

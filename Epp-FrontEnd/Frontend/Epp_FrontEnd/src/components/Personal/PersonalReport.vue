@@ -11,13 +11,19 @@
           <el-table :data="displayedDocuments" v-loading="loading" style="width: 100%; min-height: 420px;" :default-sort = "{prop: 'date', order: 'descending'}">
             <el-table-column prop="title" label="报告标题" align="center">
               <template slot-scope="scope">
-                <el-link class="report-link" :underline="false" @click="viewReport(scope.row.report_id)" type="primary">{{ scope.row.title }}</el-link>
+                <el-link class="report-link" :underline="false" @click="viewReport(scope.row.report_id,scope.row.type)" type="primary">{{ scope.row.title }}</el-link>
               </template>
             </el-table-column>
             <el-table-column prop="date" label="生成时间" align="center" sortable></el-table-column>
+            <el-table-column prop="type" label="报告类型" align="center">
+              <template slot-scope="scope">
+                <span>{{ scope.row.type === 'summary' ? '多篇' : '单篇' }}</span>
+                <!-- 单篇是abstract,多篇是summary -->
+              </template>
+            </el-table-column>
             <el-table-column label="操作" align="center">
               <template slot-scope="scope">
-                <el-button type="primary" size="small" icon="el-icon-delete" @click="deleteReport(scope.row.report_id)">删除</el-button>
+                <el-button type="primary" size="small" icon="el-icon-delete" @click="deleteReport(scope.row.report_id,scope.row.type)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -84,11 +90,11 @@ export default {
         console.log('error')
       }
     },
-    async deleteReport (id) {
+    async deleteReport (id, type) {
       // eslint-disable-next-line camelcase
       var report_ids = []
       report_ids.push(id)
-      var data = {report_ids}
+      var data = {report_ids: report_ids, type: type}
       try {
         var res = (await deleteReport({data}))
         console.log(res)
@@ -127,9 +133,9 @@ export default {
         console.log(error)
       }
     },
-    async viewReport (id) {
+    async viewReport (id, type) {
       try {
-        var params = {report_id: id}
+        var params = {report_id: id, type: type}
         const markdownContent = (await fetchReportContent({params})).data.summary
         console.log(markdownContent)
         this.convertMarkdownToPdf(markdownContent)
