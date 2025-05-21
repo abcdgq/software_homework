@@ -1458,6 +1458,11 @@ def dialog_query(request):
         history['conversation'].extend([{'role': 'assistant', 'content': content}])
     with open(conversation_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(history))
+
+    #TODO:
+    from scripts.get_keywords import get_keywords
+    words = get_keywords(ai_reply)
+
     res = {
         'dialog_type': dialog_type,
         'papers': papers,
