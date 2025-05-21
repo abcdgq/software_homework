@@ -303,6 +303,7 @@ def get_related_paper(request):
 
     # papers = get_filtered_paper(title, 5)
     papers = do_string_search(title, 5)
+    papers = papers[1:]
     for p in papers:
         data['papers'].append({
             'id': str(p.paper_id),
