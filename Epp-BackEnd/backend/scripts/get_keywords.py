@@ -25,10 +25,18 @@ def get_keywords(answers):
     print("提取的结果:\n"+result)
     try:
         r = json.loads(result)
-        return r
+        words = []
+        for w in r.keys():
+            words.append({"start": answers.find(w),
+                          "end": answers.find(w) + len(w),
+                          "word": w,
+                          "tooltip": r[w]
+                          })
+        print(words)
+        return words
     except:
         print("没有提取到")
-        return None
+        return []
 
 
 if __name__ =='__main__':
