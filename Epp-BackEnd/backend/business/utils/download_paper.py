@@ -68,6 +68,9 @@
 
 
 
+
+
+
 import requests
 from backend.settings import PAPERS_PATH
 import os
@@ -76,23 +79,34 @@ if not os.path.exists(PAPERS_PATH):
     os.makedirs(PAPERS_PATH)
 
 
-def downloadPaper(url, filename):
+def downloadPaper(url, filename, timeout=100):
     """
     下载文献到服务器
+    :param url: 下载链接
+    :param filename: 保存的文件名
+    :param timeout: 超时时间（秒），默认10秒
+    :return: 文件路径或None
     """
     path = os.path.join(PAPERS_PATH, filename) if filename.endswith('.pdf') else os.path.join(PAPERS_PATH, filename + '.pdf')
     if os.path.exists(path):
         return path
-    response = requests.get(url)
-    if response.status_code == 200:
-        print(filename)
-        if not filename.endswith('.pdf'):
-            filepath = os.path.join(PAPERS_PATH, filename + '.pdf')
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            print(filename)
+            if not filename.endswith('.pdf'):
+                filepath = os.path.join(PAPERS_PATH, filename + '.pdf')
+            else:
+                filepath = os.path.join(PAPERS_PATH, filename)
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            return filepath
         else:
-            filepath = os.path.join(PAPERS_PATH, filename)
-        with open(filepath, 'wb') as f:
-            f.write(response.content)
-        return filepath
-    else:
-        print('下载失败')
+            print('下载失败，状态码:', response.status_code)
+            return None
+    except requests.exceptions.Timeout:
+        print(f'请求超时（{timeout}秒）')
+        return None
+    except requests.exceptions.RequestException as e:
+        print('下载出错:', str(e))
         return None

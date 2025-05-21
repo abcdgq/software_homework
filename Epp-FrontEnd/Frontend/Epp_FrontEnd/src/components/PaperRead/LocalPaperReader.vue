@@ -490,7 +490,7 @@ export default {
       }).catch(error => {
         console.error('保存注释失败', error)
         this.$message({
-          message: error.response.data.error || '保存注释失败',
+          message: error.response.data.message || '保存注释失败',
           type: 'error'
         })
       })
