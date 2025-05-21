@@ -1,7 +1,19 @@
 import openai
 
 openai.api_base = "https://api.moonshot.cn/v1"
-openai.api_key = 'sk-yXyyuuFBxj3m8v0baMatcFATSB0XxjJYInNMOr5lPKGDyPAA'
+openai.api_key = 'sk-Nc04xpjdSvfg9q0iJQMO0nXO7iuIAhyvTo4TpbFIzVCq0bnh'
+
+def queryKimi(message):
+    history=[]
+    user_input=message
+    history.append({"role": "user", "content": user_input})
+    response = openai.ChatCompletion.create(
+            model="moonshot-v1-128k",
+            messages=history,
+            stream=False
+    )
+    print(response.choices[0].message.content)
+    return response.choices[0].message.content
 
 if __name__ == '__main__':
     history = []
