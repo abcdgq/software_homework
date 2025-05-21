@@ -28,41 +28,41 @@ from business.models.problem import problem_record
 
 def insert_search_record_2_kb(search_record_id, tmp_kb_id):
     # 调试：打印输入参数
-    print(f"函数 insert_search_record_2_kb 被调用，参数：search_record_id={search_record_id}, tmp_kb_id={tmp_kb_id}")
+    # print(f"函数 insert_search_record_2_kb 被调用，参数：search_record_id={search_record_id}, tmp_kb_id={tmp_kb_id}")
 
     # 转换 search_record_id 为字符串
     search_record_id = str(search_record_id)
-    print(f"已将 search_record_id 转换为字符串：{search_record_id}")
+    # print(f"已将 search_record_id 转换为字符串：{search_record_id}")
 
-        # 调试：检查文件路径是否存在
-    print(f"检查文件路径：{settings.USER_SEARCH_MAP_PATH}")
+    # 调试：检查文件路径是否存在
+    # print(f"检查文件路径：{settings.USER_SEARCH_MAP_PATH}")
     if not os.path.exists(settings.USER_SEARCH_MAP_PATH):
-        print(f"文件 {settings.USER_SEARCH_MAP_PATH} 不存在，正在创建新文件。")
+        # print(f"文件 {settings.USER_SEARCH_MAP_PATH} 不存在，正在创建新文件。")
         # 创建新文件并写入空的 JSON 对象
         with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
             json.dump({}, f, indent=4)
-        print(f"已成功创建新文件：{settings.USER_SEARCH_MAP_PATH}")
+        # print(f"已成功创建新文件：{settings.USER_SEARCH_MAP_PATH}")
 
     try:
         # 读取 JSON 文件
         with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
             s_2_kb_map = json.load(f)
-        print(f"从文件加载的 s_2_kb_map：{s_2_kb_map}")
+        # print(f"从文件加载的 s_2_kb_map：{s_2_kb_map}")
 
         # 调试：检查映射关系
-        print(f"当前的 s_2_kb_map：{s_2_kb_map}")
+        # print(f"当前的 s_2_kb_map：{s_2_kb_map}")
 
         # 转换键为字符串
         s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
-        print(f"已将 s_2_kb_map 的键转换为字符串：{s_2_kb_map}")
+        # print(f"已将 s_2_kb_map 的键转换为字符串：{s_2_kb_map}")
 
         # 检查 search_record_id 是否已存在
         if search_record_id in s_2_kb_map:
-            print(f"发现 search_record_id 已存在：{search_record_id}，当前对应的 tmp_kb_id：{s_2_kb_map[search_record_id]}")
+            # print(f"发现 search_record_id 已存在：{search_record_id}，当前对应的 tmp_kb_id：{s_2_kb_map[search_record_id]}")
 
             # 调试：尝试删除旧的 tmp_kb
             old_tmp_kb_id = s_2_kb_map[search_record_id]
-            print(f"尝试删除旧的 tmp_kb_id：{old_tmp_kb_id}")
+            # print(f"尝试删除旧的 tmp_kb_id：{old_tmp_kb_id}")
 
             if delete_tmp_kb(old_tmp_kb_id):
                 print("删除 TmpKb 成功")
@@ -73,12 +73,12 @@ def insert_search_record_2_kb(search_record_id, tmp_kb_id):
 
         # 更新映射关系
         s_2_kb_map[search_record_id] = tmp_kb_id
-        print(f"已更新 s_2_kb_map：{s_2_kb_map}")
+        # print(f"已更新 s_2_kb_map：{s_2_kb_map}")
 
         # 写入 JSON 文件
         with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
             json.dump(s_2_kb_map, f, indent=4)
-        print(f"已成功将更新后的 s_2_kb_map 写入文件：{settings.USER_SEARCH_MAP_PATH}")
+        # print(f"已成功将更新后的 s_2_kb_map 写入文件：{settings.USER_SEARCH_MAP_PATH}")
 
     except Exception as e:
         print(f"发生错误：{e}")
@@ -745,7 +745,7 @@ def search_my_model(query_string):
 
     return results
 
-def do_string_search(search_content, max_results=10):
+def do_string_search(search_content, max_results=20):
     pattern = r'[,\s!?.]+'
     search_terms = re.split(pattern, search_content)
     search_terms = [token for token in search_terms if token]
@@ -799,6 +799,100 @@ def do_similar_string_search(search_content, max_results=10):
     # 返回排序后的结果
     sorted_results = [result for distance, result in results_with_distance]
     return sorted_results[:max_results]  # 返回前10篇相似度最高的文章
+
+def search_papers(keywords, start_year=None, end_year=None, authors=None, max_results=10):
+    print("search_papers参数设置: keywords: ", keywords, "start_year: ", start_year, "end_year: ", end_year, "authors: ", authors, "max_results: ", max_results)
+    query = Q()
+
+    # 关键词搜索（标题/摘要）
+    if keywords:
+        keyword_query = Q()
+        for keyword in keywords:
+            keyword_query |= Q(title__icontains=keyword) | Q(abstract__icontains=keyword)
+        query &= keyword_query
+
+    # 作者搜索（处理逗号分隔的字符串）
+    if authors:
+        author_query = Q()
+        for author in authors:
+            # 增加前后逗号的精确匹配（防止匹配到名字片段）
+            author_query |= Q(authors__icontains=author)
+            # 更精确的方式（需处理首尾作者的情况）：
+            # author_query |= Q(authors__startswith=f"{author},") | 
+            #                 Q(authors__contains=f",{author},") |
+            #                 Q(authors__endswith=f",{author}")
+        query &= author_query
+
+    # 时间范围过滤（处理DateField的年份）
+    if start_year is not None:
+        query &= Q(publication_date__year__gte=start_year)
+    if end_year is not None:
+        query &= Q(publication_date__year__lte=end_year)
+
+    # 执行查询（添加时间倒序排序）
+    results = Paper.objects.filter(query).order_by('-publication_date')
+    
+    # 去重处理（虽然主键唯一，但可能因多对多关系产生重复）
+    if authors or keywords:
+        results = results.distinct()
+    
+    print("search_papers返回结果: ")
+    for result in results[:max_results]:
+        print(result.title + " " + str(result.publication_date) + " " + result.authors)
+    return list(results[:max_results])
+
+def extract_search_conditions(query: str):
+
+
+    """
+    使用AI提取结构化搜索条件
+    
+    参数：
+    query: 用户自然语言查询
+    
+    返回：json格式查找条件
+    """
+    prompt = f"""您是一个专业的学术搜索引擎解析器，请从查询{query}中提取信息，返回格式如下：
+
+  "keywords": [],  # 研究主题相关词汇
+  "start_year": 2010,  # 开始年份（含）
+  "end_year":  2022    # 结束年份（含）
+  "authors": [],  # 作者名称
+
+
+解析规则：
+1. 时间相关表述处理：
+   - "XX年以前" -> end_year=XX-1
+   - "XX年之后" -> start_year=XX+1，end_year=2025
+   - "XX到YY年间" -> start_year=XX, end_year=YY
+   - "最近N年" -> start_year=2025-N，end_year=2025
+
+2. 逻辑关系处理：
+   - "包含A和B" -> 逻辑AND
+   - "A或B" -> 逻辑OR
+   - "排除C" -> NOT条件
+
+3. 特殊语义转换：
+   - "最新研究" -> start_year=2023，end_year=2025
+
+4.如果相关词汇与作者名称没有提取到对应属性，则保持这两项对应的列表为空
+
+5.start_year默认为2010， end_year默认为2022
+
+6.研究主题相关词汇用英文输出
+
+返回纯JSON对象，不要额外解释"""
+
+    try:
+        r = queryGLM(prompt)
+        result = json.loads(r)
+        print(result)
+        return result
+    except Exception as e:
+        print(f"提取出错: {e}")
+
+    # 如果提取失败，返回None,后边根据None
+    return None
 
 @require_http_methods(["POST"])
 def vector_query(request):
@@ -873,8 +967,8 @@ def vector_query(request):
     if search_type == 'dialogue':
         filtered_papers = do_dialogue_search(search_content, chat_chat_url, headers)
     else:
-        filtered_papers = do_string_search(search_content)
-        print("filtered_papers: ", filtered_papers)
+        # filtered_papers = do_string_search(search_content)
+        filtered_papers = get_filtered_paper(search_content, 20)
         if len(filtered_papers) == 0:
             return JsonResponse({"paper_infos": [], 'ai_reply': "EPP助手哭哭惹，很遗憾未能检索出相关论文。",
                                  'search_record_id': search_record.search_record_id}, status=200)
@@ -972,7 +1066,7 @@ def vector_query_build_kb(request):
     '''
     data = json.loads(request.body)
     paper_id_list = data['paperIDs']
-    search_record_id = data['searchRecordID']
+    search_record_id = data['searchRecordId']
 
     try:
         tmp_kb_id = build_abs_kb_by_paper_ids(paper_id_list, search_record_id)
@@ -1123,7 +1217,62 @@ def get_final_answer(conversation_history, query, tmp_kb_id):
     # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
     # docs.append(doc)
     print("多智能体：已完成来源整合")
-    
+    # 2. 自反馈机制
+    # 2.1 检查回答质量
+    quality_check_prompt = f"""
+       请评估以下回答的质量，指出存在的问题：
+       问题：{query}
+       回答：{ai_reply}
+
+       评估标准：
+       1. 准确性 - 信息是否准确无误
+       2. 完整性 - 是否全面回答了问题
+       3. 清晰度 - 表达是否清晰易懂
+       4. 相关性 - 内容是否紧密围绕问题
+
+       请按以下格式返回评估结果：
+       {{
+           "accuracy": 评分(1-5),
+           "completeness": 评分(1-5),
+           "clarity": 评分(1-5),
+           "relevance": 评分(1-5),
+           "issues": ["具体问题描述1", "具体问题描述2"]
+       }}
+       """
+
+    quality_report = queryGLM(quality_check_prompt)
+    print("质量评估报告:", quality_report)
+
+    try:
+        quality_data = json.loads(quality_report)
+        # 如果任何一项评分低于3分，则进行修正
+        if any(score < 3 for score in [quality_data["accuracy"], quality_data["completeness"],
+                                       quality_data["clarity"], quality_data["relevance"]]):
+            print("检测到低质量回答，正在进行修正...")
+            correction_prompt = f"""
+               原始问题：{query}
+               初始回答：{ai_reply}
+               检测到的问题：{quality_data["issues"]}
+
+               请根据以下要求改进回答：
+               1. 修正不准确的信息
+               2. 补充缺失的重要内容
+               3. 使表达更加清晰专业
+               4. 保持回答简洁明了
+               5. 保持专业学术风格
+               6. 修正语法和表达错误
+               7. 优化段落结构
+               8. 保持原意的完整性
+               返回改进后的回答：
+               """
+            ai_reply = queryGLM(correction_prompt)
+            print("修正后的回答:", ai_reply)
+    except:
+        print("质量评估解析失败，使用原始回答")
+
+
+    # 2.2 TODO 可以持久化检测报告，返回给多智能体，从而实现自反馈
+
     return ai_reply, docs
 
 def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
@@ -1202,7 +1351,6 @@ def dialog_query(request):
         content: '回复内容'
     }
     
-    TODO:
         1. 从Request中获取对话内容
         2. 根据最后一条user的对话回答进行关键词触发，分析属于哪种对话类型
             - 如果对话类型为'query'
@@ -1221,9 +1369,8 @@ def dialog_query(request):
     data = json.loads(request.body)
     message = data.get('message')
     search_record_id = data.get('search_record_id')
-    # TODO 获取临时知识库id,debug
+    # 获取临时知识库id
     kb_id = get_tmp_kb_id(search_record_id) 
-    # kb_id = 0
     
     user = User.objects.filter(username=username).first()
     if user is None:
@@ -1250,14 +1397,21 @@ def dialog_query(request):
     content = ''
     # print(response_type)
     if 'yes' in response_type:  # 担心可能有句号等等
-        # 查询论文，TODO:接入向量化检索
+        # 查询论文
         # filtered_paper = query_with_vector(message) # 旧版的接口，换掉了 2024.4.28
         search_content = response_type.split('+')[-1].strip()
         print("search_content:", search_content)
+
+        conditions = extract_search_conditions(message)
+        
         # filtered_paper = do_string_search(search_content=search_content, max_results=5)   # 字符串匹配，检索效果较差
         # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化,初始化之后注掉这个方法即可
         #local_vdb_init(None)
-        filtered_paper = get_filtered_paper(text=message, k=5)
+        filtered_paper=[]
+        if conditions == None:
+            filtered_paper = get_filtered_paper(text=message, k=5)
+        else:
+            filtered_paper = search_papers(keywords=conditions["keywords"], start_year=conditions["start_year"], end_year=conditions["end_year"],authors=conditions["authors"])
         print("filtered_paper: ", filtered_paper)
         dialog_type = 'query'
         papers = []
@@ -1265,6 +1419,9 @@ def dialog_query(request):
             papers.append(paper.to_dict())
         # print(papers)
         content = '根据您的需求，我们检索到了一些论文信息'
+        if len(filtered_paper) == 0:
+            dialog_type = 'dialog'
+            content = "抱歉，没有查找到相关论文"
         for i in range(len(papers)):
             content += '\n' + f'第{i+1}篇：' + papers[i]['title']
             # content += '\n' + f'第{i+1}篇：'
@@ -1290,11 +1447,10 @@ def dialog_query(request):
         #     "history": list(input_history),
         #     "prompt_name": "text"  # 使用历史记录对话模式
         # })
-        # TODO 分发与整合
-        ai_reply, origin_docs = get_final_answer(input_history, message, kb_id)
         # ai_reply, origin_docs = kb_ask_ai(payload)
         # ai_reply = queryGLM(message, input_history)
         # print("ai_reply: ", ai_reply)
+        ai_reply, origin_docs = get_final_answer(input_history, message, kb_id)
         dialog_type = 'dialog'
         papers = []
         content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话（注意不要出现作为EPP论文助手等语句，直接给出转述后的内容）：' + ai_reply, [])
@@ -1302,6 +1458,11 @@ def dialog_query(request):
         history['conversation'].extend([{'role': 'assistant', 'content': content}])
     with open(conversation_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(history))
+
+    #TODO:
+    from scripts.get_keywords import get_keywords
+    words = get_keywords(ai_reply)
+
     res = {
         'dialog_type': dialog_type,
         'papers': papers,
