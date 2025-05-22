@@ -151,6 +151,6 @@ urlpatterns = [
                   path("api/paperPrivateRecommend", paper_recommend.get_unique_recommendation),
 
                   # 最新论文获取
-                  path("api/getNewestPapers", ArxivPaperAPI.get_newest_papers),
+                  path("api/news/fetchNews", ArxivPaperAPI.get_newest_papers),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
