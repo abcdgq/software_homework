@@ -56,7 +56,7 @@ class ArxivPaperAPI(View):
             # 'timestamp': datetime.now().isoformat()
         }
 
-    def get_newest_papers(self, request, category=None):
+    def get_newest_papers(self, category=None):
         """处理分类查询请求（使用统一响应风格）"""
         # 检查分类参数
         if not category:
