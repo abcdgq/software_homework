@@ -122,51 +122,15 @@ export default {
       searchQuery: '',
       timeRange: 'all',
       newsList: [
-        {
-          title: 'NeuroAgent: Brain-Inspired Autonomous Agents with Meta-Learning Capabilities',
-          link: 'https://arxiv.org/abs/2505.14789',
-          published: 'May-20',
-          time: '三天内',
-          summary: 'arXiv:2505.14789v1 Announce Type: new \nAbstract: We propose NeuroAgent...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'EdgeSense: Real-Time Multimodal Perception for IoT Devices at the Edge',
-          link: 'https://arxiv.org/abs/2505.14502',
-          published: '5-19',
-          time: '一周内',
-          summary: 'arXiv:2505.14502v1 Announce Type: cross \nAbstract: EdgeSense leverages...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'Ego4D-Social: Benchmarking Social Interaction Understanding in Egocentric Videos',
-          link: 'https://arxiv.org/abs/2505.14276',
-          published: 'May-18',
-          time: '一周内',
-          summary: 'arXiv:2505.14276v1 Announce Type: new \nAbstract: We introduce a large-scale...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'DiffusionKit: A Toolkit for Deploying Diffusion Models on Mobile Devices',
-          link: 'https://arxiv.org/abs/2505.14033',
-          published: '5-15',
-          time: '一月内',
-          summary: 'arXiv:2505.14033v2 Announce Type: replace \nAbstract: DiffusionKit achieves...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'ChatUIX: Automatic UI Generation for LLM-Based Conversational Agents',
-          link: 'https://arxiv.org/abs/2505.13894',
-          published: 'May-12',
-          time: '一月内',
-          summary: 'arXiv:2505.13894v1 Announce Type: new \nAbstract: ChatUIX dynamically renders...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        }
+        // {
+        //   title: 'NeuroAgent: Brain-Inspired Autonomous Agents with Meta-Learning Capabilities',
+        //   link: 'https://arxiv.org/abs/2505.14789',
+        //   published: 'May-20',
+        //   time: '三天内',
+        //   summary: 'arXiv:2505.14789v1 Announce Type: new \nAbstract: We propose NeuroAgent...',
+        //   source: 'TypeScript社区',
+        //   authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
+        // }
       ],
       selectedNews: null
     }
