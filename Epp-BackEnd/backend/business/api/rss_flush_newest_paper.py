@@ -13,7 +13,7 @@ from business.utils.reply import success, fail
 
 
 RSS_FEEDS = {
-        "人工智能（AI）": "https://arxiv.org/rss/cs.AI",
+        "人工智能": "https://arxiv.org/rss/cs.AI",
         "机器学习": "https://arxiv.org/rss/cs.LG",
         "计算机视觉与模式识别": "https://arxiv.org/rss/cs.CV",
         "自然语言处理": "https://arxiv.org/rss/cs.CL",
@@ -23,7 +23,7 @@ RSS_FEEDS = {
         "人机交互": "https://arxiv.org/rss/cs.HC",
     }
 
-def _fetch_rss(self, feed_url):
+def _fetch_rss(feed_url):
     """统一RSS获取方法"""
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
@@ -33,7 +33,7 @@ def _fetch_rss(self, feed_url):
     except Exception as e:
         return None, str(e)
 
-def _parse_entry(self, entry, feed_title):
+def _parse_entry( entry, feed_title):
     """统一数据解析格式"""
     published_str = entry.get('published', datetime.now().isoformat())
     dt_utc = datetime.strptime(published_str, "%a, %d %b %Y %H:%M:%S %z").replace(tzinfo=UTC)
@@ -57,9 +57,10 @@ def _parse_entry(self, entry, feed_title):
 def get_newest_paper(request):
     """处理分类查询请求（使用统一响应风格）"""
     # 检查分类参数
-    category = request.GET.get('category')
-    if not category:
-        return fail(msg="缺少分类参数")
+    # category = request.GET.get('category')
+    # if not category:
+    #     return fail(msg="缺少分类参数")
+    category = "机器学习"
 
     # 检查分类是否存在
     if category not in RSS_FEEDS:
