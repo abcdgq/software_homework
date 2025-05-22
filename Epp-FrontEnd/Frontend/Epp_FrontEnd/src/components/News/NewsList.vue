@@ -4,7 +4,7 @@
     <!-- 左侧筛选区 -->
       <div class="news-sidebar">
         <div class="filter-section">
-          <h3 class="filter-title">新闻分类</h3>
+          <h3 class="filter-title">资讯分类</h3>
           <el-checkbox-group v-model="selectedCategories">
             <el-checkbox
               v-for="category in categories"
@@ -50,7 +50,7 @@
             <div class="search-container">
                 <el-input
                 v-model="searchQuery"
-                placeholder="搜索新闻..."
+                placeholder="搜索资讯..."
                 class="search-input"
                 @keyup.enter="handleSearch"
                 >
@@ -65,7 +65,7 @@
         <div class="news-layout">
 
         <!-- 主内容区 -->
-            <!-- 新闻列表或详情 -->
+            <!-- 资讯列表或详情 -->
             <div class="news-main">
             <!-- 筛选标签区域只在列表视图中显示 -->
                 <div v-if="!selectedNews && activeFilters.length > 0" class="active-filters">
@@ -261,7 +261,7 @@ export default {
           tags: ['TypeScript', 'JavaScript']
         }
       ],
-      selectedNews: null // 新增：当前选中的新闻详情
+      selectedNews: null // 新增：当前选中的资讯详情
     }
   },
   computed: {
@@ -321,8 +321,8 @@ export default {
     },
     viewNewsDetail (news) {
       this.selectedNews = news
-      // TODO 这里添加查看新闻详情的逻辑，可以向后端获取具体新闻内容。
-    //   alert(`查看新闻详情: ${news.title}`)
+      // TODO 这里添加查看资讯详情的逻辑，可以向后端获取具体资讯内容。
+    //   alert(`查看资讯详情: ${news.title}`)
     },
     goBackToList () {
       this.selectedNews = null
