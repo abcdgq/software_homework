@@ -1305,7 +1305,7 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
         for qa in uselist
         ])
     
-    from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+    from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
     summarized_search_reply = text_summarizer(search_reply)
 
     docs = []
@@ -1459,7 +1459,7 @@ def dialog_query(request):
     with open(conversation_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(history))
 
-    from scripts.get_keywords import get_keywords
+    from business.utils.get_explainationwords import get_keywords
     words = get_keywords(ai_reply)
 
     res = {

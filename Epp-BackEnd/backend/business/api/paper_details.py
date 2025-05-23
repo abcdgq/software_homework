@@ -22,7 +22,7 @@ from business.models.paper_annotation import FileAnnotation
 from business.models.paper_note import FileNote
 from business.utils import reply
 from business.utils.download_paper import downloadPaper
-from scripts.aliyun_test import auto_comment_detection
+from business.utils.aliyun_detect import auto_comment_detection
 from scripts.text_translate_test import connect as text_translate_tool
 
 if not os.path.exists(BATCH_DOWNLOAD_PATH):
