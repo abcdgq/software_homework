@@ -1,89 +1,68 @@
 {
     "metadata": {
-        "title": "VLMAE: Vision-Language Masked Autoencoder",
+        "title": "FusionVAE: A Deep Hierarchical Variational Autoencoder for RGB Image Fusion",
         "authors": [
             {
-                "name": "Sunan He",
+                "name": "Fabian Duffhauss",
                 "affiliations": [
                     {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
-            },
-            {
-                "name": "Taian Guo",
-                "affiliations": [
-                    {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
-            },
-            {
-                "name": "Tao Dai",
-                "affiliations": [
-                    {
-                        "name": "College of Computer Science and Software Engineering",
+                        "name": "Bosch Center for Artificial Intelligence",
                         "type": "department"
-                    },
+                    }
+                ]
+            },
+            {
+                "name": "Ngo Vien",
+                "affiliations": [
                     {
-                        "name": "Shenzhen University",
+                        "name": "Bosch Center for Artificial Intelligence",
+                        "type": "department"
+                    }
+                ]
+            },
+            {
+                "name": "Hanna Ziesche",
+                "affiliations": [
+                    {
+                        "name": "Bosch Center for Artificial Intelligence",
+                        "type": "department"
+                    }
+                ]
+            },
+            {
+                "name": "Gerhard Neumann",
+                "affiliations": [
+                    {
+                        "name": "Karlsruhe Institute of Technology",
                         "type": "institution"
                     }
                 ]
             },
             {
-                "name": "Ruizhi Qiao",
-                "affiliations": [
-                    {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
+                "name": "{fabian Duffhauss"
             },
             {
-                "name": "Chen Wu",
-                "affiliations": [
-                    {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
+                "name": "Anhvien Ngo"
             },
             {
-                "name": "Xiujun Shu",
-                "affiliations": [
-                    {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
+                "name": "Hanna Ziesche}"
             },
             {
-                "name": "Bo Ren",
-                "affiliations": [
-                    {
-                        "name": "YouTu Lab",
-                        "type": "laboratory"
-                    }
-                ]
+                "name": "@ Bosch"
+            },
+            {
+                "name": "Com"
             }
         ],
-        "abstract": "Image and language modeling is of crucial importance for vision-language pre-training (VLP), which aims to learn multi-modal representations from large-scale paired imagetext data. However, we observe that most existing VLP methods focus on modeling the interactions between image and text features while neglecting the information disparity between image and text, thus suffering from focal bias. To address this problem, we propose a vision-language masked autoencoder framework (VLMAE). VLMAE employs visual generative learning, facilitating the model to acquire finegrained and unbiased features. Unlike the previous works, VLMAE pays attention to almost all critical patches in an image, providing more comprehensive understanding. Extensive experiments demonstrate that VLMAE achieves better performance in various vision-language downstream tasks, including visual question answering, image-text retrieval and visual grounding, even with up to 20% pre-training speedup."
+        "abstract": "Sensor fusion can significantly improve the performance of many computer vision tasks. However, traditional fusion approaches are either not data-driven and cannot exploit prior knowledge nor find regularities in a given dataset or they are restricted to a single application. We overcome this shortcoming by presenting a novel deep hierarchical variational autoencoder called FusionVAE that can serve as a basis for many fusion tasks. Our approach is able to generate diverse image samples that are conditioned on multiple noisy, occluded, or only partially visible input images. We derive and optimize a variational lower bound for the conditional log-likelihood of FusionVAE. In order to assess the fusion capabilities of our model thoroughly, we created three novel datasets for image fusion based on popular computer vision datasets. In our experiments, we show that FusionVAE learns a representation of aggregated information that is relevant to fusion tasks. The results demonstrate that our approach outperforms traditional methods significantly. Furthermore, we present the advantages and disadvantages of different design choices."
     },
     "sections": {
         "Introduction": [
             {
                 "title": "Introduction",
                 "content": [
-                    "In recent years, with the prevalence of self-supervised learning and transformer-based models in both natural language processing and computer vision (Devlin et al. 2018;Dosovitskiy et al. 2020), we have witnessed rapid development in vision-language representation learning. In multi-modal tasks, such as visual question answering and image-text retrieval, where the model needs to comprehend and aggregate visual-textual information, vision-language pre-training (VLP) plays a fundamental role.",
-                    "Early VLP methods (Lu et al. 2019;Li et al. 2020;Chen et al. 2020) rely on a well-trained but heavy object detector on the input image for visual proposal feature extraction, followed by a cross-model encoder for visual-textual interaction. To eliminate the heavy object detector, some recent methods (Huang et al. 2021;Kim, Son, and Kim 2021;Wang et al. 2021) resort to vision dictionary with a lightweight visual embedder or modality experts networks for better trade-off between efficiency and performance of downstream tasks. Very recently, ALBEF (Li et al. 2021  By contrast, our VLMAE produces better results (in green) with a universal focus over the whole image.",
-                    "tures, facilitating the aggregation of multi-modal information. TCL (Yang et al. 2022) further leverages cross-modal and intra-modal self-supervision simultaneously to obtain multi-modal interactions more easily, leading to the most recent state-of-the-art performance. Despite impressive performance of ALBEF and TCL, such methods may focus on specific objects of interest from training data, while neglecting other critical objects (see Figure 1), thus leading to focal bias problem. This is mainly due to the information disparity between image and text. For example, as shown in Figure 1, the corresponding training text of the top row figure is \"The chair is purple\", which only describes parts of the image. The image encoder needs to pay more attention to the text-relevant area to facilitate the alignment between image and text while neglecting some irrelevant regions. However, for VLP models, without any textual prior, the image feature should be task-agnostic, and all critical objects in an image should be attended to. To alleviate such bias, in this work, we introduce a generative task of pixel-level reconstruction, relying on a comprehensive understanding of the image.",
-                    "Pixel-level image reconstruction with the encoderdecoder paradigm is prevalent in representation learning (Vincent et al. 2008;Kingma and Welling 2013). Recently, with asymmetric encoder-decoder architecture, masked autoencoders (MAE) (He et al. 2022) exhibits high generalizability and remarkable performance in vision tasks. The simple but insightful pre-training strategy, i.e., masking a very high portion of random patches, exploits image redundancy and forces the model to acquire comprehensive understanding of the image. Inspired by MAE, we adopt the masking-then-predicting paradigm and introduce a pixel-level reconstruction task for alleviating the focal bias problem.",
-                    "In this paper, we propose a novel VLP framework called Vision-Language Masked AutoEncoder (VLMAE), which is composed of two uni-modal encoders to extract visual and textual features, an image decoder for pixel-level reconstruction, and a fusion learner to aggregate the multi-modal features. VLMAE employs image-text contrastive learning and visual generative learning simultaneously. Contrastive learning promotes the alignment of image-text pairs and enables the model to obtain global semantic representations, and generative learning facilitates the model to acquire more comprehensive and fine-grained understanding. We propose Regional Masked Image Modeling (RMIM) loss to refine the image-text alignment and facilitate fusion of multi-modal features. To enhance the model's representation ability, we further propose the Image Feature Reconstruction (IFR) task, which requires the model to predict masked patch features based on visible patch inputs. Meanwhile, the masking design for the image patches in VLMAE reduces pretraining cost significantly.",
-                    "Our main contributions can be summarized as: age and text embeddings separately with dual uni-modal encoders (Radford et al. 2021;Andonian, Chen, and Hamid 2022). Recent methods model the vision-language interaction with contrastive loss on massive noisy paired imagetext data crawled from Internet. Despite thire simplicity, they achieve remarkable performance in cross-modal retrieval tasks with high efficiency. However, these methods do not perform well in more complex multi-modal downstream tasks, such as visual question answering and visual reasoning, which require the aggregation of visual-textual information and reasoning capabilities. They lack the capability to model more complicated interactions between the two modalities, which is indispensable for multi-modal reasoning. The second category adopts a transformer-based multimodal fusion encoder to model the interactions between images and texts (Kim, Son, and Kim 2021;Li et al. 2021;Zeng, Zhang, and Li 2021). These models achieve superior performance for downstream vision-language reasoning or classification tasks, thanks to the interaction modeling capability of the deep fusion encoder. Earlier methods rely on a pre-trained object detector for visual region feature extraction, which observably slows down the inference procedure.",
-                    "Latter methods endeavor to remove the heavy object detector for high inference efficiency. Among them, SOHO (Huang et al. 2021) adopts a vision dictionary to extract compact visual features from the whole image, while ViLT (Kim, Son, and Kim 2021) uses lightweight image and text tokenizers instead of separate uni-modal encoders to achieve faster inference speed. While these methods of the second category aggregate the multi-modal feature effectively, they ignore the importance of image-text alignment, hindering the interaction between the visual and textual modalities. To address this disadvantage, ALBEF (Li et al. 2021) proposes to align the visual and textual representations with contrastive learning before fusing them in the fusion encoder with cross-modal attention. Besides, ALBEF adopts pseudo-targets produced by a momentum model to conduct momentum distillation for better noise resistance capability when learning from the noisy web data. VLMO (Wang et al. 2021) further introduces Mixture-of-Modality-Experts (MOME) Transformer and stage-wise pre-training strategy, leading to better performance in downstream tasks with prominent efficiency. TCL (Yang et al. 2022) also shares the similar aligningbefore-fusing spirit of ALBEF but leverages cross-modal and intra-modal self-supervision simultaneously to enhance multi-modal interactions, achieving the most recent stateof-the-art performance. Though effective, previous visionlanguage pre-training methods with contrastive learning rely on modeling global semantic interactions and aim to maximize image-text mutual information, resulting in the focal bias problem. Motivated by recent generative methods in visual self-supervised learning (He et al. 2022;Chen et al. 2022), we propose to introduce pixel-level reconstruction task to VLP. To restore the image, the model needs to pay attention to almost all patches instead of only salient regions. With such masking-then-predicting paradigm, our model provides more comprehensive understanding of the image and achieves superior performance in downstream multi-modal tasks with significant pre-training cost reduction."
+                    "Sensor fusion is a popular technique in computer vision as it allows to combine the advantages from multiple information sources. It is especially gainful in scenarios where a single sensor is not able to capture all necessary data to perform a task satisfactorily. Over the last years, we have seen many examples, where the accuracy of computer vision tasks was significantly improved by sensor fusion, e.g. in environmental perception for autonomous driving [7,30,67], for 6D pose estimation [16,17,61], and for robotic grasping [62,72]. However, traditional fusion methods usually focus more on the beneficial merging of multiple modalities and less on teaching the model to obtain profound prior knowledge about the used dataset.",
+                    "Our work tries to fill in this research gap by proposing a deep hierarchical variational autoencoder called FusionVAE that is able to perform both tasks: fusing information from multiple sources and supplementing it with prior knowledge about the data gained while training. As shown in Fig. 1, FusionVAE merges a varying number of input images for reconstructing the original target image using"
                 ]
             }
         ],
@@ -91,154 +70,172 @@
             {
                 "title": "Introduction",
                 "content": [
-                    "In recent years, with the prevalence of self-supervised learning and transformer-based models in both natural language processing and computer vision (Devlin et al. 2018;Dosovitskiy et al. 2020), we have witnessed rapid development in vision-language representation learning. In multi-modal tasks, such as visual question answering and image-text retrieval, where the model needs to comprehend and aggregate visual-textual information, vision-language pre-training (VLP) plays a fundamental role.",
-                    "Early VLP methods (Lu et al. 2019;Li et al. 2020;Chen et al. 2020) rely on a well-trained but heavy object detector on the input image for visual proposal feature extraction, followed by a cross-model encoder for visual-textual interaction. To eliminate the heavy object detector, some recent methods (Huang et al. 2021;Kim, Son, and Kim 2021;Wang et al. 2021) resort to vision dictionary with a lightweight visual embedder or modality experts networks for better trade-off between efficiency and performance of downstream tasks. Very recently, ALBEF (Li et al. 2021  By contrast, our VLMAE produces better results (in green) with a universal focus over the whole image.",
-                    "tures, facilitating the aggregation of multi-modal information. TCL (Yang et al. 2022) further leverages cross-modal and intra-modal self-supervision simultaneously to obtain multi-modal interactions more easily, leading to the most recent state-of-the-art performance. Despite impressive performance of ALBEF and TCL, such methods may focus on specific objects of interest from training data, while neglecting other critical objects (see Figure 1), thus leading to focal bias problem. This is mainly due to the information disparity between image and text. For example, as shown in Figure 1, the corresponding training text of the top row figure is \"The chair is purple\", which only describes parts of the image. The image encoder needs to pay more attention to the text-relevant area to facilitate the alignment between image and text while neglecting some irrelevant regions. However, for VLP models, without any textual prior, the image feature should be task-agnostic, and all critical objects in an image should be attended to. To alleviate such bias, in this work, we introduce a generative task of pixel-level reconstruction, relying on a comprehensive understanding of the image.",
-                    "Pixel-level image reconstruction with the encoderdecoder paradigm is prevalent in representation learning (Vincent et al. 2008;Kingma and Welling 2013). Recently, with asymmetric encoder-decoder architecture, masked autoencoders (MAE) (He et al. 2022) exhibits high generalizability and remarkable performance in vision tasks. The simple but insightful pre-training strategy, i.e., masking a very high portion of random patches, exploits image redundancy and forces the model to acquire comprehensive understanding of the image. Inspired by MAE, we adopt the masking-then-predicting paradigm and introduce a pixel-level reconstruction task for alleviating the focal bias problem.",
-                    "In this paper, we propose a novel VLP framework called Vision-Language Masked AutoEncoder (VLMAE), which is composed of two uni-modal encoders to extract visual and textual features, an image decoder for pixel-level reconstruction, and a fusion learner to aggregate the multi-modal features. VLMAE employs image-text contrastive learning and visual generative learning simultaneously. Contrastive learning promotes the alignment of image-text pairs and enables the model to obtain global semantic representations, and generative learning facilitates the model to acquire more comprehensive and fine-grained understanding. We propose Regional Masked Image Modeling (RMIM) loss to refine the image-text alignment and facilitate fusion of multi-modal features. To enhance the model's representation ability, we further propose the Image Feature Reconstruction (IFR) task, which requires the model to predict masked patch features based on visible patch inputs. Meanwhile, the masking design for the image patches in VLMAE reduces pretraining cost significantly.",
-                    "Our main contributions can be summarized as: age and text embeddings separately with dual uni-modal encoders (Radford et al. 2021;Andonian, Chen, and Hamid 2022). Recent methods model the vision-language interaction with contrastive loss on massive noisy paired imagetext data crawled from Internet. Despite thire simplicity, they achieve remarkable performance in cross-modal retrieval tasks with high efficiency. However, these methods do not perform well in more complex multi-modal downstream tasks, such as visual question answering and visual reasoning, which require the aggregation of visual-textual information and reasoning capabilities. They lack the capability to model more complicated interactions between the two modalities, which is indispensable for multi-modal reasoning. The second category adopts a transformer-based multimodal fusion encoder to model the interactions between images and texts (Kim, Son, and Kim 2021;Li et al. 2021;Zeng, Zhang, and Li 2021). These models achieve superior performance for downstream vision-language reasoning or classification tasks, thanks to the interaction modeling capability of the deep fusion encoder. Earlier methods rely on a pre-trained object detector for visual region feature extraction, which observably slows down the inference procedure.",
-                    "Latter methods endeavor to remove the heavy object detector for high inference efficiency. Among them, SOHO (Huang et al. 2021) adopts a vision dictionary to extract compact visual features from the whole image, while ViLT (Kim, Son, and Kim 2021) uses lightweight image and text tokenizers instead of separate uni-modal encoders to achieve faster inference speed. While these methods of the second category aggregate the multi-modal feature effectively, they ignore the importance of image-text alignment, hindering the interaction between the visual and textual modalities. To address this disadvantage, ALBEF (Li et al. 2021) proposes to align the visual and textual representations with contrastive learning before fusing them in the fusion encoder with cross-modal attention. Besides, ALBEF adopts pseudo-targets produced by a momentum model to conduct momentum distillation for better noise resistance capability when learning from the noisy web data. VLMO (Wang et al. 2021) further introduces Mixture-of-Modality-Experts (MOME) Transformer and stage-wise pre-training strategy, leading to better performance in downstream tasks with prominent efficiency. TCL (Yang et al. 2022) also shares the similar aligningbefore-fusing spirit of ALBEF but leverages cross-modal and intra-modal self-supervision simultaneously to enhance multi-modal interactions, achieving the most recent stateof-the-art performance. Though effective, previous visionlanguage pre-training methods with contrastive learning rely on modeling global semantic interactions and aim to maximize image-text mutual information, resulting in the focal bias problem. Motivated by recent generative methods in visual self-supervised learning (He et al. 2022;Chen et al. 2022), we propose to introduce pixel-level reconstruction task to VLP. To restore the image, the model needs to pay attention to almost all patches instead of only salient regions. With such masking-then-predicting paradigm, our model provides more comprehensive understanding of the image and achieves superior performance in downstream multi-modal tasks with significant pre-training cost reduction."
+                    "Sensor fusion is a popular technique in computer vision as it allows to combine the advantages from multiple information sources. It is especially gainful in scenarios where a single sensor is not able to capture all necessary data to perform a task satisfactorily. Over the last years, we have seen many examples, where the accuracy of computer vision tasks was significantly improved by sensor fusion, e.g. in environmental perception for autonomous driving [7,30,67], for 6D pose estimation [16,17,61], and for robotic grasping [62,72]. However, traditional fusion methods usually focus more on the beneficial merging of multiple modalities and less on teaching the model to obtain profound prior knowledge about the used dataset.",
+                    "Our work tries to fill in this research gap by proposing a deep hierarchical variational autoencoder called FusionVAE that is able to perform both tasks: fusing information from multiple sources and supplementing it with prior knowledge about the data gained while training. As shown in Fig. 1, FusionVAE merges a varying number of input images for reconstructing the original target image using"
                 ]
             }
         ],
         "Methodology": [
             {
-                "title": "Masked Image Modeling",
+                "title": "FusionVAE Inputs Target Predictions",
                 "content": [
-                    "Inspired by Masked Language Modeling (MLM) (Devlin et al. 2018) in NLP, Masked Image Modeling (MIM) is adopted in visual pre-training and has shown impressive results in downstream visual tasks. Existing MIM works can be classified into two categories. Methods in the first category predict discrete tokens generated by VQ-VAE (Van Den Oord, Vinyals et al. 2017) or its variants, such as BEiT (Bao, Dong, and Wei 2021), mc-BEiT (Li et al. 2022) and PeCo (Dong et al. 2021). Methods of the second category adopt masking strategies to exploit the redundancy nature of images for visual pre-training. MaskFeat (Wei et al. 2022) randomly masks a portion of video sequence and regresses Histograms of Oriented Gradients (HOG) features of masked regions. MAE (He et al. 2022) and SimMIM (Xie et al. 2022) predict pixel RGB values directly to promote image pre-training, achieving even better performance than complicatedly designed token classification methods.",
-                    "Most recently, several concurrent works explore the masked token/patch prediction task for vision-language pretraining. M3AE (Geng et al. 2022) randomly masks the unified sequence of image patches and text tokens, and encodes the visible image patches into embeddings with the same dimension as the language embeddings to perform joint training of the two modalities. Due to the lack of alignment and interaction between the two modalities during pretraining, it is hard to apply directly to various multi-modal downstream tasks. VLC (Gui et al. 2022) initializes the vision backbone from the pre-trained MAE model, thus avoiding supervised training, and performs intra-modal reconstruction via masked image/language modeling. However, the performance in downstream tasks can be sub-optimal due to the lack of elaborate arrangements between MIM and other proxy tasks. Meanwhile, VLC suffers from severe pre-training burden due to the large image input size (e.g., 384) and full patches input. In comparison, our VL-MAE adopts a simple yet effective design to simultaneously employ image-text contrastive learning and visual generative learning, achieving SOTA performance with less pretraining cost."
+                    "Fig. 1: Overview of our FusionVAE approach. The network receives up to three partly occluded input images, fuses them together with prior knowledge, and predicts different hypothesis of how the target images could look like.",
+                    "prior knowledge about the dataset. To the best of our knowledge, FusionVAE is the first approach that combines these two tasks. Therefore, we developed three challenging benchmarks based on well-known computer vision datasets to evaluate the performance of our approach. In addition, we perform comparisons to baselines by extending traditional approaches to perform the same tasks. FusionVAE outperforms all these traditional methods on all proposed benchmark tasks significantly. We show that FusionVAE can generate high-quality images given few input images with partial observability. We provide ablation studies to illustrate the impact of commonly used information aggregation operations and to prove the benefits of the employed posterior distribution. We can summarize the four main contributions of our paper as follows: i) We create three challenging image fusion tasks for generative models. ii) We develop a deep hierarchical VAE called FusionVAE that is able to perform image-based data fusion while employing prior knowledge of the used dataset. iii) We show that FusionVAE produces high-quality fused output images and outperforms traditional methods by a large margin. iv) We perform ablation studies showing the benefits of our design choices regarding both the posterior distribution and commonly used aggregation methods. and expressiveness and thus, when applied to image generation leads to oversmoothed results lacking fine-grained details. Over the last years much work has been invested into the effort of improving the generative performance of VAEs. One stream of work is based on introducing a hierarchy into the latent space of the VAE and scaling this hierarchy to greater and greater depth. First introduced in [54] many hierarchical VAEs are based on coupling the inference and generative processes by introducing a deterministic bottom-up path combined with a stochastic top-down process in the inference network and sharing the latter with the generative model. This setting has been extended by an additional deterministic top-down path and bidirectional inference in [44]. Recently, very deep hierarchical VAEs were realized in [8] by introducing residual bottlenecks with dedicated scaling, update skipping, and nearest neighbour up-sampling. Closest to our work is the recently proposed NVAE architecture [57], which relies on depth-wise convolution, residual posterior parametrization, and spectral regularization to enhance stability.",
+                    "Other approaches propose increasing the expressiveness of VAEs by combining them with auto-regressive models like RNNs or PixelCNNs [6,11,13,50], conditioning contexts (CVAE) [53,60], normalizing flows [28], generative adversarial networks (GANs) [31,46], or variational generative adversarial networks (CVAE-GAN) [1]."
                 ]
             },
             {
-                "title": "Methodology",
-                "content": []
-            },
-            {
-                "title": "Observation",
+                "title": "Fusion of Multiple Images",
                 "content": [
-                    "As image-text dataset plays a fundamental role in visionlanguage pre-training tasks, we first explore the prevalent pre-training datasets. Concretely, we calculate the similarity between image and text embedding extracted by a pretrained CLIP model (Radford et al. 2021). Figure 2 shows the distribution of similarity and samples from different intervals. In low relevance interval, texts only depict the background or \"unsalient\" regions, and in medium relevance interval, texts describe the \"salient\" objects but ignore some details. For contrastive learning based methods (Li et al. 2021;Yang et al. 2022), this information disparity between Shadow of tree and leaves on pavement.",
-                    "Closed brown wooden door."
+                    "Image fusion has long been dominated by classical computer vision. Only lately deep learning methods entered the domain with the CNN-based approach proposed by Liu et al. [38]. In a subsequent publication the authors extended their work to a multi-scale setting [37]. Shortly afterwards, Prabhakar et al. developed a fusion method based on a siamese network architecture, called DeepFuse [48] which was improved in subsequent work [33] by employing the DenseNet architecture [20]. Concurrently, Li et al. [35] proposed a fusion architecture based on VGG [52] and in order to scale to even greater depth another one [34] based on ResNet-50 [15]. The aforementioned methods use CNNs as feature extractors and as decoders, while the fusion operations themselves are restricted to classical methods like averaging or addition of feature maps or weighted source images. A fully CNN-based feature-map fusion mechanism was proposed in [24].",
+                    "While all previous publications target only a specific fusion task (e.g. multifocus fusion, multi-resolution fusion, etc.) or were limited to specific domains (e.g. medical images), two very recent works propose novel multi-purpose fusion networks, which are applicable to many fusion tasks and image types [64,71]. Very recently also GAN-based methods entered the domain of image fusion, starting with the work by Ma et al. on infrared-visible fusion [41,43] and with [42,63] on multi-resolution image fusion. Most recent are two publications on GAN-based multi-focus image fusion [14,21]. While GAN-based approaches can generate high-fidelity images, it is known that they suffer from the mode collapse problem. VAE-based methods in contrast are known to generate more faithful data distribution [57]. Different from previous work, this paper proposes a VAE-based multi-purpose fusion framework."
                 ]
             },
             {
-                "title": "Low Relevance",
+                "title": "Image Completion",
                 "content": [
-                    "The cow is black and white.",
-                    "Street signs on a metal pole."
+                    "Similar to image fusion, also image completion has only recently become a playing field for deep learning methods. First approaches based on simple multilayer perceptrons (MLPs) [29] or CNNs [12] were targeted only to filling small holes in an image. However, with the introduction of GANs [10], the area quickly became dominated by GAN-based approaches, starting with the context encoders presented by Pathak et al. [47]. Many subsequent papers proposed extensions to this model in order to obtain fine-grained completions while preserving global coherence by introducing additional discriminators [22], searching for closest samples to the corrupted image in a latent embedding space conditioning on semantic labels [56], or designing additional specialized loss functions [36]. High resolution results were obtained recently by multi-scale approaches [66], iterative upsampling [70], and the application of contextual attention [55,65,68]. Another stream of current work focuses on multi-hypothesis image completion, leveraging probabilistic problem formulations [45,73]."
                 ]
             },
             {
-                "title": "Medium Relevance",
+                "title": "Background",
                 "content": [
-                    "Red sling backs with apples.",
-                    "Cat sitting inside open umbrella.",
-                    "High Relevance image and text may cause the focal bias problem because image encoder tends to pay more attention to the text-relevant area for better alignment between visual and textual embedding. Therefore, we introduce generative learning to alleviate such bias during the pre-training phase."
+                    "In this section, we outline the fundamentals of standard VAEs, conditional VAEs, and hierarchical VAEs upon which we build our approach. Another section is dedicated to aggregation methods for data fusion."
                 ]
             },
             {
-                "title": "Model Architecture",
+                "title": "Standard VAE",
                 "content": [
-                    "The overall architecture of our VLMAE model is illustrated in Figure 3. VLMAE contains an image encoder g(•) and a text encoder h(•) to extract uni-modal features. An image decoder is introduced to reconstruct masked patches, and the fusion learner aggregates the vision-language features for multi-modal tasks. Similar to previous works (Li et al. 2021;Yang et al. 2022), for each encoder, we maintain a momentum counterpart ĝ(•), ĥ(•) and update their parameters following θ ĝ = mθ ĝ + (1 -m)θ g ."
+                    "A variational autoencoder (VAE) [27] is a neural network consisting of a probabilistic encoder q(z|y) and a generative model p(y|z). The generator models a distribution over the input data y, conditioned on a latent variable z with prior distribution p θ (z). The encoder approximates the posterior distribution p(z|y) of the latent variables z given input data y and is trained along with the generative model by maximizing the evidence lower bound (ELBO) ELBO(y) = E q(z|y) [log p(y|z)] -KL(q(z|y)||p(z)), (1) where KL is the Kullback-Leibler divergence and log p(y) ≥ ELBO(y)."
                 ]
             },
             {
-                "title": "Feature Extraction",
+                "title": "Conditional VAE",
                 "content": [
-                    "Given an image I, we split it into non-overlapping patches and project them into a sequence of patch embeddings,",
-                    ", where N is the number of patches. Following MAE (He et al. 2022), we randomly divide the patches into visible patches x vis"
+                    "In VAEs, the generative model p(y|z) is unconditional. In contrast, conditional VAEs (CVAE) [53] consider a generative model for a conditional distribution p(y|x, z) where y is the target data, x is the conditional input variable, and z is a latent variable. The prior of the latent variable is p(z|x), while its approximate posterior distribution is given by q(z|x, y). The variational lower bound of the conditional log-likelihood can be written as follows log p(y|x) ≥ E q(z|x,y) [log p(y|x, z)] -KL(q(z|x, y)||p(z|x)).",
+                    "(2)"
                 ]
             },
             {
-                "title": "Regional Mask Image Modeling",
+                "title": "Hierarchical VAE",
                 "content": [
-                    "Unlike MAE (He et al. 2022), we aim to reconstruct the invisible patches with both image and text features to facilitate multi-modal information fusion. Concretely,we concatenate the masked visual representations v cls , v vis 1 , . . . , v vis N -M and text representations {w cls , w 1 , . . . , w L } and feed them into the image decoder. Specifically, for the text with bounding box annotation, we propose to apply a regional reconstruction loss to facilitate the aggregation of multi-modal features. Formally, the reconstruction loss is defined as:",
-                    "where D is the pre-training dataset and T is the input text. I vis denotes the visible patches and I msk denotes the masked patches in text-relevant region. For text without bounding box annotation, we treat the whole image as text-relevant region. The objective f mim calculates the mean squared error (MSE) between the reconstructed and original images at the pixel level."
+                    "In hierarchical VAEs [25,54,57], the latent variables z are divided into L disjoint groups z 1 , ..., z L in order to increase the expressiveness of both prior and approximate posterior which become",
+                    "p(z l |z <l ) and q(z|y)",
+                    "where z <l denotes the latent variables in all previous hierarchies. All the conditionals in the prior p(z l |z <l ) and in the approximate posterior q(z l |z <l , y) are modeled by factorial Gaussian distributions. Under this modelling choice, the ELBO from Eq. ( 1) turns into"
                 ]
             },
             {
-                "title": "Image Feature Reconstruction",
+                "title": "Aggregation Methods",
                 "content": [
-                    "Because only parts of image patches are fed into the image encoder while the remaining patches are invisible, it causes information insufficiency. In order to enhance the representation ability of the model, we propose the image feature reconstruction task, which requires the image encoder to reconstruct the global feature generated by momentum image encoder. Concretely, we take the output [CLS] embedding vcls of momentum image encoder ĝ(•), which is given by the complete image, as the target feature. The reconstruction loss is denoted as",
-                    "The reconstruction objective f r is L1 loss in practice."
+                    "For fusing data within our approach, we consider different aggregation methods, such as mean aggregation, max aggregation, Bayesian aggregation [59] and pixelwise addition. All described aggregation methods fuse a set of feature tensors f 1 , ..., f K , obtained by encoding K input images {x i } K i=1 in a permutation invariant way [69]. In mean aggregation, multiple feature vectors are fused by taking the pixel-wise average f = 1 K K i=1 f i . For max aggregation, we take the pixel-wise maximum instead f = max i (f i ). Bayesian aggregation (BA) [59] considers an uncertainty estimate for the fused feature vectors. In order to obtain such an uncertainty estimate, the encoder has to predict means µ i and variances σ i of a factorized Gaussian distribution over the latent feature vectors",
+                    "instead of f i directly. Here enc µ and enc σ represent the encoding process which generates means and variances respectively. The predicted distributions over latent feature vectors for multiple input images can be fused iteratively using the Bayes rule [2] (detailed derivation is given in Appendix B)",
+                    "where 7) ⊘ and ⊙ denote element-wise division and multiplication respectively."
                 ]
             },
             {
-                "title": "Image-Text Contrastive Learning",
+                "title": "Conditional Generative Models for Image Fusion",
                 "content": [
-                    "To further fuse the vision and language representations, we introduce common vision-language pre-training tasks, namely, image-text contrastive learning (ITC), image-text matching (ITM), and masked language modeling (MLM).",
-                    "To facilitate the alignment among the features of image and its corresponding texts, we introduce contrastive learning between image feature v cls and text feature w cls . The similarity function is formatted as s(I, T ) = φ v (v cls ) φw ( ŵcls ) and s(T, I) = φ w (w cls ) φv (v cls ), where φ(•) is a linear projection. Given a batch of imagetext pairs, the image-text and text-image similarities are:",
-                    "where B is the batchsize and τ is a learnable temperature parameter. The image-text contrastive loss is defined as:",
-                    ") where H(; ) is the cross-entropy. y i2t and y t2i are ground truth logits which are guided by momentum distillation following previous work (Li et al. 2021)."
+                    "We propose a deep hierarchical conditional variational autoencoder, called Fusion-VAE (Fusion Variational Auto-Encoder), that is able to fuse information from multiple sources and to infer the missing information in the images from a prior learned from the dataset. To the best of our knowledge, it is the first model that combines the generative ability of a hierarchical VAE to learn the underlying distribution of complex datasets with the ability to fuse multiple input images."
                 ]
             },
             {
-                "title": "Image-Text Matching",
+                "title": "Problem Formulation",
                 "content": [
-                    "As a widely used training objective in VLP, ITM aims to determine whether a pair of image and text is matched. Concretely, we take the output [CLS] embedding of fusion learner as the multi-modal representation to predict the correspondence between image and text. The objective L itm is defined as: where p itm is the predicted probability. y itm is the grounding truth which evaluates to 1 iff that the input image and text are matched."
+                    "We consider image fusion problems that are concerned with generating the fused target image from multiple source images. Each source image contains partial information of the target image and the goal of the task is to recover the original target image given a finite set of source images. In particular, we denote the target image as y and the set of K source images as context x = {x 1 , x 2 , . . . , x K }, where each x i is one source image. Given training sample (x, y), we aim to maximize the conditional likelihood p(y|x)."
                 ]
             },
             {
-                "title": "Masked Language Modeling",
+                "title": "FusionVAE",
                 "content": [
-                    "Following BERT (Devlin et al. 2018), MLM aims to predict the masked words based on visual and textual features. We randomly mask out 15% tokens in an input sentence. Each token is replaced with the [MASK] token, a random word, or left unchanged, with the probability of 80%, 10% and 10%, respectively. Denote masked text input as T msk , the L mlm is formatted as:",
-                    "where p msk is the predicted probability of the masked token and y msk is the ground truth distribution.",
-                    "The training objective of VLMAE is summarized as follows:"
+                    "Our approach is designed to maximize the conditional likelihood p(y|x). However, optimizing this objective directly is intractable. Therefore, we derive a variational lower bound as follows (detailed derivation can be found in Appendix C)",
+                    "where we split the latent variables z into L disjoint groups {z 1 , z 2 , . . . , z L }. β and α l are annealing parameters that control the warming-up of the KL terms as in [57]. Inspired by [54], β is increased linearly from 0 to 1 during the first few training epochs to start training the reconstruction before introducing the KL term, which is increased gradually. α l is a KL balancing coefficient [58] that is used during the warm-up period to encourage the equal use of all latent groups and to avoid posterior collapse. FusionVAE consists of three main networks and a latent space as illustrated in Fig. 2: 1) a context encoder network which models the conditional prior p ϕ (z l |x, z <l ), 2) a target encoder which models the approximate posterior q ϕ (z|y), 3) a latent space comprising the L latent groups, and 4) a generator network p θ (y|x, z) that aims to reconstruct the target image."
+                ]
+            },
+            {
+                "title": "Network Architecture",
+                "content": [
+                    "Fig. 2 illustrates the network architecture of our FusionVAE for training. It is built in a hierarchical way inspired by [57]. In each latent hierarchy l ∈ 1, . . . , L we have a set of feature maps f lx , f ly and latent distributions p l , q l . The first gray box contains the context encoder network that obtains a stack of source images x and employs residual cells [15] as in [57] to extract features f lx . The second gray box shows the target encoder network that encodes the target Fig. 2: Overview of the proposed network architecture. h is a trainable parameter vector, ⊕ denotes concatenation, ⊕ max aggregation, and ⊕ pixel-wise addition.",
+                    "r r is a residual network like in [57]. The dotted lines between the residual networks indicate shared parameters.",
+                    "image y into the feature map f ly using the same residual cells as the context encoder. The third gray box illustrates the latent space which contains the prior distributions p ϕ (z l |x, z <l ) (denoted p 1 , ..., p L in Fig. 2) and the approximate posterior distributions q ϕ (z l |y, z <l ) (denoted q 1 , ..., q L in Fig. 2). The fourth gray box contains the generator network which aims to create different output samples ŷ. It employs a trainable parameter vector h, concatenates the information from all hierarchies, and decodes them using residual cells.",
+                    "In each latent hierarchy, we aggregate the context features f lx using pixelwise max aggregation. In all but the first hierarchy, we pixel-wisely add the corresponding feature map from the generator network to the aggregated context features and to the target image features f ly . Using 2D convolutional layers, we learn the prior distributions p l and the approximate posterior distributions q l . We propose to use the approximate posterior distributions q l as target distributions in order to learn good prior distributions p l . Therefore, q ϕ (z l |y, z <l ) is created from the target image features f ly as well as information from the generator network.",
+                    "During training the generator network aims to create a prediction ŷ based on samples of the posterior distributions q l and a trainable parameter vector h.",
+                    "For evaluation, we can omit the target image input y and sample from the prior distributions p l . In case no input image is given, we set p 1 to a standard normal distribution. Based on the samples and the trainable parameter vector h, our FusionVAE can generate new output images."
                 ]
             }
         ],
         "Experiments": [
             {
-                "title": "Implementation Details",
+                "title": "Experimental Setup",
                 "content": [
-                    "In VLMAE, we apply a 12-layer ViT-B/16 (Dosovitskiy et al. 2020) as our image encoder, which is initialized by Im-ageNet 1K pre-trained weights. Following (He et al. 2022), we take a 4-layer transformer with 512 dim as our image decoder. The text encoder is implemented by the first 6 layers of BERT base and the last 6 layers are taken as the fusion learner. During the pre-training stage, we train the model for 30 epochs with a total batch size of 512 on 8 GPUs. We utilize AdamW (Loshchilov and Hutter 2017) optimizer with weight decay of 0.02. The learning rate is warmed-up to 1e-4 in the first 1000 iterations and decayed to 1e-5 following a cosine schedule. Following (Li et al. 2021;Yang et al. 2022), we crop the image into 256 × 256 and apply random color jittering, random grayscale conversion, random Gaussian Blur, random horizontal flip, and RandAugment (Cubuk et al. 2020) on it. During the fine-tuning stage, we increase the image resolution to 384 × 384."
+                    "To evaluate our approach, we conduct a series of experiments on three different datasets using data augmentation. Furthermore, we adapt traditional architec-tures for solving the same tasks in order to compare our results. Finally, we perform an ablation study to show the effects of specific design choices."
                 ]
             },
             {
-                "title": "Downstream Tasks",
+                "title": "Datasets",
                 "content": [
-                    "Image-Text Retrieval Image-Text Retrieval consists of two subtasks, namely, image-to-text retrieval (TR) and text-to-image retrieval (IR). We evaluate our model on Flickr30K (Plummer et al. 2015) and COCO (Lin et al. 2014) dataset. In testing data, Flickr30K contains 1K images and 5K texts, and COCO contains 5K images and 25K texts. Following the same protocol as ALBEF (Li et al. 2021), we conduct experiments on the fine-tuning and zero-shot settings. In the fine-tuning setting, we fine-tune our pre-trained model on training data and test it on validation/test data.",
-                    "In the zero-shot setting, following (Li et al. 2021;Yang et al. 2022), we fine-tune the model on COCO and test it on Flickr30k.",
-                    "Visual Question Answering (VQA) In the visual question answering (Goyal et al. 2017) task, given an image and a text question, the model is expected to understand features of both modals and provide a textual answer. Following the same setting in (Li et al. 2021), we treat this task as a generation problem and introduce an answer decoder on top of the fusion learner. Given the multi-model features, the answer decoder is required to generate the answer from 3192 candidates.",
-                    "Visual Entailment (SNLI-VE) visual entailment (Xie et al. 2019) task requires the model to judge the relation between an image and a text is entailment, neutral, or contradictory. Following the same setting in (Li et al. 2021), we consider this task as a three-way classification problem and generate the prediction using an MLP on the representation of [CLS] token of the text decoder.",
-                    "Visual Reasoning (NLVR2) In visual reasoning (Suhr et al. 2018) task, given an image-text pair, the model aims to predict whether a text describes a pair of images. Following (Li et al. 2021), we evaluate our model on NLVR2 dataset, which consists of 107,292 image-text examples, and extend the model to suit paired images input.",
-                    "Visual Grounding (VG) In visual grounding task, the model aims to localize the region in an image corresponding to a specific textual description. Following (Li et al. 2021), we study this task on weakly-supervised setting and evaluate our model on RefCOCO+ (Yu et al. 2016) dataset. Concretely, we fine-tune the pre-trained model with image-text pairs without any bounding box annotations. During inference, we generate heatmaps by Grad-CAM (Selvaraju et al. 2017) and rank the proposals generated by MAttNet (Yu et al. 2018) based on these heatmaps."
+                    "For training and evaluating our approach, we create three novel fusion datasets based on MNIST [32], CelebA [39], and T-LESS [18] as described in the following.",
+                    "FusionMNIST. Based on the dataset MNIST [32], we create an image fusion dataset called FusionMNIST. For each target image, it contains different noisy representations where only random parts of the target image are visible. The first three columns of Fig. 3 show different examples of FusionMNIST corresponding to the target images in the fourth column. To generate FusionMNIST, we applied zero padding to all MNIST images to obtain a resolution of 32 × 32. For creating a noisy representation, we generate a mask composed of the union of a varying number of ellipses with random size, shape and position. All parts of the given images outside the mask are blackened. Finally, we add Gaussian noise with a fixed variance and clip the pixel values afterwards to stay within [0, 1].",
+                    "FusionCelebA. We generate a similar fusion dataset based on the aligned and cropped version of CelebA [39] which we call FusionCelebA. Fig. 4 depicts different example images in the first three columns which belong to the target image in the fourth column. To generate FusionCelebA, we center-crop the CelebA images to 148 × 148 before scaling them down to 64 × 64 as proposed by [31]. As in Fusion-MNIST, we create different representations by using masks based on random ellipses."
                 ]
             },
             {
-                "title": "Evaluation on Image-Text Retrieval",
+                "title": "FusionT-LESS.",
                 "content": [
-                    "We first evaluate our model on image-text retrieval task, which is the most common downstream task in visionlanguage pre-training. Image Retrieval Text Retrieval Image Retrieval R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10 OSCAR 4M 70.0 91. Table 2: Performance comparison of fine-tuned image-text retrieval on Flickr30K and COCO datasets.",
-                    "Method TR IR R@1 R@5 R@10 R@1 R@5 R@10 ALBEF 90. on fine-tuned and zero-shot settings, respectively. In finetuned image-text retrieval, our model surpasses the previous state-of-the-art TCL (Yang et al. 2022) on MSCOCO dataset, reaching 77.3% and 59.6% in terms of TR@1 and IR@1, respectively. On Flickr30k dataset, VLMAE has a comparable performance with TCL and outperforms previous work ALBEF (Li et al. 2021). In the zero-shot setting, VLMAE surpasses TCL on text retrieval subtask but has an inferior performance on image retrieval. We speculate that this is because, compared with other methods (Li et al. 2021)"
+                    "A promising area of application for our FusionVAE is robot vision. Scenes in robotics settings can be very difficult to understand due to texture-less or reflective objects and occlusions. To examine the performance of our FusionVAE in this area, we create an object dataset with challenging occlusions based on T-LESS [18] which we call FusionT-LESS. To generate FusionT-LESS, we use the real training images of T-LESS and take all images of classes 19 -24 as basis for the target images. This selection contains all objects with power sockets and therefore images with many similarities. Every tenth image is removed from the training set and used for evaluation. In order to create challenging occlusions, we cut all objects from images of other classes using a Canny edge detector [5] and overlay each target image with a random number between five and eight cropped objects. We select all images from classes 1, 2, 5 -7, 11 -14, and 25 -27 as occluding objects for training and classes 3, 4, 8 -10, 15 -18, and 28 -30 for evaluation."
                 ]
             },
             {
-                "title": "Evaluation on Visual Grounding",
+                "title": "Data Augmentation",
                 "content": [
-                    "As shown in Table 5, VLMAE surpasses the previous stateof-the-art ALBEF (Li et al. 2021) by a large margin, reaching 71.6% and 50.7% accuracy on Test data. Similar to the finding in CAE (Chen et al. 2022), we argue that the reconstruction of pixels in an image makes the model focus on almost every patch instead of only the salient region, resulting in better performance on location tasks (see Section 4.8 and Figure 4)."
+                    "During training we apply different augmentation methods on the datasets to avoid overfitting. For FusionMNIST, we apply the elliptical mask generation and the addition of Gaussian noise live during training so that we obtain an infinite number of different fusion tasks. For FusionT-LESS, almost the entire creation of occluded images is performed during training. We apply horizontal flips, rotations, scaling and movement of target and occluding images with random parameters before composing the different occluded representations. Solely the object cutting with the Canny edge detector is performed offline as a pre-processing step to keep the training time low. For FusionCelebA, we apply a horizontal flip of all images randomly in 50% of all occasions and also the elliptical mask generation is done live during training."
                 ]
             },
             {
-                "title": "Ablation Study",
+                "title": "Architectures for Comparison",
                 "content": [
-                    "In this section, we conduct ablation studies on image-text retrieval task to validate the effectiveness of the newly proposed RMIM and IFR. Table 6 shows the results on both MSCOCO and Flickr30k datasets. We consider the VLMAE trained with only ITC, ITM, and MLM loss as our baseline model. With the addition of MIM loss, model achieves better performance on both IR and TR tasks. We argue that the reconstruction of pixels can facilitate the model to capture more comprehensive feature of the image. Moreover, introducing regional MIM loss further improves the model performance, which can be attributed to better image-text align-  We also explore the effect of the mask ratio, which is a trade-off between training efficiency and model performance. Table 7 shows the results with different mask ratios. Compared with ImageNet (Russakovsky et al. 2015) dataset, the content of images in vision-language pretraining datasets is more complicated. We argue that a too large mask ratio (e.g., 75%) may cause severe information loss, leading to a performance drop. In practice, we choose a 50% mask ratio to balance training efficiency and performance."
+                    "To the best of our knowledge, FusionVAE is the first fusion network for multiple images with a generative ability to fill areas without input information based on prior knowledge about the dataset under consideration. For lack of a suitable other model from the literature which would allow a fair comparison on our multi-image fusion tasks, we compare our approach with standard architectures that we adapted to support our tasks.",
+                    "The first architecture for comparison is a CVAE with residual layers as employed in [57]. We use a shared encoder for processing the input images and applied max aggregation before the latent space as we did in our FusionVAE. The second architecture for comparison is a fully convolutional network (FCN) with shared encoder and max aggregation before the decoder.",
+                    "For both baseline architectures, we created a version with skip connections (+S) and a version without. When using skip connections, we applied max aggregation at each shortcut for merging the features from the encoder with the decoder's features. To allow for a fair comparison, we designed all architectures so that they have a similar number of trainable parameters."
                 ]
             },
             {
-                "title": "Qualitative Assessment",
+                "title": "Training Procedure",
                 "content": [
-                    "To demonstrate the effectiveness of our model, following ALBEF (Li et al. 2021), we visualize the cross-attention maps in visual grounding task. As shown in Figure 4, compared with ALBEF, VLMAE can identify the relevant region more precisely and pay attention to the whole relevant area."
+                    "We trained all networks in a supervised manner using the augmented target images y as described in Sec. 5.2. In order to teach the networks both to fuse information from a different number of input images and to learn prior knowledge about the dataset, we vary the number of input images x during the entire training. Specifically, we select a uniformly distributed random number between zero and three for each batch."
                 ]
             },
             {
-                "title": "Investigation About Focal Bias",
+                "title": "Evaluation Metrics",
                 "content": [
-                    "To demonstrate that VLMAE can alleviate the focal bias problem, we explore the attention weights between the [CLS] token and the patch tokens of the image encoder. Results are shown in Figure 5. Since the text in pre-training dataset only depicts parts of the image (e.g., \"A bridge over the small river\"), ALBEF neglects other irrelevant regions (e.g., \"River bank\"). However, thanks to generative learning, VLMAE pays attention to most patches and provides"
+                    "For evaluation, we estimate the negative log-likelihood (NLL) in bits per dimension (BPD) using weighted importance sampling [4]. We use 100 samples for all experiments with FusionCelebA as well as FusionT-LESS and 1000 samples for FusionMNIST. Since we cannot estimate the NLL of the FCN, we used the minimum over all samples of the mean squared error (MSE min ) as second metric."
                 ]
             },
             {
-                "title": "Pre-training Efficiency",
+                "title": "Results",
                 "content": [
-                    "To demonstrate the efficiency of our proposed method, in Table 8, we compare VLMAE with previous works (Li et al. 2021;Yang et al. 2022)"
+                    "This section presents and discusses the quantitative and qualitative results of our research in comparison to the baseline methods mentioned in Sec. 5.3."
+                ]
+            },
+            {
+                "title": "Quantitative Results",
+                "content": [
+                    "Tabs. 1 to 3 show the NLL and the MSE min of all architectures on FusionMNIST, FusionCelebA, and FusionT-LESS respectively. The results are divided into the results based on zero to three input images and the average (avg) of it. We see that our FusionVAE outperforms all baseline methods on average. Regarding the NLL, our model surpasses the others additionally for 0 and 1 input images. For 2 and 3 images, CVAE+S reaches sometimes slightly better NLL values. However, our approach reaches the best MSE min values for each number of input images."
+                ]
+            },
+            {
+                "title": "Qualitative Results",
+                "content": [
+                    "The outstanding performance of our architecture in comparison to the others is also obvious when looking at the qualitative results in Figs. 3 to 5. For every row, these figures show the input, target, and up to three output predictions for all architectures. For the FCN, we depict just a single output prediction per row as all of them look almost identical.",
+                    "In the first three rows when the network does not receive any input image, we see that our network provides very realistic images. This indicates that it is able to capture the underlying distribution of the used datasets very well and much better than the other architectures. Due to the difficulty of the FusionT-LESS dataset, none of the models is able to produce realistic images without any input. Still our model shows much better performance in generating object-like shapes. In case the models receive at least one input image (cf. rows 4 -12), all architectures are able to extract the available information from the given input images. In addition, all VAE approaches, ours included, are able to complete the given input data based on prior knowledge. It is clearly visible, however, that the predictions of our model are much more realistic than the ones of the standard CVAE approaches especially for the more difficult datasets like FusionCelebA and FusionT-LESS. Fig. 5: Predictions on FusionT-LESS for zero to three input images."
+                ]
+            },
+            {
+                "title": "Ablation Studies",
+                "content": [
+                    "We conducted ablation studies to show the effect of certain design choices, such as the selection of the approximate posterior and the aggregation method. All experiments are run on the FusionCelebA dataset. Tab. 4 compares the performance of our FusionVAE for two different approximate posterior distributions q. The approximate posterior we selected for our FusionVAE q(y), depends only on the given target image y. It performs slightly better on average compared to the same method using a posterior that is computed based on the input images x as well as the target image y. However, the latter approach is superior when fusing two or three input images.   Tab. 5 shows the performance of different aggregation methods which are applied to create the prior distributions p l of every latent group. In our Fusion-VAE, the prior is created by fusing the input image features f lx using max aggregation (MaxAgg) and adding them to the decoded features of the same latent group before applying a 2D convolution. We abbreviate that method with MaxAggAdd.",
+                    "In addition to MaxAgg, we examined mean aggregation (MeanAgg) and Bayesian aggregation (BayAgg) [59] for comparison. For each aggregation principle, we tried two different versions: 1) aggregation of the input image features f lx adding the corresponding information from the decoder in a pixel-wise manner (denoted by suffix Add), and 2) directly aggregating all features, i.e. both input image features f lx and decoder features (denoted by suffix All).",
+                    "For creating the prior p i when using BayAgg, we moved the 2D convolutions before the aggregation in order to create the parameters µ and σ of a latent Gaussian distribution. Unlike MaxAgg and MeanAgg, BayAgg directly outputs a new Gaussian distribution that does not need to be processed any further by a convolution.",
+                    "We can see that all variations of mean and max aggregation are significantly better than Bayesian aggregation. Also their training procedures are less often impaired due to numeric instabilities. Interestingly, the NLL is very similar independent of whether the aggregation is performed on all features or not. However, the MSE min is much better for the aggregation with addition. Since the expressiveness of the metrics is limited, we provide additional visualizations of this ablation in Appendix D."
                 ]
             }
         ],
@@ -246,19 +243,7 @@
             {
                 "title": "Conclusion",
                 "content": [
-                    "In this paper, we propose a vision-language masked autoencoder framework (VLMAE). VLMAE utilizes an asymmetric encoder-decoder architecture, consisting of a fusion learner for aggregating multi-modal information and a lightweight image decoder for reconstructing pixels. Due to its simple yet effective design, VLMAE can successfully handle the focal bias problem in pre-training, providing a more comprehensive understanding of the image. Moreover, VLMAE utilizes Regional Masked Image Modeling to stabilize pixel-level reconstruction and Image Feature Reconstruction to improve the model's representation ability. Extensive experiments on various downstream vision-language benchmarks demonstrate that VLMAE surpasses existing state-of-the-art methods while prominently alleviating the training cost in the pre-training stage.",
-                    "Another view of the new flower bed near the garage area remember it was all gravel.",
-                    "Nothing says fun like a girl in pink leotards on a pink tall bike wielding a sword that's on fire.",
-                    "An olive tree in your bathroom turns it into a Mediterranean spa.",
-                    "Pickup truck outside the bar in red hook.",
-                    "Oldest wooden bridge in the world Luzern.",
-                    "A new graduate by the clock tower at Otago university.",
-                    "It must be great being a gardener in Hastings the flower beds are beautifully kept.",
-                    "The 42-foot long slate wall is a monument to the first amendment built by the Thomas Jefferson Center for free expression.",
-                    "This was the kitchen in the house we rented at nags head north Carolina back in the summer of 04 great vacation.",
-                    "Coffee table and small peace lily indoor plant with vase as shown below.",
-                    "Neutral bedroom + black floor + lush tree California home by Nickey Kehoe.",
-                    "Icelandic girl jumping into Ohrid lake in Macedonia."
+                    "We have presented a novel deep hierarchical variational autoencoder for generative image fusion called FusionVAE. Our approach fuses multiple corrupted input images together with prior knowledge obtained during training. We created three challenging image fusion benchmarks based on common computer vision datasets. Moreover, we implemented four standard methods that we modified to support our tasks. We showed that our FusionVAE outperforms all other methods significantly while having a similar number of trainable parameters. The predicted images of our approach look very realistic and incorporate given input information almost perfectly. During ablation studies, we revealed the benefits of our design choices regarding the applied aggregation method and the used posterior distribution. In future work, our research could be extended by enabling the fusion of different modalities e.g. by using multiple encoders. Additionally, an explicit uncertainty estimation could be implemented that helps to weigh the impact of input information according to its uncertainty."
                 ]
             }
         ]

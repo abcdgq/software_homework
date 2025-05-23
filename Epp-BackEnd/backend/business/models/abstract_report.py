@@ -2,6 +2,9 @@
 摘要报告表
 """
 from django.db import models
+import uuid
+
+from .user import User
 
 
 class AbstractReport(models.Model):
@@ -23,8 +26,11 @@ class AbstractReport(models.Model):
         (STATUS_TIMEOUT, '超时')
     ]
     
-    file_local_path = models.CharField(max_length=255, primary_key=True)
+    report_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    file_local_path = models.CharField(max_length=255)
     report_path = models.CharField(max_length=255, unique=True)
+    date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=2,
         choices=STATUS_CHOICES,

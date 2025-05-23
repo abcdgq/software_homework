@@ -325,7 +325,7 @@ def create_abstract_report(request):
             ar2.delete()
             
         ## 先创建一个知识库
-        ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path)
+        ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path, user_id=user)
         upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
         local_path = local_path[1:] if local_path.startswith('/') else local_path
         print(local_path)

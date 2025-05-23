@@ -6,102 +6,80 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 	<teiHeader xml:lang="en">
 		<fileDesc>
 			<titleStmt>
-				<title level="a" type="main">VLMAE: Vision-Language Masked Autoencoder</title>
+				<title level="a" type="main">FusionVAE: A Deep Hierarchical Variational Autoencoder for RGB Image Fusion</title>
 			</titleStmt>
 			<publicationStmt>
 				<publisher/>
 				<availability  status="unknown">
 					<licence/>
 				</availability>
-				<date type="published" when="2022-08-19">19 Aug 2022</date>
+				<date type="published" when="2022-09-22">22 Sep 2022</date>
 			</publicationStmt>
 			<sourceDesc>
 				<biblStruct>
 					<analytic>
 						<author>
-							<persName><forename type="first">Sunan</forename><surname>He</surname></persName>
-							<email>sunanhe@tencent.com</email>
+							<persName><forename type="first">Fabian</forename><surname>Duffhauss</surname></persName>
+							<idno type="ORCID">0000-0002-8910-3852</idno>
 							<affiliation key="aff0">
-								<orgName type="laboratory">YouTu Lab</orgName>
-								<address>
-									<region>Tencent</region>
-								</address>
+								<orgName type="department">Bosch Center for Artificial Intelligence</orgName>
 							</affiliation>
 							<affiliation key="aff1">
-								<orgName type="department">Tsinghua Shenzhen International Graduate School</orgName>
-								<orgName type="institution">Tsinghua University</orgName>
+								<orgName type="institution">University of Tübingen</orgName>
 							</affiliation>
 						</author>
 						<author>
-							<persName><forename type="first">Taian</forename><surname>Guo</surname></persName>
-							<email>taianguo@tencent.com</email>
+							<persName><forename type="first">Ngo</forename><forename type="middle">Anh</forename><surname>Vien</surname></persName>
+							<idno type="ORCID">0000-0001-9646-267X</idno>
 							<affiliation key="aff0">
-								<orgName type="laboratory">YouTu Lab</orgName>
-								<address>
-									<region>Tencent</region>
-								</address>
+								<orgName type="department">Bosch Center for Artificial Intelligence</orgName>
 							</affiliation>
 						</author>
 						<author>
-							<persName><forename type="first">Tao</forename><surname>Dai</surname></persName>
+							<persName><forename type="first">Hanna</forename><surname>Ziesche</surname></persName>
+							<idno type="ORCID">0000-0003-2042-3660</idno>
+							<affiliation key="aff0">
+								<orgName type="department">Bosch Center for Artificial Intelligence</orgName>
+							</affiliation>
+						</author>
+						<author role="corresp">
+							<persName><forename type="first">Gerhard</forename><surname>Neumann</surname></persName>
+							<email>gerhard.neumann@kit.edu</email>
+							<idno type="ORCID">0000-0002-5483-4225</idno>
 							<affiliation key="aff2">
-								<orgName type="department">College of Computer Science and Software Engineering</orgName>
-								<orgName type="institution">Shenzhen University</orgName>
+								<orgName type="institution">Karlsruhe Institute of Technology</orgName>
 							</affiliation>
 						</author>
 						<author>
-							<persName><forename type="first">Ruizhi</forename><surname>Qiao</surname></persName>
-							<email>ruizhiqiao@tencent.com</email>
-							<affiliation key="aff0">
-								<orgName type="laboratory">YouTu Lab</orgName>
-								<address>
-									<region>Tencent</region>
-								</address>
-							</affiliation>
+							<persName><forename type="first">{fabian</forename><surname>Duffhauss</surname></persName>
 						</author>
 						<author>
-							<persName><forename type="first">Chen</forename><surname>Wu</surname></persName>
-							<affiliation key="aff0">
-								<orgName type="laboratory">YouTu Lab</orgName>
-								<address>
-									<region>Tencent</region>
-								</address>
-							</affiliation>
+							<persName><forename type="first">Anhvien</forename><surname>Ngo</surname></persName>
 						</author>
 						<author>
-							<persName><forename type="first">Xiujun</forename><surname>Shu</surname></persName>
-							<email>xiujunshu@tencent.com</email>
-							<affiliation key="aff0">
-								<orgName type="laboratory">YouTu Lab</orgName>
-								<address>
-									<region>Tencent</region>
-								</address>
-							</affiliation>
+							<persName><forename type="first">Hanna</forename><surname>Ziesche}</surname></persName>
 						</author>
 						<author>
-							<persName><forename type="first">Bo</forename><surname>Ren</surname></persName>
-							<affiliation key="aff0">
-								<orgName type="laboratory">YouTu Lab</orgName>
-								<address>
-									<region>Tencent</region>
-								</address>
-							</affiliation>
+							<persName><forename type="first">@</forename><surname>Bosch</surname></persName>
 						</author>
-						<title level="a" type="main">VLMAE: Vision-Language Masked Autoencoder</title>
+						<author>
+							<persName><surname>Com</surname></persName>
+						</author>
+						<title level="a" type="main">FusionVAE: A Deep Hierarchical Variational Autoencoder for RGB Image Fusion</title>
 					</analytic>
 					<monogr>
 						<imprint>
-							<date type="published" when="2022-08-19">19 Aug 2022</date>
+							<date type="published" when="2022-09-22">22 Sep 2022</date>
 						</imprint>
 					</monogr>
-					<idno type="MD5">F15EA2D8B936CC963F999C52E19206CC</idno>
-					<idno type="arXiv">arXiv:2208.09374v1[cs.CV]</idno>
+					<idno type="MD5">1E6659617709632A94D0B1B570F2644F</idno>
+					<idno type="arXiv">arXiv:2209.11277v1[cs.CV]</idno>
 				</biblStruct>
 			</sourceDesc>
 		</fileDesc>
 		<encodingDesc>
 			<appInfo>
-				<application version="0.8.1" ident="GROBID" when="2025-05-06T04:17+0000">
+				<application version="0.8.1" ident="GROBID" when="2025-05-14T06:32+0000">
 					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
 					<ref target="https://github.com/kermitt2/grobid"/>
 				</application>
@@ -109,260 +87,73 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 		</encodingDesc>
 		<profileDesc>
 			<abstract>
-<div xmlns="http://www.tei-c.org/ns/1.0"><p>Image and language modeling is of crucial importance for vision-language pre-training (VLP), which aims to learn multi-modal representations from large-scale paired imagetext data. However, we observe that most existing VLP methods focus on modeling the interactions between image and text features while neglecting the information disparity between image and text, thus suffering from focal bias. To address this problem, we propose a vision-language masked autoencoder framework (VLMAE). VLMAE employs visual generative learning, facilitating the model to acquire finegrained and unbiased features. Unlike the previous works, VLMAE pays attention to almost all critical patches in an image, providing more comprehensive understanding. Extensive experiments demonstrate that VLMAE achieves better performance in various vision-language downstream tasks, including visual question answering, image-text retrieval and visual grounding, even with up to 20% pre-training speedup.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><p>Sensor fusion can significantly improve the performance of many computer vision tasks. However, traditional fusion approaches are either not data-driven and cannot exploit prior knowledge nor find regularities in a given dataset or they are restricted to a single application. We overcome this shortcoming by presenting a novel deep hierarchical variational autoencoder called FusionVAE that can serve as a basis for many fusion tasks. Our approach is able to generate diverse image samples that are conditioned on multiple noisy, occluded, or only partially visible input images. We derive and optimize a variational lower bound for the conditional log-likelihood of FusionVAE. In order to assess the fusion capabilities of our model thoroughly, we created three novel datasets for image fusion based on popular computer vision datasets. In our experiments, we show that FusionVAE learns a representation of aggregated information that is relevant to fusion tasks. The results demonstrate that our approach outperforms traditional methods significantly. Furthermore, we present the advantages and disadvantages of different design choices.</p></div>
 			</abstract>
 		</profileDesc>
 	</teiHeader>
 	<text xml:lang="en">
 		<body>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>In recent years, with the prevalence of self-supervised learning and transformer-based models in both natural language processing and computer vision <ref type="bibr" target="#b5">(Devlin et al. 2018;</ref><ref type="bibr" target="#b7">Dosovitskiy et al. 2020)</ref>, we have witnessed rapid development in vision-language representation learning. In multi-modal tasks, such as visual question answering and image-text retrieval, where the model needs to comprehend and aggregate visual-textual information, vision-language pre-training (VLP) plays a fundamental role.</p><p>Early VLP methods <ref type="bibr" target="#b21">(Lu et al. 2019;</ref><ref type="bibr" target="#b16">Li et al. 2020;</ref><ref type="bibr" target="#b3">Chen et al. 2020</ref>) rely on a well-trained but heavy object detector on the input image for visual proposal feature extraction, followed by a cross-model encoder for visual-textual interaction. To eliminate the heavy object detector, some recent methods <ref type="bibr" target="#b12">(Huang et al. 2021;</ref><ref type="bibr" target="#b13">Kim, Son, and Kim 2021;</ref><ref type="bibr" target="#b31">Wang et al. 2021</ref>) resort to vision dictionary with a lightweight visual embedder or modality experts networks for better trade-off between efficiency and performance of downstream tasks. Very recently, ALBEF <ref type="bibr" target="#b17">(Li et al. 2021</ref>  By contrast, our VLMAE produces better results (in green) with a universal focus over the whole image.</p><p>tures, facilitating the aggregation of multi-modal information. TCL <ref type="bibr" target="#b35">(Yang et al. 2022</ref>) further leverages cross-modal and intra-modal self-supervision simultaneously to obtain multi-modal interactions more easily, leading to the most recent state-of-the-art performance. Despite impressive performance of ALBEF and TCL, such methods may focus on specific objects of interest from training data, while neglecting other critical objects (see <ref type="bibr">Figure 1)</ref>, thus leading to focal bias problem. This is mainly due to the information disparity between image and text. For example, as shown in Figure <ref type="figure" target="#fig_1">1</ref>, the corresponding training text of the top row figure is "The chair is purple", which only describes parts of the image. The image encoder needs to pay more attention to the text-relevant area to facilitate the alignment between image and text while neglecting some irrelevant regions. However, for VLP models, without any textual prior, the image feature should be task-agnostic, and all critical objects in an image should be attended to. To alleviate such bias, in this work, we introduce a generative task of pixel-level reconstruction, relying on a comprehensive understanding of the image.</p><p>Pixel-level image reconstruction with the encoderdecoder paradigm is prevalent in representation learning <ref type="bibr" target="#b30">(Vincent et al. 2008;</ref><ref type="bibr" target="#b14">Kingma and Welling 2013)</ref>. Recently, with asymmetric encoder-decoder architecture, masked autoencoders (MAE) <ref type="bibr" target="#b11">(He et al. 2022</ref>) exhibits high generalizability and remarkable performance in vision tasks. The simple but insightful pre-training strategy, i.e., masking a very high portion of random patches, exploits image redundancy and forces the model to acquire comprehensive understanding of the image. Inspired by MAE, we adopt the masking-then-predicting paradigm and introduce a pixel-level reconstruction task for alleviating the focal bias problem.</p><p>In this paper, we propose a novel VLP framework called Vision-Language Masked AutoEncoder (VLMAE), which is composed of two uni-modal encoders to extract visual and textual features, an image decoder for pixel-level reconstruction, and a fusion learner to aggregate the multi-modal features. VLMAE employs image-text contrastive learning and visual generative learning simultaneously. Contrastive learning promotes the alignment of image-text pairs and enables the model to obtain global semantic representations, and generative learning facilitates the model to acquire more comprehensive and fine-grained understanding. We propose Regional Masked Image Modeling (RMIM) loss to refine the image-text alignment and facilitate fusion of multi-modal features. To enhance the model's representation ability, we further propose the Image Feature Reconstruction (IFR) task, which requires the model to predict masked patch features based on visible patch inputs. Meanwhile, the masking design for the image patches in VLMAE reduces pretraining cost significantly.</p><p>Our main contributions can be summarized as: age and text embeddings separately with dual uni-modal encoders <ref type="bibr" target="#b24">(Radford et al. 2021;</ref><ref type="bibr" target="#b0">Andonian, Chen, and Hamid 2022)</ref>. Recent methods model the vision-language interaction with contrastive loss on massive noisy paired imagetext data crawled from Internet. Despite thire simplicity, they achieve remarkable performance in cross-modal retrieval tasks with high efficiency. However, these methods do not perform well in more complex multi-modal downstream tasks, such as visual question answering and visual reasoning, which require the aggregation of visual-textual information and reasoning capabilities. They lack the capability to model more complicated interactions between the two modalities, which is indispensable for multi-modal reasoning. The second category adopts a transformer-based multimodal fusion encoder to model the interactions between images and texts <ref type="bibr" target="#b13">(Kim, Son, and Kim 2021;</ref><ref type="bibr" target="#b17">Li et al. 2021;</ref><ref type="bibr" target="#b38">Zeng, Zhang, and Li 2021)</ref>. These models achieve superior performance for downstream vision-language reasoning or classification tasks, thanks to the interaction modeling capability of the deep fusion encoder. Earlier methods rely on a pre-trained object detector for visual region feature extraction, which observably slows down the inference procedure.</p><p>Latter methods endeavor to remove the heavy object detector for high inference efficiency. Among them, SOHO <ref type="bibr" target="#b12">(Huang et al. 2021</ref>) adopts a vision dictionary to extract compact visual features from the whole image, while ViLT <ref type="bibr" target="#b13">(Kim, Son, and Kim 2021)</ref> uses lightweight image and text tokenizers instead of separate uni-modal encoders to achieve faster inference speed. While these methods of the second category aggregate the multi-modal feature effectively, they ignore the importance of image-text alignment, hindering the interaction between the visual and textual modalities. To address this disadvantage, ALBEF <ref type="bibr" target="#b17">(Li et al. 2021)</ref> proposes to align the visual and textual representations with contrastive learning before fusing them in the fusion encoder with cross-modal attention. Besides, ALBEF adopts pseudo-targets produced by a momentum model to conduct momentum distillation for better noise resistance capability when learning from the noisy web data. VLMO <ref type="bibr" target="#b31">(Wang et al. 2021</ref>) further introduces Mixture-of-Modality-Experts (MOME) Transformer and stage-wise pre-training strategy, leading to better performance in downstream tasks with prominent efficiency. TCL <ref type="bibr" target="#b35">(Yang et al. 2022</ref>) also shares the similar aligningbefore-fusing spirit of ALBEF but leverages cross-modal and intra-modal self-supervision simultaneously to enhance multi-modal interactions, achieving the most recent stateof-the-art performance. Though effective, previous visionlanguage pre-training methods with contrastive learning rely on modeling global semantic interactions and aim to maximize image-text mutual information, resulting in the focal bias problem. Motivated by recent generative methods in visual self-supervised learning <ref type="bibr" target="#b11">(He et al. 2022;</ref><ref type="bibr" target="#b2">Chen et al. 2022)</ref>, we propose to introduce pixel-level reconstruction task to VLP. To restore the image, the model needs to pay attention to almost all patches instead of only salient regions. With such masking-then-predicting paradigm, our model provides more comprehensive understanding of the image and achieves superior performance in downstream multi-modal tasks with significant pre-training cost reduction.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.2">Masked Image Modeling</head><p>Inspired by Masked Language Modeling (MLM) <ref type="bibr" target="#b5">(Devlin et al. 2018)</ref> in NLP, Masked Image Modeling (MIM) is adopted in visual pre-training and has shown impressive results in downstream visual tasks. Existing MIM works can be classified into two categories. Methods in the first category predict discrete tokens generated by VQ-VAE <ref type="bibr" target="#b29">(Van Den Oord, Vinyals et al. 2017)</ref> or its variants, such as BEiT <ref type="bibr" target="#b1">(Bao, Dong, and Wei 2021)</ref>, mc-BEiT <ref type="bibr" target="#b18">(Li et al. 2022)</ref> and PeCo <ref type="bibr" target="#b6">(Dong et al. 2021)</ref>. Methods of the second category adopt masking strategies to exploit the redundancy nature of images for visual pre-training. MaskFeat <ref type="bibr" target="#b32">(Wei et al. 2022)</ref> randomly masks a portion of video sequence and regresses Histograms of Oriented Gradients (HOG) features of masked regions. MAE <ref type="bibr" target="#b11">(He et al. 2022)</ref> and SimMIM <ref type="bibr" target="#b34">(Xie et al. 2022)</ref> predict pixel RGB values directly to promote image pre-training, achieving even better performance than complicatedly designed token classification methods.</p><p>Most recently, several concurrent works explore the masked token/patch prediction task for vision-language pretraining. M3AE <ref type="bibr" target="#b8">(Geng et al. 2022</ref>) randomly masks the unified sequence of image patches and text tokens, and encodes the visible image patches into embeddings with the same dimension as the language embeddings to perform joint training of the two modalities. Due to the lack of alignment and interaction between the two modalities during pretraining, it is hard to apply directly to various multi-modal downstream tasks. VLC <ref type="bibr" target="#b10">(Gui et al. 2022</ref>) initializes the vision backbone from the pre-trained MAE model, thus avoiding supervised training, and performs intra-modal reconstruction via masked image/language modeling. However, the performance in downstream tasks can be sub-optimal due to the lack of elaborate arrangements between MIM and other proxy tasks. Meanwhile, VLC suffers from severe pre-training burden due to the large image input size (e.g., 384) and full patches input. In comparison, our VL-MAE adopts a simple yet effective design to simultaneously employ image-text contrastive learning and visual generative learning, achieving SOTA performance with less pretraining cost.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Methodology</head></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1">Observation</head><p>As image-text dataset plays a fundamental role in visionlanguage pre-training tasks, we first explore the prevalent pre-training datasets. Concretely, we calculate the similarity between image and text embedding extracted by a pretrained CLIP model <ref type="bibr" target="#b24">(Radford et al. 2021)</ref>. Figure <ref type="figure" target="#fig_3">2</ref> shows the distribution of similarity and samples from different intervals. In low relevance interval, texts only depict the background or "unsalient" regions, and in medium relevance interval, texts describe the "salient" objects but ignore some details. For contrastive learning based methods <ref type="bibr" target="#b17">(Li et al. 2021;</ref><ref type="bibr" target="#b35">Yang et al. 2022)</ref>, this information disparity between Shadow of tree and leaves on pavement.</p><p>Closed brown wooden door.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head>Low Relevance</head><p>The cow is black and white.</p><p>Street signs on a metal pole.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head>Medium Relevance</head><p>Red sling backs with apples.</p><p>Cat sitting inside open umbrella.</p><p>High Relevance image and text may cause the focal bias problem because image encoder tends to pay more attention to the text-relevant area for better alignment between visual and textual embedding. Therefore, we introduce generative learning to alleviate such bias during the pre-training phase.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2">Model Architecture</head><p>The overall architecture of our VLMAE model is illustrated in Figure <ref type="figure" target="#fig_4">3</ref>. VLMAE contains an image encoder g(•) and a text encoder h(•) to extract uni-modal features. An image decoder is introduced to reconstruct masked patches, and the fusion learner aggregates the vision-language features for multi-modal tasks. Similar to previous works <ref type="bibr" target="#b17">(Li et al. 2021;</ref><ref type="bibr" target="#b35">Yang et al. 2022)</ref>, for each encoder, we maintain a momentum counterpart ĝ(•), ĥ(•) and update their parameters following θ ĝ = mθ ĝ + (1 -m)θ g .</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3">Feature Extraction</head><p>Given an image I, we split it into non-overlapping patches and project them into a sequence of patch embeddings,</p><formula xml:id="formula_0">{x i } N i=1</formula><p>, where N is the number of patches. Following MAE <ref type="bibr" target="#b11">(He et al. 2022)</ref>, we randomly divide the patches into visible patches x vis </p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.4">Regional Mask Image Modeling</head><p>Unlike MAE <ref type="bibr" target="#b11">(He et al. 2022)</ref>, we aim to reconstruct the invisible patches with both image and text features to facilitate multi-modal information fusion. Concretely,we concatenate the masked visual representations v cls , v vis 1 , . . . , v vis N -M and text representations {w cls , w 1 , . . . , w L } and feed them into the image decoder. Specifically, for the text with bounding box annotation, we propose to apply a regional reconstruction loss to facilitate the aggregation of multi-modal features. Formally, the reconstruction loss is defined as:</p><formula xml:id="formula_1">L rmim = E (I,T )∼D f mim I msk | T, I vis , (<label>1</label></formula><formula xml:id="formula_2">)</formula><p>where D is the pre-training dataset and T is the input text. I vis denotes the visible patches and I msk denotes the masked patches in text-relevant region. For text without bounding box annotation, we treat the whole image as text-relevant region. The objective f mim calculates the mean squared error (MSE) between the reconstructed and original images at the pixel level.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.5">Image Feature Reconstruction</head><p>Because only parts of image patches are fed into the image encoder while the remaining patches are invisible, it causes information insufficiency. In order to enhance the representation ability of the model, we propose the image feature reconstruction task, which requires the image encoder to reconstruct the global feature generated by momentum image encoder. Concretely, we take the output [CLS] embedding vcls of momentum image encoder ĝ(•), which is given by the complete image, as the target feature. The reconstruction loss is denoted as</p><formula xml:id="formula_3">L ifr = E I∼D f r (ĝ(I)|g(I vis )).<label>(2)</label></formula><p>The reconstruction objective f r is L1 loss in practice.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.6">Image-Text Contrastive Learning</head><p>To further fuse the vision and language representations, we introduce common vision-language pre-training tasks, namely, image-text contrastive learning (ITC), image-text matching (ITM), and masked language modeling (MLM).</p><p>To facilitate the alignment among the features of image and its corresponding texts, we introduce contrastive learning between image feature v cls and text feature w cls . The similarity function is formatted as s(I, T ) = φ v (v cls ) φw ( ŵcls ) and s(T, I) = φ w (w cls ) φv (v cls ), where φ(•) is a linear projection. Given a batch of imagetext pairs, the image-text and text-image similarities are:</p><formula xml:id="formula_4">p i2t (I) = exp s I vis , T i /τ B i=1 exp (s (I vis , T i ) /τ ) , p t2i (T ) = exp s T, I vis i /τ B i=1 exp s T, I vis i /τ ,<label>(3)</label></formula><p>where B is the batchsize and τ is a learnable temperature parameter. The image-text contrastive loss is defined as:</p><formula xml:id="formula_5">L itc = E (I,T )∼D H y i2t , p i2t (I) + H y t2i , p t2i (T ) ,<label>(4</label></formula><p>) where H(; ) is the cross-entropy. y i2t and y t2i are ground truth logits which are guided by momentum distillation following previous work <ref type="bibr" target="#b17">(Li et al. 2021)</ref>.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.7">Image-Text Matching</head><p>As a widely used training objective in VLP, ITM aims to determine whether a pair of image and text is matched. Concretely, we take the output [CLS] embedding of fusion learner as the multi-modal representation to predict the correspondence between image and text. The objective L itm is defined as: where p itm is the predicted probability. y itm is the grounding truth which evaluates to 1 iff that the input image and text are matched.</p><formula xml:id="formula_6">L itm = E (I,T )∼D H y itm , p itm (I vis , T ) ,<label>(5)</label></formula></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.8">Masked Language Modeling</head><p>Following BERT <ref type="bibr" target="#b5">(Devlin et al. 2018)</ref>, MLM aims to predict the masked words based on visual and textual features. We randomly mask out 15% tokens in an input sentence. Each token is replaced with the [MASK] token, a random word, or left unchanged, with the probability of 80%, 10% and 10%, respectively. Denote masked text input as T msk , the L mlm is formatted as:</p><formula xml:id="formula_7">L mlm = E (I,T )∼D H y msk , p msk (I vis , T msk ) ,<label>(6)</label></formula><p>where p msk is the predicted probability of the masked token and y msk is the ground truth distribution.</p><p>The training objective of VLMAE is summarized as follows: </p><formula xml:id="formula_8">L = L rmim + L ifr + L itc + L itm + L mlm .<label>(7</label></formula></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2">Implementation Details</head><p>In VLMAE, we apply a 12-layer ViT-B/16 <ref type="bibr" target="#b7">(Dosovitskiy et al. 2020</ref>) as our image encoder, which is initialized by Im-ageNet 1K pre-trained weights. Following <ref type="bibr" target="#b11">(He et al. 2022)</ref>, we take a 4-layer transformer with 512 dim as our image decoder. The text encoder is implemented by the first 6 layers of BERT base and the last 6 layers are taken as the fusion learner. During the pre-training stage, we train the model for 30 epochs with a total batch size of 512 on 8 GPUs. We utilize AdamW <ref type="bibr" target="#b20">(Loshchilov and Hutter 2017)</ref> optimizer with weight decay of 0.02. The learning rate is warmed-up to 1e-4 in the first 1000 iterations and decayed to 1e-5 following a cosine schedule. Following <ref type="bibr" target="#b17">(Li et al. 2021;</ref><ref type="bibr" target="#b35">Yang et al. 2022)</ref>, we crop the image into 256 × 256 and apply random color jittering, random grayscale conversion, random Gaussian Blur, random horizontal flip, and RandAugment <ref type="bibr" target="#b4">(Cubuk et al. 2020</ref>) on it. During the fine-tuning stage, we increase the image resolution to 384 × 384.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3">Downstream Tasks</head><p>Image-Text Retrieval Image-Text Retrieval consists of two subtasks, namely, image-to-text retrieval (TR) and text-to-image retrieval (IR). We evaluate our model on Flickr30K <ref type="bibr" target="#b23">(Plummer et al. 2015)</ref> and COCO <ref type="bibr" target="#b19">(Lin et al. 2014)</ref> dataset. In testing data, Flickr30K contains 1K images and 5K texts, and COCO contains 5K images and 25K texts. Following the same protocol as ALBEF <ref type="bibr" target="#b17">(Li et al. 2021)</ref>, we conduct experiments on the fine-tuning and zero-shot settings. In the fine-tuning setting, we fine-tune our pre-trained model on training data and test it on validation/test data.</p><p>In the zero-shot setting, following <ref type="bibr" target="#b17">(Li et al. 2021;</ref><ref type="bibr" target="#b35">Yang et al. 2022)</ref>, we fine-tune the model on COCO and test it on Flickr30k.</p><p>Visual Question Answering (VQA) In the visual question answering <ref type="bibr" target="#b9">(Goyal et al. 2017</ref>) task, given an image and a text question, the model is expected to understand features of both modals and provide a textual answer. Following the same setting in <ref type="bibr" target="#b17">(Li et al. 2021)</ref>, we treat this task as a generation problem and introduce an answer decoder on top of the fusion learner. Given the multi-model features, the answer decoder is required to generate the answer from 3192 candidates.</p><p>Visual Entailment (SNLI-VE) visual entailment <ref type="bibr" target="#b33">(Xie et al. 2019</ref>) task requires the model to judge the relation between an image and a text is entailment, neutral, or contradictory. Following the same setting in <ref type="bibr" target="#b17">(Li et al. 2021)</ref>, we consider this task as a three-way classification problem and generate the prediction using an MLP on the representation of [CLS] token of the text decoder.</p><p>Visual Reasoning (NLVR2) In visual reasoning <ref type="bibr" target="#b28">(Suhr et al. 2018</ref>) task, given an image-text pair, the model aims to predict whether a text describes a pair of images. Following <ref type="bibr" target="#b17">(Li et al. 2021)</ref>, we evaluate our model on NLVR2 dataset, which consists of 107,292 image-text examples, and extend the model to suit paired images input.</p><p>Visual Grounding (VG) In visual grounding task, the model aims to localize the region in an image corresponding to a specific textual description. Following <ref type="bibr" target="#b17">(Li et al. 2021)</ref>, we study this task on weakly-supervised setting and evaluate our model on RefCOCO+ <ref type="bibr" target="#b37">(Yu et al. 2016</ref>) dataset. Concretely, we fine-tune the pre-trained model with image-text pairs without any bounding box annotations. During inference, we generate heatmaps by Grad-CAM <ref type="bibr" target="#b26">(Selvaraju et al. 2017)</ref> and rank the proposals generated by MAttNet <ref type="bibr" target="#b36">(Yu et al. 2018)</ref> based on these heatmaps.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.4">Evaluation on Image-Text Retrieval</head><p>We first evaluate our model on image-text retrieval task, which is the most common downstream task in visionlanguage pre-training. Image Retrieval Text Retrieval Image Retrieval R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10 R@1 R@5 R@10 OSCAR 4M 70.0 91. Table <ref type="table">2</ref>: Performance comparison of fine-tuned image-text retrieval on Flickr30K and COCO datasets.</p><p>Method TR IR R@1 R@5 R@10 R@1 R@5 R@10 ALBEF 90. on fine-tuned and zero-shot settings, respectively. In finetuned image-text retrieval, our model surpasses the previous state-of-the-art TCL <ref type="bibr" target="#b35">(Yang et al. 2022</ref>) on MSCOCO dataset, reaching 77.3% and 59.6% in terms of TR@1 and IR@1, respectively. On Flickr30k dataset, VLMAE has a comparable performance with TCL and outperforms previous work ALBEF <ref type="bibr" target="#b17">(Li et al. 2021</ref>). In the zero-shot setting, VLMAE surpasses TCL on text retrieval subtask but has an inferior performance on image retrieval. We speculate that this is because, compared with other methods <ref type="bibr" target="#b17">(Li et al. 2021)</ref>  </p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.6">Evaluation on Visual Grounding</head><p>As shown in Table <ref type="table" target="#tab_8">5</ref>, VLMAE surpasses the previous stateof-the-art ALBEF <ref type="bibr" target="#b17">(Li et al. 2021</ref>) by a large margin, reaching 71.6% and 50.7% accuracy on Test data. Similar to the finding in CAE <ref type="bibr" target="#b2">(Chen et al. 2022)</ref>, we argue that the reconstruction of pixels in an image makes the model focus on almost every patch instead of only the salient region, resulting in better performance on location tasks (see Section 4.8 and Figure <ref type="figure" target="#fig_5">4</ref>).</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.7">Ablation Study</head><p>In this section, we conduct ablation studies on image-text retrieval task to validate the effectiveness of the newly proposed RMIM and IFR. Table <ref type="table" target="#tab_9">6</ref> shows the results on both MSCOCO and Flickr30k datasets. We consider the VLMAE trained with only ITC, ITM, and MLM loss as our baseline model. With the addition of MIM loss, model achieves better performance on both IR and TR tasks. We argue that the reconstruction of pixels can facilitate the model to capture more comprehensive feature of the image. Moreover, introducing regional MIM loss further improves the model performance, which can be attributed to better image-text align-  We also explore the effect of the mask ratio, which is a trade-off between training efficiency and model performance. Table <ref type="table" target="#tab_10">7</ref> shows the results with different mask ratios. Compared with ImageNet <ref type="bibr" target="#b25">(Russakovsky et al. 2015)</ref> dataset, the content of images in vision-language pretraining datasets is more complicated. We argue that a too large mask ratio (e.g., 75%) may cause severe information loss, leading to a performance drop. In practice, we choose a 50% mask ratio to balance training efficiency and performance.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.8">Qualitative Assessment</head><p>To demonstrate the effectiveness of our model, following ALBEF <ref type="bibr" target="#b17">(Li et al. 2021)</ref>, we visualize the cross-attention maps in visual grounding task. As shown in Figure <ref type="figure" target="#fig_5">4</ref>, compared with ALBEF, VLMAE can identify the relevant region more precisely and pay attention to the whole relevant area.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.9">Investigation About Focal Bias</head><p>To demonstrate that VLMAE can alleviate the focal bias problem, we explore the attention weights between the [CLS] token and the patch tokens of the image encoder. Results are shown in Figure <ref type="figure" target="#fig_7">5</ref>. Since the text in pre-training dataset only depicts parts of the image (e.g., "A bridge over the small river"), ALBEF neglects other irrelevant regions (e.g., "River bank"). However, thanks to generative learning, VLMAE pays attention to most patches and provides   </p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.10">Pre-training Efficiency</head><p>To demonstrate the efficiency of our proposed method, in Table <ref type="table" target="#tab_11">8</ref>, we compare VLMAE with previous works <ref type="bibr" target="#b17">(Li et al. 2021;</ref><ref type="bibr" target="#b35">Yang et al. 2022)</ref>  </p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Conclusion</head><p>In this paper, we propose a vision-language masked autoencoder framework (VLMAE). VLMAE utilizes an asymmetric encoder-decoder architecture, consisting of a fusion learner for aggregating multi-modal information and a lightweight image decoder for reconstructing pixels. Due to its simple yet effective design, VLMAE can successfully handle the focal bias problem in pre-training, providing a more comprehensive understanding of the image. Moreover, VLMAE utilizes Regional Masked Image Modeling to stabilize pixel-level reconstruction and Image Feature Reconstruction to improve the model's representation ability. Extensive experiments on various downstream vision-language benchmarks demonstrate that VLMAE surpasses existing state-of-the-art methods while prominently alleviating the training cost in the pre-training stage.</p><p>Another view of the new flower bed near the garage area remember it was all gravel.</p><p>Nothing says fun like a girl in pink leotards on a pink tall bike wielding a sword that's on fire.</p><p>An olive tree in your bathroom turns it into a Mediterranean spa.</p><p>Pickup truck outside the bar in red hook.</p><p>Oldest wooden bridge in the world Luzern.</p><p>A new graduate by the clock tower at Otago university.</p><p>It must be great being a gardener in Hastings the flower beds are beautifully kept.</p><p>The 42-foot long slate wall is a monument to the first amendment built by the Thomas Jefferson Center for free expression.</p><p>This was the kitchen in the house we rented at nags head north Carolina back in the summer of 04 great vacation.</p><p>Coffee table and small peace lily indoor plant with vase as shown below.</p><p>Neutral bedroom + black floor + lush tree California home by Nickey Kehoe.</p><p>Icelandic girl jumping into Ohrid lake in Macedonia.      </p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head></head><label></label><figDesc>) introduces contrastive learning to align visual-textual fea-</figDesc></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Figure 1 :</head><label>1</label><figDesc>Figure 1: Comparison of ALBEF and our VLMAE in downstream tasks. ALBEF may focus on specific objects from images, while ignoring other critical objects(e.g., lamp in the top row figure), and thus make wrong predictions (in red). By contrast, our VLMAE produces better results (in green) with a universal focus over the whole image.</figDesc><graphic coords="1,347.87,355.54,56.11,56.11" type="bitmap" /></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head></head><label></label><figDesc>Distribution of similarity of image-text pairs. (b) Samples in different relevance intervals.</figDesc></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Figure 2 :</head><label>2</label><figDesc>Figure 2: Observation on pre-training dataset.</figDesc><graphic coords="3,342.84,273.20,62.21,62.17" type="bitmap" /></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_4"><head>Figure 3 :</head><label>3</label><figDesc>Figure 3: An overview of VLMAE.</figDesc></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_5"><head>Figure 4 :</head><label>4</label><figDesc>Figure 4: Grad-CAM visualization in visual grounding task.</figDesc></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_7"><head>Figure 5 :</head><label>5</label><figDesc>Figure 5: Comparison of attention.</figDesc></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_8"><head></head><label></label><figDesc>in terms of MACs, time of epoch, and image-text retrieval result. The MACs of each model in one forward pass (divided by batchsize 64) is calculated by the thop package 1 . Time spent per epoch is tested on 8 NVIDIA V100 GPUs. As only half of the image patches are fed into the image encoder during the pre-training stage, VLMAE achieves state-of-the-art performance with lower memory consumption and shorter pre-training time.</figDesc></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_9"><head>Figure 6 :</head><label>6</label><figDesc>Figure 6: Additional attention maps of pre-training samples.</figDesc><graphic coords="11,83.24,520.07,65.55,65.55" type="bitmap" /></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_14"><head>Figure 7 :</head><label>7</label><figDesc>Figure 7: Additional results in visual grounding task. Orange: ground truths. Green: correct predictions. Red: incorrect predictions.</figDesc><graphic coords="12,80.11,491.94,60.41,60.41" type="bitmap" /></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_1"><head>Table 1 :</head><label>1</label><figDesc>Statistics of pre-training datasets.</figDesc><table><row><cell></cell><cell>COCO</cell><cell>VG</cell><cell>SBU</cell><cell>CC</cell></row><row><cell># images</cell><cell>113K</cell><cell>98K</cell><cell cols="2">857K 2.77M</cell></row><row><cell># text</cell><cell>567K</cell><cell cols="3">2.85M 857K 2.77M</cell></row></table></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2"><head></head><label></label><figDesc>)</figDesc><table><row><cell>4 Experiment</cell></row><row><cell>4.1 Pre-training Datasets</cell></row><row><cell>Following previous work (Chen et al. 2020; Li et al. 2021;</cell></row><row><cell>Yang et al. 2022), we utilize four common vision and</cell></row><row><cell>language datasets, MS COCO (Lin et al. 2014), Visual</cell></row><row><cell>Genome (Krishna et al. 2017), Google Conceptual Cap-</cell></row><row><cell>tions (Sharma et al. 2018) and SBU Captions (Ordonez,</cell></row><row><cell>Kulkarni, and Berg 2011), as our pre-training corpus which</cell></row><row><cell>comprises 4M images and 7M texts. We filter the samples in</cell></row><row><cell>the Visual Genome dataset where the proportion of relevant</cell></row><row><cell>regions in the images is less than 20%. And since the links to</cell></row><row><cell>some of the images are no longer available in Google Con-</cell></row><row><cell>ceptual Captions and SBU Captions, we only access parts of</cell></row><row><cell>these datasets. Table 1 shows the statistics of the image and</cell></row><row><cell>text of the pre-training datasets.</cell></row></table></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_3"><head></head><label></label><figDesc>Table 2 and Table 3 report the results</figDesc><table><row><cell></cell><cell>MSCOCO (5K)</cell><cell>Flickr30K (1K)</cell></row><row><cell>Method #Images</cell><cell>Text Retrieval</cell></row></table></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_5"><head>Table 3 :</head><label>3</label><figDesc>Zero-shot image-text retrieval results on Flickr30K.</figDesc><table><row><cell></cell><cell></cell><cell>5</cell><cell>98.8</cell><cell>99.7</cell><cell>76.8</cell><cell>93.7</cell><cell>96.7</cell></row><row><cell>TCL</cell><cell cols="2">93.0</cell><cell>99.1</cell><cell>99.6</cell><cell>79.6</cell><cell>95.1</cell><cell>97.4</cell></row><row><cell>Ours</cell><cell cols="2">93.4</cell><cell>99.1</cell><cell>99.8</cell><cell>78.6</cell><cell>94.5</cell><cell>97.3</cell></row><row><cell cols="2">Method</cell><cell cols="6">VQA test-dev test-std dev test-P val test NLVR 2 SNLI-VE</cell></row><row><cell cols="4">OSCAR 73.2</cell><cell cols="2">73.4 78.1 78.4</cell><cell></cell></row><row><cell>ViLT</cell><cell></cell><cell></cell><cell>71.3</cell><cell cols="2">75.7 76.1</cell><cell></cell></row><row><cell>VLC</cell><cell></cell><cell></cell><cell>74.0</cell><cell cols="2">74.0 77.7 79.0</cell><cell></cell></row><row><cell cols="4">ALBEF 74.5</cell><cell cols="4">74.7 80.2 80.5 80.1 80.3</cell></row><row><cell>TCL</cell><cell></cell><cell></cell><cell>74.9</cell><cell cols="4">74.9 80.5 81.3 80.5 80.3</cell></row><row><cell>Ours</cell><cell></cell><cell></cell><cell>75.3</cell><cell cols="4">75.4 80.5 81.2 80.3 80.3</cell></row></table></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_6"><head>Table 4 :</head><label>4</label><figDesc>Performance comparison on vision question answering, visual reasoning, visual entailment.</figDesc><table /></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_8"><head>Table 5 :</head><label>5</label><figDesc>Visual grounding on RefCOCO+ dataset.</figDesc><table><row><cell>Table 4 shows the result of visual question answering, visual</cell></row><row><cell>entailment, and visual reasoning tasks which are classical</cell></row><row><cell>multi-modal tasks and require the model to exploit both im-</cell></row><row><cell>age and text information. VLMAE outperforms TCL (Yang</cell></row><row><cell>et al. 2022) on VQA task and achieves state-of-the-art per-</cell></row></table></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_9"><head>Table 6 :</head><label>6</label><figDesc>Ablation study of Modules. Results are reported in terms of the average score of TR and IR.</figDesc><table><row><cell>formance with 75.3% and 75.4% scores on test-dev and test-</cell></row><row><cell>std. On VE and VR tasks, VLMAE has a comparable per-</cell></row><row><cell>formance with TCL, reaching 81.2% on NLVR test-P and</cell></row><row><cell>80.3% on SNLI-VE test.</cell></row></table></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_10"><head>Table 7 :</head><label>7</label><figDesc>Exploration of mask ratio. Results are reported in terms of the average score of TR and IR.</figDesc><table><row><cell></cell><cell></cell><cell></cell><cell cols="2">Fine-Tune</cell></row><row><cell></cell><cell>Mask Ratio</cell><cell cols="2">MSCOCO</cell><cell cols="2">Flickr30K</cell></row><row><cell></cell><cell></cell><cell>TR</cell><cell>IR</cell><cell>TR</cell><cell>IR</cell></row><row><cell></cell><cell>25%</cell><cell cols="4">89.1 78.0 98.4 92.6</cell></row><row><cell></cell><cell>50%</cell><cell cols="4">89.4 77.8 98.2 92.9</cell></row><row><cell></cell><cell>75%</cell><cell cols="4">88.1 76.7 98.0 91.6</cell></row><row><cell>Image</cell><cell></cell><cell></cell><cell></cell><cell></cell></row><row><cell>ALBEF</cell><cell></cell><cell></cell><cell></cell><cell></cell></row><row><cell>VLMAE</cell><cell></cell><cell></cell><cell></cell><cell></cell></row><row><cell>Query Text</cell><cell>Adult.</cell><cell>Adult in chair.</cell><cell cols="2">Official watching.</cell><cell>Motorcycle man is sitting on.</cell></row></table></figure>
-<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_11"><head>Table 8 :</head><label>8</label><figDesc>Comparison of training consumption.</figDesc><table><row><cell>Method</cell><cell>MACs</cell><cell>Epoch Time</cell><cell>MSCOCO TR IR</cell><cell>Flickr30K TR IR</cell></row><row><cell>ALBEF</cell><cell>60.5G</cell><cell>7.7h</cell><cell cols="2">86.8 75.8 97.8 92.6</cell></row><row><cell>TCL</cell><cell>60.6G</cell><cell>7.8h</cell><cell cols="2">88.4 77.4 98.1 93.1</cell></row><row><cell cols="2">VLMAE 49.6G</cell><cell>6.2h</cell><cell cols="2">89.4 77.8 98.2 92.9</cell></row></table><note><p>more comprehensive understanding, which is fundamental to downstream tasks. Moreover, according to the statistic on attention weights, VLMAE has fewer patches in the low-attention interval, which means less information is neglected, and extracted features are more unbiased.</p></note></figure>
-			<note xmlns="http://www.tei-c.org/ns/1.0" place="foot" n="1" xml:id="foot_0"><p>https://github.com/Lyken17/pytorch-OpCounter</p></note>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>Sensor fusion is a popular technique in computer vision as it allows to combine the advantages from multiple information sources. It is especially gainful in scenarios where a single sensor is not able to capture all necessary data to perform a task satisfactorily. Over the last years, we have seen many examples, where the accuracy of computer vision tasks was significantly improved by sensor fusion, e.g. in environmental perception for autonomous driving <ref type="bibr" target="#b6">[7,</ref><ref type="bibr" target="#b29">30,</ref><ref type="bibr" target="#b65">67]</ref>, for 6D pose estimation <ref type="bibr" target="#b15">[16,</ref><ref type="bibr" target="#b16">17,</ref><ref type="bibr" target="#b59">61]</ref>, and for robotic grasping <ref type="bibr" target="#b60">[62,</ref><ref type="bibr">72]</ref>. However, traditional fusion methods usually focus more on the beneficial merging of multiple modalities and less on teaching the model to obtain profound prior knowledge about the used dataset.</p><p>Our work tries to fill in this research gap by proposing a deep hierarchical variational autoencoder called FusionVAE that is able to perform both tasks: fusing information from multiple sources and supplementing it with prior knowledge about the data gained while training. As shown in Fig. <ref type="figure">1</ref>, FusionVAE merges a varying number of input images for reconstructing the original target image using</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>FusionVAE Inputs Target Predictions</head><p>Fig. <ref type="figure">1</ref>: Overview of our FusionVAE approach. The network receives up to three partly occluded input images, fuses them together with prior knowledge, and predicts different hypothesis of how the target images could look like.</p><p>prior knowledge about the dataset. To the best of our knowledge, FusionVAE is the first approach that combines these two tasks. Therefore, we developed three challenging benchmarks based on well-known computer vision datasets to evaluate the performance of our approach. In addition, we perform comparisons to baselines by extending traditional approaches to perform the same tasks. FusionVAE outperforms all these traditional methods on all proposed benchmark tasks significantly. We show that FusionVAE can generate high-quality images given few input images with partial observability. We provide ablation studies to illustrate the impact of commonly used information aggregation operations and to prove the benefits of the employed posterior distribution. We can summarize the four main contributions of our paper as follows: i) We create three challenging image fusion tasks for generative models. ii) We develop a deep hierarchical VAE called FusionVAE that is able to perform image-based data fusion while employing prior knowledge of the used dataset. iii) We show that FusionVAE produces high-quality fused output images and outperforms traditional methods by a large margin. iv) We perform ablation studies showing the benefits of our design choices regarding both the posterior distribution and commonly used aggregation methods. and expressiveness and thus, when applied to image generation leads to oversmoothed results lacking fine-grained details. Over the last years much work has been invested into the effort of improving the generative performance of VAEs. One stream of work is based on introducing a hierarchy into the latent space of the VAE and scaling this hierarchy to greater and greater depth. First introduced in <ref type="bibr" target="#b52">[54]</ref> many hierarchical VAEs are based on coupling the inference and generative processes by introducing a deterministic bottom-up path combined with a stochastic top-down process in the inference network and sharing the latter with the generative model. This setting has been extended by an additional deterministic top-down path and bidirectional inference in <ref type="bibr" target="#b42">[44]</ref>. Recently, very deep hierarchical VAEs were realized in <ref type="bibr" target="#b7">[8]</ref> by introducing residual bottlenecks with dedicated scaling, update skipping, and nearest neighbour up-sampling. Closest to our work is the recently proposed NVAE architecture <ref type="bibr" target="#b55">[57]</ref>, which relies on depth-wise convolution, residual posterior parametrization, and spectral regularization to enhance stability.</p><p>Other approaches propose increasing the expressiveness of VAEs by combining them with auto-regressive models like RNNs or PixelCNNs <ref type="bibr" target="#b5">[6,</ref><ref type="bibr" target="#b10">11,</ref><ref type="bibr" target="#b12">13,</ref><ref type="bibr" target="#b48">50]</ref>, conditioning contexts (CVAE) <ref type="bibr" target="#b51">[53,</ref><ref type="bibr" target="#b58">60]</ref>, normalizing flows <ref type="bibr" target="#b27">[28]</ref>, generative adversarial networks (GANs) <ref type="bibr" target="#b30">[31,</ref><ref type="bibr" target="#b44">46]</ref>, or variational generative adversarial networks (CVAE-GAN) <ref type="bibr" target="#b0">[1]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.2">Fusion of Multiple Images</head><p>Image fusion has long been dominated by classical computer vision. Only lately deep learning methods entered the domain with the CNN-based approach proposed by Liu et al. <ref type="bibr" target="#b36">[38]</ref>. In a subsequent publication the authors extended their work to a multi-scale setting <ref type="bibr" target="#b35">[37]</ref>. Shortly afterwards, Prabhakar et al. developed a fusion method based on a siamese network architecture, called DeepFuse <ref type="bibr" target="#b46">[48]</ref> which was improved in subsequent work <ref type="bibr" target="#b31">[33]</ref> by employing the DenseNet architecture <ref type="bibr" target="#b19">[20]</ref>. Concurrently, Li et al. <ref type="bibr" target="#b33">[35]</ref> proposed a fusion architecture based on VGG <ref type="bibr" target="#b50">[52]</ref> and in order to scale to even greater depth another one <ref type="bibr" target="#b32">[34]</ref> based on ResNet-50 <ref type="bibr" target="#b14">[15]</ref>. The aforementioned methods use CNNs as feature extractors and as decoders, while the fusion operations themselves are restricted to classical methods like averaging or addition of feature maps or weighted source images. A fully CNN-based feature-map fusion mechanism was proposed in <ref type="bibr" target="#b23">[24]</ref>.</p><p>While all previous publications target only a specific fusion task (e.g. multifocus fusion, multi-resolution fusion, etc.) or were limited to specific domains (e.g. medical images), two very recent works propose novel multi-purpose fusion networks, which are applicable to many fusion tasks and image types <ref type="bibr" target="#b62">[64,</ref><ref type="bibr">71]</ref>. Very recently also GAN-based methods entered the domain of image fusion, starting with the work by Ma et al. on infrared-visible fusion <ref type="bibr" target="#b39">[41,</ref><ref type="bibr" target="#b41">43]</ref> and with <ref type="bibr" target="#b40">[42,</ref><ref type="bibr" target="#b61">63]</ref> on multi-resolution image fusion. Most recent are two publications on GAN-based multi-focus image fusion <ref type="bibr" target="#b13">[14,</ref><ref type="bibr" target="#b20">21]</ref>. While GAN-based approaches can generate high-fidelity images, it is known that they suffer from the mode collapse problem. VAE-based methods in contrast are known to generate more faithful data distribution <ref type="bibr" target="#b55">[57]</ref>. Different from previous work, this paper proposes a VAE-based multi-purpose fusion framework.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.3">Image Completion</head><p>Similar to image fusion, also image completion has only recently become a playing field for deep learning methods. First approaches based on simple multilayer perceptrons (MLPs) <ref type="bibr" target="#b28">[29]</ref> or CNNs <ref type="bibr" target="#b11">[12]</ref> were targeted only to filling small holes in an image. However, with the introduction of GANs <ref type="bibr" target="#b9">[10]</ref>, the area quickly became dominated by GAN-based approaches, starting with the context encoders presented by Pathak et al. <ref type="bibr" target="#b45">[47]</ref>. Many subsequent papers proposed extensions to this model in order to obtain fine-grained completions while preserving global coherence by introducing additional discriminators <ref type="bibr" target="#b21">[22]</ref>, searching for closest samples to the corrupted image in a latent embedding space conditioning on semantic labels <ref type="bibr" target="#b54">[56]</ref>, or designing additional specialized loss functions <ref type="bibr" target="#b34">[36]</ref>. High resolution results were obtained recently by multi-scale approaches <ref type="bibr" target="#b64">[66]</ref>, iterative upsampling [70], and the application of contextual attention <ref type="bibr" target="#b53">[55,</ref><ref type="bibr" target="#b63">65,</ref><ref type="bibr" target="#b66">68]</ref>. Another stream of current work focuses on multi-hypothesis image completion, leveraging probabilistic problem formulations <ref type="bibr" target="#b43">[45,</ref><ref type="bibr">73]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Background</head><p>In this section, we outline the fundamentals of standard VAEs, conditional VAEs, and hierarchical VAEs upon which we build our approach. Another section is dedicated to aggregation methods for data fusion.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1">Standard VAE</head><p>A variational autoencoder (VAE) <ref type="bibr" target="#b26">[27]</ref> is a neural network consisting of a probabilistic encoder q(z|y) and a generative model p(y|z). The generator models a distribution over the input data y, conditioned on a latent variable z with prior distribution p θ (z). The encoder approximates the posterior distribution p(z|y) of the latent variables z given input data y and is trained along with the generative model by maximizing the evidence lower bound (ELBO) ELBO(y) = E q(z|y) [log p(y|z)] -KL(q(z|y)||p(z)), <ref type="bibr" target="#b0">(1)</ref> where KL is the Kullback-Leibler divergence and log p(y) ≥ ELBO(y).</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2">Conditional VAE</head><p>In VAEs, the generative model p(y|z) is unconditional. In contrast, conditional VAEs (CVAE) <ref type="bibr" target="#b51">[53]</ref> consider a generative model for a conditional distribution p(y|x, z) where y is the target data, x is the conditional input variable, and z is a latent variable. The prior of the latent variable is p(z|x), while its approximate posterior distribution is given by q(z|x, y). The variational lower bound of the conditional log-likelihood can be written as follows log p(y|x) ≥ E q(z|x,y) [log p(y|x, z)] -KL(q(z|x, y)||p(z|x)).</p><p>(2)</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3">Hierarchical VAE</head><p>In hierarchical VAEs <ref type="bibr" target="#b24">[25,</ref><ref type="bibr" target="#b52">54,</ref><ref type="bibr" target="#b55">57]</ref>, the latent variables z are divided into L disjoint groups z 1 , ..., z L in order to increase the expressiveness of both prior and approximate posterior which become</p><formula xml:id="formula_0">p(z) = L l=1</formula><p>p(z l |z &lt;l ) and q(z|y)</p><formula xml:id="formula_1">= L l=1 q(z l |z &lt;l , y),<label>(3)</label></formula><p>where z &lt;l denotes the latent variables in all previous hierarchies. All the conditionals in the prior p(z l |z &lt;l ) and in the approximate posterior q(z l |z &lt;l , y) are modeled by factorial Gaussian distributions. Under this modelling choice, the ELBO from Eq. ( <ref type="formula">1</ref>) turns into</p><formula xml:id="formula_2">ELBO(y) = E q(z|y) [log p(y|z)] - L l=1 E q(z &lt;l |y) [KL(q(z l |z &lt;l , y)||p(z l |z &lt;l ))]. (<label>4</label></formula><formula xml:id="formula_3">)</formula></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.4">Aggregation Methods</head><p>For fusing data within our approach, we consider different aggregation methods, such as mean aggregation, max aggregation, Bayesian aggregation <ref type="bibr" target="#b57">[59]</ref> and pixelwise addition. All described aggregation methods fuse a set of feature tensors f 1 , ..., f K , obtained by encoding K input images {x i } K i=1 in a permutation invariant way <ref type="bibr">[69]</ref>. In mean aggregation, multiple feature vectors are fused by taking the pixel-wise average f = 1 K K i=1 f i . For max aggregation, we take the pixel-wise maximum instead f = max i (f i ). Bayesian aggregation (BA) <ref type="bibr" target="#b57">[59]</ref> considers an uncertainty estimate for the fused feature vectors. In order to obtain such an uncertainty estimate, the encoder has to predict means µ i and variances σ i of a factorized Gaussian distribution over the latent feature vectors</p><formula xml:id="formula_4">f i = N (µ i , diag(σ i )), with µ i = enc µ (x i , y) and σ i = enc σ (x i , y),<label>(5)</label></formula><p>instead of f i directly. Here enc µ and enc σ represent the encoding process which generates means and variances respectively. The predicted distributions over latent feature vectors for multiple input images can be fused iteratively using the Bayes rule <ref type="bibr" target="#b1">[2]</ref> (detailed derivation is given in Appendix B)</p><formula xml:id="formula_5">q i = σ 2 i-1 ⊘ (σ 2 i-1 + σ 2 i )<label>(6)</label></formula><p>where <ref type="formula">7</ref>) ⊘ and ⊙ denote element-wise division and multiplication respectively.</p><formula xml:id="formula_6">µ i = µ i-1 + q i ⊙ (µ i -µ i-1 ) and σ 2 i = σ 2 i-1 ⊙ (1 -q i ). (</formula></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4">Conditional Generative Models for Image Fusion</head><p>We propose a deep hierarchical conditional variational autoencoder, called Fusion-VAE (Fusion Variational Auto-Encoder), that is able to fuse information from multiple sources and to infer the missing information in the images from a prior learned from the dataset. To the best of our knowledge, it is the first model that combines the generative ability of a hierarchical VAE to learn the underlying distribution of complex datasets with the ability to fuse multiple input images.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.1">Problem Formulation</head><p>We consider image fusion problems that are concerned with generating the fused target image from multiple source images. Each source image contains partial information of the target image and the goal of the task is to recover the original target image given a finite set of source images. In particular, we denote the target image as y and the set of K source images as context x = {x 1 , x 2 , . . . , x K }, where each x i is one source image. Given training sample (x, y), we aim to maximize the conditional likelihood p(y|x).</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2">FusionVAE</head><p>Our approach is designed to maximize the conditional likelihood p(y|x). However, optimizing this objective directly is intractable. Therefore, we derive a variational lower bound as follows (detailed derivation can be found in Appendix C)</p><formula xml:id="formula_7">log p(y|x) ≥ E q ϕ (z|y) [log p θ (y|x, z)] -β L l=1 α l E q(z &lt;l |y) [KL(q ϕ (z l |y, z &lt;l )||p θ (z l |x, z &lt;l ))],<label>(8)</label></formula><p>where we split the latent variables z into L disjoint groups {z 1 , z 2 , . . . , z L }. β and α l are annealing parameters that control the warming-up of the KL terms as in <ref type="bibr" target="#b55">[57]</ref>. Inspired by <ref type="bibr" target="#b52">[54]</ref>, β is increased linearly from 0 to 1 during the first few training epochs to start training the reconstruction before introducing the KL term, which is increased gradually. α l is a KL balancing coefficient <ref type="bibr" target="#b56">[58]</ref> that is used during the warm-up period to encourage the equal use of all latent groups and to avoid posterior collapse. FusionVAE consists of three main networks and a latent space as illustrated in Fig. <ref type="figure">2:</ref> 1) a context encoder network which models the conditional prior p ϕ (z l |x, z &lt;l ), 2) a target encoder which models the approximate posterior q ϕ (z|y), 3) a latent space comprising the L latent groups, and 4) a generator network p θ (y|x, z) that aims to reconstruct the target image.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3">Network Architecture</head><p>Fig. <ref type="figure">2</ref> illustrates the network architecture of our FusionVAE for training. It is built in a hierarchical way inspired by <ref type="bibr" target="#b55">[57]</ref>. In each latent hierarchy l ∈ 1, . . . , L we have a set of feature maps f lx , f ly and latent distributions p l , q l . The first gray box contains the context encoder network that obtains a stack of source images x and employs residual cells <ref type="bibr" target="#b14">[15]</ref> as in <ref type="bibr" target="#b55">[57]</ref> to extract features f lx . The second gray box shows the target encoder network that encodes the target Fig. <ref type="figure">2</ref>: Overview of the proposed network architecture. h is a trainable parameter vector, ⊕ denotes concatenation, ⊕ max aggregation, and ⊕ pixel-wise addition.</p><p>r r is a residual network like in <ref type="bibr" target="#b55">[57]</ref>. The dotted lines between the residual networks indicate shared parameters.</p><p>image y into the feature map f ly using the same residual cells as the context encoder. The third gray box illustrates the latent space which contains the prior distributions p ϕ (z l |x, z &lt;l ) (denoted p 1 , ..., p L in Fig. <ref type="figure">2</ref>) and the approximate posterior distributions q ϕ (z l |y, z &lt;l ) (denoted q 1 , ..., q L in Fig. <ref type="figure">2</ref>). The fourth gray box contains the generator network which aims to create different output samples ŷ. It employs a trainable parameter vector h, concatenates the information from all hierarchies, and decodes them using residual cells.</p><p>In each latent hierarchy, we aggregate the context features f lx using pixelwise max aggregation. In all but the first hierarchy, we pixel-wisely add the corresponding feature map from the generator network to the aggregated context features and to the target image features f ly . Using 2D convolutional layers, we learn the prior distributions p l and the approximate posterior distributions q l . We propose to use the approximate posterior distributions q l as target distributions in order to learn good prior distributions p l . Therefore, q ϕ (z l |y, z &lt;l ) is created from the target image features f ly as well as information from the generator network.</p><p>During training the generator network aims to create a prediction ŷ based on samples of the posterior distributions q l and a trainable parameter vector h.</p><p>For evaluation, we can omit the target image input y and sample from the prior distributions p l . In case no input image is given, we set p 1 to a standard normal distribution. Based on the samples and the trainable parameter vector h, our FusionVAE can generate new output images.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Experimental Setup</head><p>To evaluate our approach, we conduct a series of experiments on three different datasets using data augmentation. Furthermore, we adapt traditional architec-tures for solving the same tasks in order to compare our results. Finally, we perform an ablation study to show the effects of specific design choices.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.1">Datasets</head><p>For training and evaluating our approach, we create three novel fusion datasets based on MNIST [32], CelebA <ref type="bibr" target="#b37">[39]</ref>, and T-LESS <ref type="bibr" target="#b17">[18]</ref> as described in the following.</p><p>FusionMNIST. Based on the dataset MNIST [32], we create an image fusion dataset called FusionMNIST. For each target image, it contains different noisy representations where only random parts of the target image are visible. The first three columns of Fig. <ref type="figure">3</ref> show different examples of FusionMNIST corresponding to the target images in the fourth column. To generate FusionMNIST, we applied zero padding to all MNIST images to obtain a resolution of 32 × 32. For creating a noisy representation, we generate a mask composed of the union of a varying number of ellipses with random size, shape and position. All parts of the given images outside the mask are blackened. Finally, we add Gaussian noise with a fixed variance and clip the pixel values afterwards to stay within [0, 1].</p><p>FusionCelebA. We generate a similar fusion dataset based on the aligned and cropped version of CelebA <ref type="bibr" target="#b37">[39]</ref> which we call FusionCelebA. Fig. <ref type="figure">4</ref> depicts different example images in the first three columns which belong to the target image in the fourth column. To generate FusionCelebA, we center-crop the CelebA images to 148 × 148 before scaling them down to 64 × 64 as proposed by <ref type="bibr" target="#b30">[31]</ref>. As in Fusion-MNIST, we create different representations by using masks based on random ellipses.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>FusionT-LESS.</head><p>A promising area of application for our FusionVAE is robot vision. Scenes in robotics settings can be very difficult to understand due to texture-less or reflective objects and occlusions. To examine the performance of our FusionVAE in this area, we create an object dataset with challenging occlusions based on T-LESS <ref type="bibr" target="#b17">[18]</ref> which we call FusionT-LESS. To generate FusionT-LESS, we use the real training images of T-LESS and take all images of classes 19 -24 as basis for the target images. This selection contains all objects with power sockets and therefore images with many similarities. Every tenth image is removed from the training set and used for evaluation. In order to create challenging occlusions, we cut all objects from images of other classes using a Canny edge detector <ref type="bibr" target="#b4">[5]</ref> and overlay each target image with a random number between five and eight cropped objects. We select all images from classes 1, 2, 5 -7, 11 -14, and 25 -27 as occluding objects for training and classes 3, 4, 8 -10, 15 -18, and 28 -30 for evaluation.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.2">Data Augmentation</head><p>During training we apply different augmentation methods on the datasets to avoid overfitting. For FusionMNIST, we apply the elliptical mask generation and the addition of Gaussian noise live during training so that we obtain an infinite number of different fusion tasks. For FusionT-LESS, almost the entire creation of occluded images is performed during training. We apply horizontal flips, rotations, scaling and movement of target and occluding images with random parameters before composing the different occluded representations. Solely the object cutting with the Canny edge detector is performed offline as a pre-processing step to keep the training time low. For FusionCelebA, we apply a horizontal flip of all images randomly in 50% of all occasions and also the elliptical mask generation is done live during training.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.3">Architectures for Comparison</head><p>To the best of our knowledge, FusionVAE is the first fusion network for multiple images with a generative ability to fill areas without input information based on prior knowledge about the dataset under consideration. For lack of a suitable other model from the literature which would allow a fair comparison on our multi-image fusion tasks, we compare our approach with standard architectures that we adapted to support our tasks.</p><p>The first architecture for comparison is a CVAE with residual layers as employed in <ref type="bibr" target="#b55">[57]</ref>. We use a shared encoder for processing the input images and applied max aggregation before the latent space as we did in our FusionVAE. The second architecture for comparison is a fully convolutional network (FCN) with shared encoder and max aggregation before the decoder.</p><p>For both baseline architectures, we created a version with skip connections (+S) and a version without. When using skip connections, we applied max aggregation at each shortcut for merging the features from the encoder with the decoder's features. To allow for a fair comparison, we designed all architectures so that they have a similar number of trainable parameters.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.4">Training Procedure</head><p>We trained all networks in a supervised manner using the augmented target images y as described in Sec. 5.2. In order to teach the networks both to fuse information from a different number of input images and to learn prior knowledge about the dataset, we vary the number of input images x during the entire training. Specifically, we select a uniformly distributed random number between zero and three for each batch.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.5">Evaluation Metrics</head><p>For evaluation, we estimate the negative log-likelihood (NLL) in bits per dimension (BPD) using weighted importance sampling <ref type="bibr" target="#b3">[4]</ref>. We use 100 samples for all experiments with FusionCelebA as well as FusionT-LESS and 1000 samples for FusionMNIST. Since we cannot estimate the NLL of the FCN, we used the minimum over all samples of the mean squared error (MSE min ) as second metric.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6">Results</head><p>This section presents and discusses the quantitative and qualitative results of our research in comparison to the baseline methods mentioned in Sec. 5.3.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.1">Quantitative Results</head><p>Tabs. 1 to 3 show the NLL and the MSE min of all architectures on FusionMNIST, FusionCelebA, and FusionT-LESS respectively. The results are divided into the results based on zero to three input images and the average (avg) of it. We see that our FusionVAE outperforms all baseline methods on average. Regarding the NLL, our model surpasses the others additionally for 0 and 1 input images. For 2 and 3 images, CVAE+S reaches sometimes slightly better NLL values. However, our approach reaches the best MSE min values for each number of input images.  </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.2">Qualitative Results</head><p>The outstanding performance of our architecture in comparison to the others is also obvious when looking at the qualitative results in Figs. <ref type="figure">3 to 5</ref>. For every row, these figures show the input, target, and up to three output predictions for all architectures. For the FCN, we depict just a single output prediction per row as all of them look almost identical.</p><p>In the first three rows when the network does not receive any input image, we see that our network provides very realistic images. This indicates that it is able to capture the underlying distribution of the used datasets very well and much better than the other architectures. Due to the difficulty of the FusionT-LESS dataset, none of the models is able to produce realistic images without any input. Still our model shows much better performance in generating object-like shapes. In case the models receive at least one input image (cf. rows 4 -12), all architectures are able to extract the available information from the given input images. In addition, all VAE approaches, ours included, are able to complete the given input data based on prior knowledge. It is clearly visible, however, that the predictions of our model are much more realistic than the ones of the standard CVAE approaches especially for the more difficult datasets like FusionCelebA and FusionT-LESS. Fig. <ref type="figure">5</ref>: Predictions on FusionT-LESS for zero to three input images.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.3">Ablation Studies</head><p>We conducted ablation studies to show the effect of certain design choices, such as the selection of the approximate posterior and the aggregation method. All experiments are run on the FusionCelebA dataset. Tab. 4 compares the performance of our FusionVAE for two different approximate posterior distributions q. The approximate posterior we selected for our FusionVAE q(y), depends only on the given target image y. It performs slightly better on average compared to the same method using a posterior that is computed based on the input images x as well as the target image y. However, the latter approach is superior when fusing two or three input images.   Tab. 5 shows the performance of different aggregation methods which are applied to create the prior distributions p l of every latent group. In our Fusion-VAE, the prior is created by fusing the input image features f lx using max aggregation (MaxAgg) and adding them to the decoded features of the same latent group before applying a 2D convolution. We abbreviate that method with MaxAggAdd.</p><p>In addition to MaxAgg, we examined mean aggregation (MeanAgg) and Bayesian aggregation (BayAgg) <ref type="bibr" target="#b57">[59]</ref> for comparison. For each aggregation principle, we tried two different versions: 1) aggregation of the input image features f lx adding the corresponding information from the decoder in a pixel-wise manner (denoted by suffix Add), and 2) directly aggregating all features, i.e. both input image features f lx and decoder features (denoted by suffix All).</p><p>For creating the prior p i when using BayAgg, we moved the 2D convolutions before the aggregation in order to create the parameters µ and σ of a latent Gaussian distribution. Unlike MaxAgg and MeanAgg, BayAgg directly outputs a new Gaussian distribution that does not need to be processed any further by a convolution.</p><p>We can see that all variations of mean and max aggregation are significantly better than Bayesian aggregation. Also their training procedures are less often impaired due to numeric instabilities. Interestingly, the NLL is very similar independent of whether the aggregation is performed on all features or not. However, the MSE min is much better for the aggregation with addition. Since the expressiveness of the metrics is limited, we provide additional visualizations of this ablation in Appendix D.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="7">Conclusion</head><p>We have presented a novel deep hierarchical variational autoencoder for generative image fusion called FusionVAE. Our approach fuses multiple corrupted input images together with prior knowledge obtained during training. We created three challenging image fusion benchmarks based on common computer vision datasets. Moreover, we implemented four standard methods that we modified to support our tasks. We showed that our FusionVAE outperforms all other methods significantly while having a similar number of trainable parameters. The predicted images of our approach look very realistic and incorporate given input information almost perfectly. During ablation studies, we revealed the benefits of our design choices regarding the applied aggregation method and the used posterior distribution. In future work, our research could be extended by enabling the fusion of different modalities e.g. by using multiple encoders. Additionally, an explicit uncertainty estimation could be implemented that helps to weigh the impact of input information according to its uncertainty. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Supplementary Material</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>A Implementation details</head><p>For FusionMNIST and FusionT-LESS, we model the decoder's output by pixelwise independent Bernoulli distributions. For FusionCelebA, we use pixel-wise independent discretized logistic mixture distributions as proposed by Salimans et al. <ref type="bibr" target="#b49">[51]</ref>.</p><p>The residual cells of the encoder are composed of batch normalization layers <ref type="bibr" target="#b22">[23]</ref>, Swish activation functions <ref type="bibr" target="#b47">[49]</ref>, convolutional layers, and Squeeze-and-Excitation (SE) blocks <ref type="bibr" target="#b18">[19]</ref> as proposed in <ref type="bibr" target="#b55">[57]</ref>. In the decoder, we also follow <ref type="bibr" target="#b55">[57]</ref> and build the residual cells out of batch normalization layers, 1x1 convolutions, Swish activations, depthwise separable convolutions <ref type="bibr" target="#b8">[9]</ref>, and SE blocks. However, we omitted normalizing flow because in our experiments it showed to increase the training time without improving the prediction accuracy significantly.</p><p>For each dataset, we chose the size of the architecture individually to achieve acceptable accuracy while keeping the training time reasonable. Tab. 6 provides details about the used hyperparameters.  In general, the number of latent groups L should be chosen depending on the complexity of the task at hand. We made our decision based on the L of the NVAE <ref type="bibr" target="#b55">[57]</ref> but reduced it for computational reasons. For FusionCelebA and FusionT-LESS, we use 17 latent groups, for FusionMNIST only seven. Using more latent groups improves the results but increases the computational effort significantly.</p><p>For all experiments, we used GPUs of type NVIDIA Tesla V100 with 32GB of memory and trained with an AdaMax optimizer <ref type="bibr" target="#b25">[26]</ref>. We applied a cosine annealing schedule for the learning rate <ref type="bibr" target="#b38">[40]</ref> starting at 0.01 and ending at 0.0001.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>B Derivation of Bayesian Aggregation</head><p>We use two related encoders to learn a latent observation µ i = enc µ (x i , y) with its corresponding variance values σ i = enc σ (x i , y).</p><p>Assuming a factorized Gaussian prior distribution in the latent space p(z) = N (z|µ z,0 , diag(σ z,0 )), we can derive the factorized posterior distribution q ϕ (z|y) = N (z|µ z , diag(σ z ) in closed form using standard Gaussian conditioning <ref type="bibr" target="#b2">[3]</ref> following <ref type="bibr" target="#b57">[59]</ref> σ</p><formula xml:id="formula_8">2 z = (σ 2 z,0 ) ⊖ + (σ 2 i ) ⊖ ⊖ ,<label>(9)</label></formula><formula xml:id="formula_9">µ z = µ z,0 + σ 2 z,0 ⊙ (µ i -µ z,0 ) ⊘ σ 2 i (<label>10</label></formula><formula xml:id="formula_10">)</formula><p>where ⊖ denotes element-wise inversion, ⊙ denotes element-wise multiplication, and ⊘ denotes element-wise division.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>C Derivation of FusionVAE's ELBO</head><p>We start with the following KL divergence between the approximate posterior and the real posterior, KL(q θ (z|y)||p θ (z|x, y)) ≥ 0.</p><p>Next, we apply the Bayes's theorem to obtain -q θ (z|y) log p(y|x, z)p(z|x) p(y|x)q θ (z|y) dz ≥ 0.</p><p>This leads to -E q θ (z|y) [log p(y|x, z)] -KL(q θ (z|y)||p(z|x))</p><p>+ q θ (z|y) log p(y|x)dz ≥ 0.</p><p>The term log p(y|x) can be moved out from the third integral component, and leaves the integral becoming 1. Finally, we obtain the ELBO of the conditional log-likelihood log p(y|x) ≥ E q θ (z|y) [log p(y|x, z)] + KL(q θ (z|y)||p(z|x)).</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>D Ablation Studies</head><p>This is a supplement for the aggregation ablation study in Sec. 6.3. In Tab. 5, we saw that the average NLL of all experiments using mean and max aggregation methods are similar. Fig. <ref type="figure" target="#fig_2">6</ref> shows the corresponding qualitative results. However, even though the NLL is very similar, the results of the aggregation of all features (MaxAggAll and MeanAggAll) are much more blurry than the results of the aggregation with addition (MaxAggAdd and MeanAggAdd). This is in conformity with the MSE min results. It indicates that the NLL alone is not always the best metric to assess the visual closeness to real faces. When carefully examining the images of the addition aggregations, you could argue that the predictions with zero input images look slightly more realistic for max aggregation while for three input images, mean aggregation seems to be marginally better. This again confirms the validity of the MSE min results even though the NLL results are also in accordance for this comparison.  </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>E Statistic Significance of the Results</head><p>All experiments for this publications were carefully designed and optimized so that the training procedures are stable and lead to reproducible results. However, the data processing pipelines introduce randomness which lead to non-deterministic training outcomes due to multi-GPU training. We therefore ran every experiment three times and reported the results of the best training in Sec. 6. In Tabs. 7 to 12 we provide the means and variances of the three training runs.    The images show that our FusionVAE reconstructs the target images almost perfectly for all three datasets. On FusionMNIST, only the FCN does not manage to reconstruct the target images but shows blurry versions of them. We also see the same behavior for FusionCelebA and FusionT-LESS which underlines the importance of skip connections for this type of network. On FusionCelebA, we see that CVAE+S suffers from numeric instabilities causing colorful artifacts in some images. Omitting the skip connections here avoids that issue. On FusionT-LESS, all baseline methods create more or less blurry versions of the target image when just the target image is given. When inputting the occluded images in addition to the target image, the reconstruction is much better which shows that these networks have over-fitted to the task of removing occluded objects so that they cannot deal well with non-occluded images. In contrast, FusionVAE has the ability to reconstruct non-occluded input images very well. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>F Reconstruction</head></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Fig. 3 :Fig. 4 :</head><label>34</label><figDesc>Fig. 3: Prediction results of the different architectures on FusionMNIST for zero to three input images.</figDesc><graphic coords="11,152.68,374.44,311.31,210.56" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Fig. 6 :</head><label>6</label><figDesc>Fig. 6: Prediction results of the different aggregation methods on FusionCelebA for zero to three input images.</figDesc><graphic coords="21,144.04,323.01,328.55,215.58" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Figs. 7</head><label>7</label><figDesc>Figs. 7 to 9 visualize the reconstruction outputs for all our datasets and architectures. For these results, the target image is always given as input. The first three rows of each figure show the reconstruction, when additionally three noisy or occluded input images are fed into the network.The images show that our FusionVAE reconstructs the target images almost perfectly for all three datasets. On FusionMNIST, only the FCN does not manage to reconstruct the target images but shows blurry versions of them. We also see the same behavior for FusionCelebA and FusionT-LESS which underlines the importance of skip connections for this type of network. On FusionCelebA, we see that CVAE+S suffers from numeric instabilities causing colorful artifacts in some images. Omitting the skip connections here avoids that issue. On FusionT-LESS, all baseline methods create more or less blurry versions of the target image when just the target image is given. When inputting the occluded images in addition to the target image, the reconstruction is much better which shows that these networks have over-fitted to the task of removing occluded objects so that they cannot deal well with non-occluded images. In contrast, FusionVAE has the ability to reconstruct non-occluded input images very well.</figDesc><graphic coords="24,152.68,368.88,311.31,105.01" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_4"><head>Fig. 7 :Fig. 8 :Fig. 9 :</head><label>789</label><figDesc>Fig. 7: Reconstruction results of the different architectures on FusionMNIST.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0"><head></head><label></label><figDesc></figDesc><graphic coords="12,152.68,136.28,311.27,210.53" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0"><head></head><label></label><figDesc></figDesc><graphic coords="12,152.68,413.81,311.27,210.53" type="bitmap" /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0"><head>Table 1 :</head><label>1</label><figDesc>Results on FusionMNIST. The best results are printed in bold.</figDesc><table><row><cell></cell><cell></cell><cell cols="3">NLL in 10 -2 BPD</cell><cell></cell><cell></cell><cell cols="3">MSEmin in 10 -2</cell></row><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>FCN</cell><cell></cell><cell></cell><cell></cell><cell></cell><cell></cell><cell cols="5">10.99 5.81 5.78 5.79 7.25</cell></row><row><cell>FCN+S</cell><cell></cell><cell></cell><cell></cell><cell></cell><cell></cell><cell cols="5">5.80 3.74 2.54 1.78 3.56</cell></row><row><cell>CVAE</cell><cell cols="10">17.81 15.01 14.07 13.61 15.23 3.83 1.72 1.05 0.80 1.93</cell></row><row><cell>CVAE+S</cell><cell cols="10">18.43 14.57 13.18 12.30 14.77 3.62 1.75 1.19 0.97 1.95</cell></row><row><cell cols="11">FusionVAE 15.93 14.17 13.70 13.48 14.39 3.14 0.99 0.74 0.65 1.45</cell></row><row><cell></cell><cell></cell><cell cols="3">NLL in 10 -2 BPD</cell><cell></cell><cell></cell><cell cols="3">MSEmin in 10 -2</cell></row><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>FCN</cell><cell></cell><cell></cell><cell></cell><cell></cell><cell></cell><cell cols="5">13.77 14.82 13.10 11.24 13.23</cell></row><row><cell>FCN+S</cell><cell></cell><cell></cell><cell></cell><cell></cell><cell></cell><cell cols="5">12.56 8.96 6.06 4.09 7.92</cell></row><row><cell>CVAE</cell><cell cols="10">446.0 280.1 273.5 266.5 316.7 9.23 3.46 2.27 1.55 4.14</cell></row><row><cell>CVAE+S</cell><cell cols="10">525.0 270.1 233.5 203.5 308.3 11.08 5.49 3.66 2.57 5.71</cell></row><row><cell cols="11">FusionVAE 248.1 227.6 231.2 228.7 233.9 5.11 0.88 0.86 0.84 1.93</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_1"><head>Table 2 :</head><label>2</label><figDesc>Results on FusionCelebA. The best results are printed in bold.</figDesc><table><row><cell></cell><cell></cell><cell cols="3">NLL in 10 -2 BPD</cell><cell></cell><cell></cell><cell cols="3">MSEmin in 10 -2</cell></row><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>FCN</cell><cell></cell><cell></cell><cell></cell><cell></cell><cell></cell><cell cols="5">5.83 3.34 2.37 1.82 3.35</cell></row><row><cell>FCN+S</cell><cell></cell><cell></cell><cell></cell><cell></cell><cell></cell><cell cols="5">8.06 1.84 1.13 0.74 2.97</cell></row><row><cell>CVAE</cell><cell cols="10">25.24 23.73 22.70 23.13 23.71 5.57 1.54 0.77 0.37 2.08</cell></row><row><cell>CVAE+S</cell><cell cols="10">26.08 24.94 23.98 23.95 24.75 4.95 2.50 1.77 1.19 2.62</cell></row><row><cell cols="11">FusionVAE 24.18 23.07 22.23 22.88 23.10 4.11 0.59 0.32 0.19 1.32</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2"><head>Table 3 :</head><label>3</label><figDesc>Results on FusionT-LESS. The best results are printed in bold.</figDesc><table /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_4"><head>Table 4 :</head><label>4</label><figDesc>Posterior ablation on the FusionCelebA dataset. The best results are printed in bold.</figDesc><table><row><cell></cell><cell></cell><cell cols="3">NLL in 10 -2 BPD</cell><cell></cell><cell></cell><cell cols="3">MSEmin in 10 -2</cell></row><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3 avg</cell></row><row><cell cols="10">MaxAggAdd 248.1 227.6 231.2 228.7 233.9 5.11 0.88 0.86 0.84 1.93</cell></row><row><cell cols="10">MeanAggAdd 270.9 223.3 216.4 214.4 231.3 5.41 1.00 0.79 0.70 1.98</cell></row><row><cell cols="10">BayAggAdd 970.7 294.0 291.4 291.5 462.6 6.03 5.17 5.10 5.12 5.36</cell></row><row><cell>MaxAggAll</cell><cell cols="9">249.6 236.0 223.9 212.7 230.6 6.15 2.82 1.84 1.30 3.03</cell></row><row><cell cols="10">MeanAggAll 252.7 235.2 222.2 213.5 230.9 6.19 2.39 1.52 1.13 2.81</cell></row><row><cell>BayAggAll</cell><cell cols="9">255.6 568.3 414.7 1376.9 653.3 5.10 4.24 1.96 1.39 3.18</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_5"><head>Table 5 :</head><label>5</label><figDesc>Aggregation ablation on the FusionCelebA dataset. The best results are printed in bold.</figDesc><table /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_6"><head></head><label></label><figDesc>69. Zaheer, M., Kottur, S., Ravanbakhsh, S., Póczos, B., Salakhutdinov, R., Smola, A.J.: Deep sets. In: NeurIPS. vol. 30, pp. 3391-3401 (2017) 70. Zeng, Y., Lin, Z., Yang, J., Zhang, J., Shechtman, E., Lu, H.: High-resolution image inpainting with iterative confidence feedback and guided upsampling. In: ECCV.</figDesc><table><row><cell>pp. 1-17. Springer (2020)</cell></row><row><cell>71. Zhang, H., Xu, H., Xiao, Y., Guo, X., Ma, J.: Rethinking the image fusion: A fast</cell></row><row><cell>unified image fusion network based on proportional maintenance of gradient and</cell></row><row><cell>intensity. AAAI 34, 12797-12804 (04 2020)</cell></row><row><cell>72. Zhang, Q., Qu, D., Xu, F., Zou, F.: Robust robot grasp detection in multimodal</cell></row><row><cell>fusion. In: MATEC Web of Conferences. vol. 139, p. 00060. EDP Sciences (2017)</cell></row><row><cell>73. Zheng, C., Cham, T.J., Cai, J.: Pluralistic image completion. In: CVPR. pp. 1438-</cell></row><row><cell>1447 (2019)</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_8"><head>Table 6 :</head><label>6</label><figDesc>Main hyperparameters of our experiments.</figDesc><table /></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_10"><head>Table 7 :</head><label>7</label><figDesc>± 0.10 15.11 ± 0.07 14.19 ± 0.08 13.71 ± 0.07 15.27 ± 0.02 CVAE+S 18.45 ± 0.02 14.64 ± 0.06 13.22 ± 0.03 12.32 ± 0.02 14.81 ± 0.03 FusionVAE 15.91 ± 0.03 14.13 ± 0.07 13.64 ± 0.09 13.41 ± 0.10 14.34 ± 0.07 Mean and standard deviation of the FusionMNIST NLL results in 10 -2 BPD. The best results are printed in bold.</figDesc><table><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>CVAE</cell><cell>17.67 0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>FCN</cell><cell cols="5">10.84 ± 0.37 5.96 ± 0.11 6.02 ± 0.18 6.13 ± 0.25 7.38 ± 0.11</cell></row><row><cell>FCN+S</cell><cell cols="5">6.21 ± 0.65 3.79 ± 0.04 2.64 ± 0.07 1.88 ± 0.08 3.73 ± 0.22</cell></row><row><cell>CVAE</cell><cell cols="5">3.87 ± 0.03 1.76 ± 0.03 1.09 ± 0.03 0.83 ± 0.02 1.97 ± 0.03</cell></row><row><cell>CVAE+S</cell><cell cols="5">3.53 ± 0.06 1.77 ± 0.01 1.23 ± 0.04 1.02 ± 0.04 1.96 ± 0.01</cell></row><row><cell cols="6">FusionVAE 3.14 ± 0.01 1.04 ± 0.06 0.77 ± 0.04 0.67 ± 0.03 1.47 ± 0.03</cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_11"><head>Table 8 :</head><label>8</label><figDesc>Mean and standard deviation of the FusionMNIST MSE min results in 10 -2 . The best results are printed in bold. ± 9.42 289.1 ± 6.53 278.9 ± 4.51 270.3 ± 3.66 324.0 ± 5.17 CVAE+S 487.4 ± 27.45 355.4 ± 60.39 280.7 ± 35.12 230.9 ± 22.59 338.8 ± 22.99 FusionVAE 251.0 ± 2.06 222.3 ± 3.71 226.8 ± 3.16 224.0 ± 3.36 231.0 ± 2.05</figDesc><table><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>CVAE</cell><cell>456.9</cell><cell></cell><cell></cell><cell></cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_12"><head>Table 9 :</head><label>9</label><figDesc>Mean and standard deviation of the FusionCelebA NLL results in 10 -2 BPD. The best results are printed in bold. ± 0.87 20.00 ± 3.77 17.87 ± 3.42 15.56 ± 3.08 16.62 ± 2.48 FCN+S 11.94 ± 0.52 18.58 ± 7.02 14.90 ± 6.59 11.19 ± 5.39 14.15 ± 4.65 CVAE 8.70 ± 0.42 6.25 ± 2.16 4.33 ± 1.77 3.02 ± 1.37 5.58 ± 1.21 CVAE+S 9.87 ± 1.10 9.60 ± 3.34 7.30 ± 3.07 5.57 ± 2.64 8.09 ± 2.19 FusionVAE 5.82 ± 0.52 1.10 ± 0.16 0.93 ± 0.06 0.84 ± 0.03 2.18 ± 0.17</figDesc><table><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>FCN</cell><cell>13.07</cell><cell></cell><cell></cell><cell></cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_13"><head>Table 10 :</head><label>10</label><figDesc>Mean and standard deviation of the FusionCelebA MSE min results in 10 -2 . The best results are printed in bold. ± 0.04 24.00 ± 0.25 22.98 ± 0.24 23.34 ± 0.19 23.90 ± 0.17 CVAE+S 26.12 ± 0.23 25.29 ± 0.27 24.27 ± 0.25 24.15 ± 0.20 24.97 ± 0.16 FusionVAE 24.32 ± 0.10 23.09 ± 0.02 22.25 ± 0.02 22.90 ± 0.02 23.15 ± 0.04</figDesc><table><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>CVAE</cell><cell>25.27</cell><cell></cell><cell></cell><cell></cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_14"><head>Table 11 :</head><label>11</label><figDesc>Mean and standard deviation of the FusionT-LESS NLL results in 10 -2 BPD. The best results are printed in bold. ± 0.04 3.32 ± 0.10 2.50 ± 0.09 1.96 ± 0.10 3.43 ± 0.06 FCN+S 8.83 ± 1.05 1.95 ± 0.14 1.28 ± 0.15 0.86 ± 0.14 3.26 ± 0.37 CVAE 5.49 ± 0.11 1.73 ± 0.22 0.95 ± 0.18 0.44 ± 0.07 2.18 ± 0.13 CVAE+S 4.87 ± 0.06 2.98 ± 0.29 2.06 ± 0.19 1.27 ± 0.09 2.81 ± 0.12 FusionVAE 4.15 ± 0.03 0.62 ± 0.03 0.33 ± 0.03 0.20 ± 0.02 1.34 ± 0.02</figDesc><table><row><cell></cell><cell>0</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>avg</cell></row><row><cell>FCN</cell><cell>5.88</cell><cell></cell><cell></cell><cell></cell></row></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_15"><head>Table 12 :</head><label>12</label><figDesc>Mean and standard deviation of the FusionT-LESS MSE min results in 10 -2 . The best results are printed in bold.</figDesc><table /></figure>
 		</body>
 		<back>
-			<div type="annex">
-<div xmlns="http://www.tei-c.org/ns/1.0"><head>Supplementary Material</head><p>A Model Architecture VLMAE consists of two uni-modal encoders to extract visual and textual features, an image decoder for the image reconstruction, and a fusion learner for multi-modal aggregation. Concretely, we build the text encoder and fusion learner based on standard BERT base <ref type="bibr" target="#b5">(Devlin et al. 2018)</ref>. For image encoder, we employ a standard ViT-B/16 <ref type="bibr" target="#b7">(Dosovitskiy et al. 2020)</ref> with random masking strategy <ref type="bibr" target="#b11">(He et al. 2022)</ref>. Following MAE <ref type="bibr" target="#b11">(He et al. 2022)</ref>, we adopt a lightweight vision transformer as our image decoder. Details about the architecture are illustrated in Table <ref type="table">9</ref>.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head>B Discussion about the attention map</head><p>Desirable Features for Vision-Language tasks. Different from single-label classification tasks, where the model is only required to pay attention to the most salient object in an image, vision-language tasks are more challenging. The first challenge is that vision-language tasks are typically openset. Without text or question prior, the model cannot identify the region of interest because anything in an image could potentially be the hint to answer. Moreover, the complexity of contents in most real-world images requires the model to provide comprehensive understanding (e.g., objects and their relations) of an image. Therefore, desirable features for vision-language tasks should incorporate information about objects as much as possible, which means the model should pay attention to most critical objects in an image.</p><p>Why Not Use Grad-CAM? Compared with Grad-CAM, attention map is task-agnostic and more general for various tasks. To acquire Grad-CAM of an image, we have to calculate the gradient according to a specific loss function, which means Grad-CAM is task-specific. Moreover, for a pre-training method, especially self-supervised methods, pre-text tasks are usually meaningless in practice. In contrast, attention maps are easy to acquire without any task prior and reflect the model's attention directly, which is more suitable for exploring the representation ability of image encoder.</p><p>More Visualizations. In Figure <ref type="figure">6</ref>, we visualize attention maps of more pre-training samples to demonstrate that VL-MAE can alleviate the focal bias problem and provide more comprehensive understanding. In contrast to ALBEF, which mainly focuses on the training-text relevant areas, VLMAE attends to almost all critical objects in an image.</p></div>
-<div xmlns="http://www.tei-c.org/ns/1.0"><head>C Visual Grounding Results</head><p>Thanks to generative learning, VLMAE can recognize most critical objects in an image and provide more comprehensive features, facilitating downstream tasks like visual grounding. To further demonstrate the superior performance of VL-MAE on localization tasks, in Figure <ref type="figure">7</ref>, we provide more results in visual grounding task. Compared with ALBEF <ref type="bibr" target="#b17">(Li et al. 2021)</ref>  positions (e.g., (a), (b), (c), (d) and (e)), recognizing the object properties (e.g., (f) and (m)), detecting whole relevant areas (e.g., (g)), distinguishing similar objects (e.g., (i), (j) and (k)), determining the subject of descriptions (e.g., (m)) and suppressing the noise regions (e.g., (g), (h), and (n)).</p></div>			</div>
 			<div type="references">
 
 				<listBibl>
 
 <biblStruct xml:id="b0">
-	<analytic>
-		<title level="a" type="main">Robust Cross-Modal Representation Learning with Progressive Self-Distillation</title>
-		<author>
-			<persName><forename type="first">A</forename><surname>Andonian</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Chen</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">R</forename><surname>Hamid</surname></persName>
-		</author>
-		<idno>16430- 16441. 2</idno>
-	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</title>
-		<meeting>the IEEE/CVF Conference on Computer Vision and Pattern Recognition</meeting>
-		<imprint>
-			<date type="published" when="2022">2022</date>
-		</imprint>
-	</monogr>
-</biblStruct>
-
-<biblStruct xml:id="b1">
-	<monogr>
-		<author>
-			<persName><forename type="first">H</forename><surname>Bao</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L</forename><surname>Dong</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">F</forename><surname>Wei</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:2106.08254.3</idno>
-		<title level="m">Beit: Bert pre-training of image transformers</title>
-		<imprint>
-			<date type="published" when="2021">2021</date>
-		</imprint>
-	</monogr>
-	<note type="report_type">arXiv preprint</note>
-</biblStruct>
-
-<biblStruct xml:id="b2">
-	<monogr>
-		<title level="m" type="main">Context autoencoder for self-supervised representation learning</title>
-		<author>
-			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">M</forename><surname>Ding</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">X</forename><surname>Wang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Xin</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Mo</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Wang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Han</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">P</forename><surname>Luo</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">G</forename><surname>Zeng</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Wang</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:2202.03026</idno>
-		<imprint>
-			<date type="published" when="2022">2022</date>
-			<biblScope unit="volume">2</biblScope>
-			<biblScope unit="page">6</biblScope>
-		</imprint>
-	</monogr>
-	<note type="report_type">arXiv preprint</note>
-</biblStruct>
-
-<biblStruct xml:id="b3">
-	<analytic>
-		<title level="a" type="main">Uniter: Universal image-text representation learning</title>
-		<author>
-			<persName><forename type="first">Y.-C</forename><surname>Chen</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L</forename><surname>Li</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L</forename><surname>Yu</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>El Kholy</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">F</forename><surname>Ahmed</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Z</forename><surname>Gan</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Cheng</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Liu</surname></persName>
-		</author>
-	</analytic>
-	<monogr>
-		<title level="m">European conference on computer vision</title>
-		<imprint>
-			<publisher>Springer</publisher>
-			<date type="published" when="2020">2020</date>
-			<biblScope unit="volume">104</biblScope>
-			<biblScope unit="page">5</biblScope>
-		</imprint>
-	</monogr>
-</biblStruct>
-
-<biblStruct xml:id="b4">
-	<analytic>
-		<title level="a" type="main">Randaugment: Practical automated data augmentation with a reduced search space</title>
-		<author>
-			<persName><forename type="first">E</forename><forename type="middle">D</forename><surname>Cubuk</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">B</forename><surname>Zoph</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Shlens</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Q</forename><forename type="middle">V</forename><surname>Le</surname></persName>
-		</author>
-	</analytic>
-	<monogr>
-		<title level="m">Proceedings of the IEEE/CVF conference on computer vision and pattern recognition workshops</title>
-		<meeting>the IEEE/CVF conference on computer vision and pattern recognition workshops</meeting>
-		<imprint>
-			<date type="published" when="2020">2020</date>
-			<biblScope unit="volume">5</biblScope>
-			<biblScope unit="page" from="702" to="703" />
-		</imprint>
-	</monogr>
-</biblStruct>
-
-<biblStruct xml:id="b5">
-	<monogr>
-		<title level="m" type="main">Bert: Pre-training of deep bidirectional transformers for language understanding</title>
-		<author>
-			<persName><forename type="first">J</forename><surname>Devlin</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">M.-W</forename><surname>Chang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">K</forename><surname>Lee</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">K</forename><surname>Toutanova</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:1810.04805.1</idno>
-		<imprint>
-			<date type="published" when="2018">2018</date>
-			<biblScope unit="volume">3</biblScope>
-			<biblScope unit="page">10</biblScope>
-		</imprint>
-	</monogr>
-	<note type="report_type">arXiv preprint</note>
-</biblStruct>
-
-<biblStruct xml:id="b6">
-	<monogr>
-		<title level="m" type="main">Peco: Perceptual codebook for bert pre-training of vision transformers</title>
-		<author>
-			<persName><forename type="first">X</forename><surname>Dong</surname></persName>
-		</author>
+		<title level="m" type="main">CVAE-GAN: fine-grained image generation through asymmetric training</title>
 		<author>
 			<persName><forename type="first">J</forename><surname>Bao</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">T</forename><surname>Zhang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">D</forename><surname>Chen</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">W</forename><surname>Zhang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L</forename><surname>Yuan</surname></persName>
 		</author>
 		<author>
 			<persName><forename type="first">D</forename><surname>Chen</surname></persName>
@@ -371,973 +162,1758 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 			<persName><forename type="first">F</forename><surname>Wen</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">N</forename><surname>Yu</surname></persName>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
 		</author>
-		<idno type="arXiv">arXiv:2111.12710.3</idno>
+		<author>
+			<persName><forename type="first">G</forename><surname>Hua</surname></persName>
+		</author>
 		<imprint>
-			<date type="published" when="2021">2021</date>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="2745" to="2754" />
 		</imprint>
+		<respStmt>
+			<orgName>ICCV</orgName>
+		</respStmt>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
-<biblStruct xml:id="b7">
+<biblStruct xml:id="b1">
 	<monogr>
+		<title level="m" type="main">Recurrent Kalman networks: Factorized inference in high-dimensional deep feature spaces</title>
 		<author>
-			<persName><forename type="first">A</forename><surname>Dosovitskiy</surname></persName>
+			<persName><forename type="first">P</forename><surname>Becker</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">L</forename><surname>Beyer</surname></persName>
+			<persName><forename type="first">H</forename><surname>Pandya</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">A</forename><surname>Kolesnikov</surname></persName>
+			<persName><forename type="first">G</forename><surname>Gebhardt</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Weissenborn</surname></persName>
+			<persName><forename type="first">C</forename><surname>Zhao</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">X</forename><surname>Zhai</surname></persName>
+			<persName><forename type="first">C</forename><forename type="middle">J</forename><surname>Taylor</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">T</forename><surname>Unterthiner</surname></persName>
+			<persName><forename type="first">G</forename><surname>Neumann</surname></persName>
 		</author>
-		<author>
-			<persName><forename type="first">M</forename><surname>Dehghani</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">M</forename><surname>Minderer</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">G</forename><surname>Heigold</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Gelly</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:2010.11929.1</idno>
-		<title level="m">An image is worth 16x16 words: Transformers for image recognition at scale</title>
+		<idno>PMLR</idno>
 		<imprint>
-			<date type="published" when="2020">2020</date>
-			<biblScope unit="volume">5</biblScope>
-			<biblScope unit="page">10</biblScope>
+			<date type="published" when="2019">2019</date>
+			<biblScope unit="page" from="544" to="552" />
 		</imprint>
+		<respStmt>
+			<orgName>ICML</orgName>
+		</respStmt>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
-<biblStruct xml:id="b8">
+<biblStruct xml:id="b2">
 	<monogr>
 		<author>
-			<persName><forename type="first">X</forename><surname>Geng</surname></persName>
+			<persName><forename type="first">C</forename><forename type="middle">M</forename><surname>Bishop</surname></persName>
+		</author>
+		<title level="m">Pattern Recognition and Machine Learning</title>
+		<imprint>
+			<publisher>Springer</publisher>
+			<date type="published" when="2006">2006</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Importance weighted autoencoders</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Burda</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">H</forename><surname>Liu</surname></persName>
+			<persName><forename type="first">R</forename><surname>Grosse</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">L</forename><surname>Lee</surname></persName>
+			<persName><forename type="first">R</forename><surname>Salakhutdinov</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ICLR</title>
+		<imprint>
+			<date type="published" when="2016">2016</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">A computational approach to edge detection</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Canny</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE TPAMI</title>
+		<imprint>
+			<biblScope unit="volume">8</biblScope>
+			<biblScope unit="issue">6</biblScope>
+			<biblScope unit="page" from="679" to="698" />
+			<date type="published" when="1986">1986</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<author>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Schuurams</surname></persName>
+			<persName><forename type="first">D</forename><forename type="middle">P</forename><surname>Kingma</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Levine</surname></persName>
+			<persName><forename type="first">T</forename><surname>Salimans</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Duan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Dhariwal</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Schulman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">I</forename><surname>Sutskever</surname></persName>
 		</author>
 		<author>
 			<persName><forename type="first">P</forename><surname>Abbeel</surname></persName>
 		</author>
-		<idno type="arXiv">arXiv:2205.14204.3</idno>
-		<title level="m">Multimodal Masked Autoencoders Learn Transferable Representations</title>
+	</analytic>
+	<monogr>
+		<title level="m">Variational lossy autoencoder</title>
 		<imprint>
-			<date type="published" when="2022">2022</date>
+			<date type="published" when="2017">2017</date>
 		</imprint>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<monogr>
+		<title level="m" type="main">Multi-view 3D object detection network for autonomous driving</title>
+		<author>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Wan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Xia</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="1907" to="1915" />
+		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Very deep VAEs generalize autoregressive models and can outperform them on images</title>
+		<author>
+			<persName><forename type="first">R</forename><surname>Child</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ICLR</title>
+		<imprint>
+			<date type="published" when="2021">2021</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<monogr>
+		<title level="m" type="main">Xception: Deep learning with depthwise separable convolutions</title>
+		<author>
+			<persName><forename type="first">F</forename><surname>Chollet</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="1251" to="1258" />
+		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
+	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b9">
 	<analytic>
-		<title level="a" type="main">Making the v in vqa matter: Elevating the role of image understanding in visual question answering</title>
+		<title level="a" type="main">Generative adversarial nets</title>
 		<author>
-			<persName><forename type="first">Y</forename><surname>Goyal</surname></persName>
+			<persName><forename type="first">I</forename><surname>Goodfellow</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">T</forename><surname>Khot</surname></persName>
+			<persName><forename type="first">J</forename><surname>Pouget-Abadie</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Summers-Stay</surname></persName>
+			<persName><forename type="first">M</forename><surname>Mirza</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Batra</surname></persName>
+			<persName><forename type="first">B</forename><surname>Xu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Parikh</surname></persName>
+			<persName><forename type="first">D</forename><surname>Warde-Farley</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Ozair</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Courville</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Bengio</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE conference on computer vision and pattern recognition</title>
-		<meeting>the IEEE conference on computer vision and pattern recognition</meeting>
+		<title level="j">NeurIPS</title>
 		<imprint>
-			<date type="published" when="2017">2017</date>
-			<biblScope unit="volume">5</biblScope>
-			<biblScope unit="page" from="6904" to="6913" />
+			<biblScope unit="volume">27</biblScope>
+			<biblScope unit="page" from="2672" to="2680" />
+			<date type="published" when="2014">2014</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">DRAW: A recurrent neural network for image generation</title>
+		<author>
+			<persName><forename type="first">K</forename><surname>Gregor</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">I</forename><surname>Danihelka</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Graves</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Rezende</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Wierstra</surname></persName>
+		</author>
+		<idno>PMLR</idno>
+	</analytic>
 	<monogr>
-		<author>
-			<persName><forename type="first">L</forename><surname>Gui</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Q</forename><surname>Huang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Hauptmann</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Bisk</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Gao</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:2205.09256.3</idno>
-		<title level="m">Training Vision-Language Transformers from Captions Alone</title>
+		<title level="m">ICML. Proc. Machine Learning Research</title>
 		<imprint>
-			<date type="published" when="2022">2022</date>
+			<date type="published" when="2015-07">Jul 2015</date>
+			<biblScope unit="volume">37</biblScope>
+			<biblScope unit="page" from="1462" to="1471" />
 		</imprint>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
 <biblStruct xml:id="b11">
 	<analytic>
-		<title level="a" type="main">Masked autoencoders are scalable vision learners</title>
+		<title level="a" type="main">Recent advances in convolutional neural networks</title>
 		<author>
-			<persName><forename type="first">K</forename><surname>He</surname></persName>
+			<persName><forename type="first">J</forename><surname>Gu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
+			<persName><forename type="first">Z</forename><surname>Wang</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Xie</surname></persName>
+			<persName><forename type="first">J</forename><surname>Kuen</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">Y</forename><surname>Li</surname></persName>
+			<persName><forename type="first">L</forename><surname>Ma</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">P</forename><surname>Dollár</surname></persName>
+			<persName><forename type="first">A</forename><surname>Shahroudy</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">R</forename><surname>Girshick</surname></persName>
+			<persName><forename type="first">B</forename><surname>Shuai</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Cai</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</title>
-		<meeting>the IEEE/CVF Conference on Computer Vision and Pattern Recognition</meeting>
+		<title level="j">Pattern Recognition</title>
 		<imprint>
-			<date type="published" when="2006">2022. 16000-16009. 2, 3, 4, 5, 6</date>
-			<biblScope unit="page">10</biblScope>
+			<biblScope unit="volume">77</biblScope>
+			<biblScope unit="page" from="354" to="377" />
+			<date type="published" when="2018">2018</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b12">
 	<analytic>
-		<title level="a" type="main">Seeing out of the box: End-to-end pre-training for vision-language representation learning</title>
+		<title level="a" type="main">PixelVAE: A latent variable model for natural images</title>
 		<author>
-			<persName><forename type="first">Z</forename><surname>Huang</surname></persName>
+			<persName><forename type="first">I</forename><surname>Gulrajani</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">Z</forename><surname>Zeng</surname></persName>
+			<persName><forename type="first">K</forename><surname>Kumar</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">Y</forename><surname>Huang</surname></persName>
+			<persName><forename type="first">F</forename><surname>Ahmed</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">B</forename><surname>Liu</surname></persName>
+			<persName><forename type="first">A</forename><forename type="middle">A</forename><surname>Taiga</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Fu</surname></persName>
+			<persName><forename type="first">F</forename><surname>Visin</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">J</forename><surname>Fu</surname></persName>
+			<persName><forename type="first">D</forename><surname>Vazquez</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Courville</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</title>
-		<meeting>the IEEE/CVF Conference on Computer Vision and Pattern Recognition</meeting>
+		<title level="j">ICLR</title>
 		<imprint>
-			<date type="published" when="2021">2021</date>
-			<biblScope unit="volume">1</biblScope>
-			<biblScope unit="page">2</biblScope>
+			<date type="published" when="2017">2017</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b13">
 	<analytic>
-		<title level="a" type="main">Vilt: Vision-andlanguage transformer without convolution or region supervision</title>
+		<title level="a" type="main">FuseGAN: Learning to fuse multi-focus image via conditional generative adversarial network</title>
 		<author>
-			<persName><forename type="first">W</forename><surname>Kim</surname></persName>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">B</forename><surname>Son</surname></persName>
+			<persName><forename type="first">R</forename><surname>Nie</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">I</forename><surname>Kim</surname></persName>
+			<persName><forename type="first">J</forename><surname>Cao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Mei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">K</forename><surname>He</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">International Conference on Machine Learning</title>
+		<title level="j">IEEE TMM</title>
 		<imprint>
-			<date type="published" when="2021">2021</date>
-			<biblScope unit="volume">1</biblScope>
-			<biblScope unit="page">2</biblScope>
+			<biblScope unit="volume">21</biblScope>
+			<biblScope unit="issue">8</biblScope>
+			<biblScope unit="page" from="1982" to="1996" />
+			<date type="published" when="2019">2019</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b14">
 	<monogr>
+		<title level="m" type="main">Deep residual learning for image recognition</title>
 		<author>
-			<persName><forename type="first">D</forename><forename type="middle">P</forename><surname>Kingma</surname></persName>
+			<persName><forename type="first">K</forename><surname>He</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">M</forename><surname>Welling</surname></persName>
+			<persName><forename type="first">X</forename><surname>Zhang</surname></persName>
 		</author>
-		<idno type="arXiv">arXiv:1312.6114.2</idno>
-		<title level="m">Auto-encoding variational bayes</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Ren</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Sun</surname></persName>
+		</author>
 		<imprint>
-			<date type="published" when="2013">2013</date>
+			<date type="published" when="2016">2016</date>
+			<biblScope unit="page" from="770" to="778" />
 		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
 <biblStruct xml:id="b15">
-	<analytic>
-		<title level="a" type="main">Visual genome: Connecting language and vision using crowdsourced dense image annotations</title>
-		<author>
-			<persName><forename type="first">R</forename><surname>Krishna</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Zhu</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">O</forename><surname>Groth</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Johnson</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">K</forename><surname>Hata</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Kravitz</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Chen</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Kalantidis</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L.-J</forename><surname>Li</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">D</forename><forename type="middle">A</forename><surname>Shamma</surname></persName>
-		</author>
-	</analytic>
 	<monogr>
-		<title level="j">International journal of computer vision</title>
+		<title level="m" type="main">FFB6D: A full flow bidirectional fusion network for 6D pose estimation</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Fan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Sun</surname></persName>
+		</author>
 		<imprint>
-			<biblScope unit="volume">123</biblScope>
-			<biblScope unit="issue">1</biblScope>
-			<biblScope unit="page" from="32" to="73" />
-			<date type="published" when="2017">2017</date>
+			<date type="published" when="2021">2021</date>
+			<biblScope unit="page" from="3003" to="3013" />
 		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b16">
-	<analytic>
-		<title level="a" type="main">Unicoder-vl: A universal encoder for vision and language by cross-modal pre-training</title>
-		<author>
-			<persName><forename type="first">G</forename><surname>Li</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">N</forename><surname>Duan</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Fang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">M</forename><surname>Gong</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">D</forename><surname>Jiang</surname></persName>
-		</author>
-	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the AAAI Conference on Artificial Intelligence</title>
-		<meeting>the AAAI Conference on Artificial Intelligence</meeting>
+		<title level="m" type="main">PVN3D: A deep point-wise 3D keypoints voting network for 6DoF pose estimation</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Sun</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Fan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Sun</surname></persName>
+		</author>
 		<imprint>
 			<date type="published" when="2020">2020</date>
-			<biblScope unit="volume">34</biblScope>
-			<biblScope unit="page" from="11336" to="11344" />
+			<biblScope unit="page" from="11632" to="11641" />
 		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b17">
 	<monogr>
-		<title level="m" type="main">Align before fuse: Vision and language representation learning with momentum distillation. Advances in neural information processing systems</title>
+		<title level="m" type="main">T-LESS: An RGB-D dataset for 6D pose estimation of texture-less objects</title>
 		<author>
-			<persName><forename type="first">J</forename><surname>Li</surname></persName>
+			<persName><forename type="first">T</forename><surname>Hodaň</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">R</forename><surname>Selvaraju</surname></persName>
+			<persName><forename type="first">P</forename><surname>Haluza</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">A</forename><surname>Gotmare</surname></persName>
+			<persName><forename type="first">Š</forename><surname>Obdržálek</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Joty</surname></persName>
+			<persName><forename type="first">J</forename><surname>Matas</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">C</forename><surname>Xiong</surname></persName>
+			<persName><forename type="first">M</forename><surname>Lourakis</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><forename type="middle">C H</forename><surname>Hoi</surname></persName>
+			<persName><forename type="first">X</forename><surname>Zabulis</surname></persName>
 		</author>
 		<imprint>
-			<date type="published" when="2021">2021. 1, 2, 3, 4, 5, 6, 7, 10</date>
-			<biblScope unit="volume">34</biblScope>
-			<biblScope unit="page" from="9694" to="9705" />
+			<date type="published" when="2017">2017</date>
+			<publisher>WACV</publisher>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b18">
 	<monogr>
+		<title level="m" type="main">Squeeze-and-excitation networks</title>
 		<author>
-			<persName><forename type="first">X</forename><surname>Li</surname></persName>
+			<persName><forename type="first">J</forename><surname>Hu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">Y</forename><surname>Ge</surname></persName>
+			<persName><forename type="first">L</forename><surname>Shen</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">K</forename><surname>Yi</surname></persName>
+			<persName><forename type="first">G</forename><surname>Sun</surname></persName>
 		</author>
-		<author>
-			<persName><forename type="first">Z</forename><surname>Hu</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Shan</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L.-Y</forename><surname>Duan</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:2203.15371.3</idno>
-		<title level="m">mc-BEiT: Multi-choice Discretization for Image BERT Pre-training</title>
 		<imprint>
-			<date type="published" when="2022">2022</date>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="7132" to="7141" />
 		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
 <biblStruct xml:id="b19">
 	<monogr>
-		<title level="m" type="main">Microsoft coco: Common objects in context</title>
+		<title level="m" type="main">Densely connected convolutional networks</title>
 		<author>
-			<persName><forename type="first">T.-Y</forename><surname>Lin</surname></persName>
+			<persName><forename type="first">G</forename><surname>Huang</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">M</forename><surname>Maire</surname></persName>
+			<persName><forename type="first">Z</forename><surname>Liu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Belongie</surname></persName>
+			<persName><forename type="first">L</forename><surname>Van Der Maaten</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">J</forename><surname>Hays</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">P</forename><surname>Perona</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">D</forename><surname>Ramanan</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">P</forename><surname>Dollár</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">C</forename><forename type="middle">L</forename><surname>Zitnick</surname></persName>
+			<persName><forename type="first">K</forename><forename type="middle">Q</forename><surname>Weinberger</surname></persName>
 		</author>
 		<imprint>
-			<date type="published" when="2014">2014</date>
-			<publisher>Springer</publisher>
-			<biblScope unit="page" from="740" to="755" />
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="4700" to="4708" />
 		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">A generative adversarial network with adaptive constraints for multi-focus image fusion</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Mei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><surname>Fan</surname></persName>
+		</author>
+	</analytic>
 	<monogr>
-		<author>
-			<persName><forename type="first">I</forename><surname>Loshchilov</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">F</forename><surname>Hutter</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:1711.05101.5</idno>
-		<title level="m">Decoupled weight decay regularization</title>
+		<title level="j">Neural Computing and Applications</title>
 		<imprint>
-			<date type="published" when="2017">2017</date>
+			<biblScope unit="volume">32</biblScope>
+			<biblScope unit="issue">18</biblScope>
+			<biblScope unit="page" from="15119" to="15129" />
+			<date type="published" when="2020">2020</date>
 		</imprint>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
 <biblStruct xml:id="b21">
 	<analytic>
-		<title level="a" type="main">Vilbert: Pretraining task-agnostic visiolinguistic representations for vision-and-language tasks</title>
+		<title level="a" type="main">Globally and locally consistent image completion</title>
 		<author>
-			<persName><forename type="first">J</forename><surname>Lu</surname></persName>
+			<persName><forename type="first">S</forename><surname>Iizuka</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Batra</surname></persName>
+			<persName><forename type="first">E</forename><surname>Simo-Serra</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Parikh</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Lee</surname></persName>
+			<persName><forename type="first">H</forename><surname>Ishikawa</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Advances in neural information processing systems</title>
+		<title level="j">TOG</title>
 		<imprint>
-			<date type="published" when="2019">2019</date>
-			<biblScope unit="volume">32</biblScope>
+			<biblScope unit="volume">36</biblScope>
+			<biblScope unit="issue">4</biblScope>
+			<biblScope unit="page" from="1" to="14" />
+			<date type="published" when="2017">2017</date>
+			<publisher>ACM</publisher>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b22">
+	<analytic>
+		<title level="a" type="main">Batch normalization: Accelerating deep network training by reducing internal covariate shift</title>
+		<author>
+			<persName><forename type="first">S</forename><surname>Ioffe</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Szegedy</surname></persName>
+		</author>
+	</analytic>
 	<monogr>
-		<title level="m" type="main">Im2text: Describing images using 1 million captioned photographs. Advances in neural information processing systems</title>
-		<author>
-			<persName><forename type="first">V</forename><surname>Ordonez</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">G</forename><surname>Kulkarni</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">T</forename><surname>Berg</surname></persName>
-		</author>
+		<title level="j">PMLR</title>
 		<imprint>
-			<date type="published" when="2011">2011</date>
-			<biblScope unit="volume">24</biblScope>
+			<biblScope unit="page" from="448" to="456" />
+			<date type="published" when="2015">2015</date>
 		</imprint>
+		<respStmt>
+			<orgName>ICML</orgName>
+		</respStmt>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b23">
 	<analytic>
-		<title level="a" type="main">Flickr30k entities: Collecting region-to-phrase correspondences for richer image-to-sentence models</title>
+		<title level="a" type="main">Unsupervised deep image fusion with structure tensor representations</title>
 		<author>
-			<persName><forename type="first">B</forename><forename type="middle">A</forename><surname>Plummer</surname></persName>
+			<persName><forename type="first">H</forename><surname>Jung</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">L</forename><surname>Wang</surname></persName>
+			<persName><forename type="first">Y</forename><surname>Kim</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">C</forename><forename type="middle">M</forename><surname>Cervantes</surname></persName>
+			<persName><forename type="first">H</forename><surname>Jang</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">J</forename><forename type="middle">C</forename><surname>Caicedo</surname></persName>
+			<persName><forename type="first">N</forename><surname>Ha</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">J</forename><surname>Hockenmaier</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Lazebnik</surname></persName>
+			<persName><forename type="first">K</forename><surname>Sohn</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE international conference on computer vision</title>
-		<meeting>the IEEE international conference on computer vision</meeting>
+		<title level="j">IEEE TIP</title>
 		<imprint>
-			<date type="published" when="2015">2015</date>
-			<biblScope unit="volume">5</biblScope>
-			<biblScope unit="page" from="2641" to="2649" />
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="3845" to="3858" />
+			<date type="published" when="2020">2020</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b24">
-	<analytic>
-		<title level="a" type="main">Learning transferable visual models from natural language supervision</title>
-		<author>
-			<persName><forename type="first">A</forename><surname>Radford</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><forename type="middle">W</forename><surname>Kim</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">C</forename><surname>Hallacy</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Ramesh</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">G</forename><surname>Goh</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Agarwal</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">G</forename><surname>Sastry</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Askell</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">P</forename><surname>Mishkin</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Clark</surname></persName>
-		</author>
-		<idno>PMLR. 2</idno>
-	</analytic>
 	<monogr>
-		<title level="m">International Conference on Machine Learning</title>
+		<title level="m" type="main">SetVAE: Learning hierarchical composition for generative modeling of set-structured data</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Yoo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Hong</surname></persName>
+		</author>
 		<imprint>
 			<date type="published" when="2021">2021</date>
-			<biblScope unit="page">3</biblScope>
+			<biblScope unit="page" from="15059" to="15068" />
 		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b25">
 	<analytic>
-		<title level="a" type="main">Imagenet large scale visual recognition challenge</title>
+		<title level="a" type="main">Adam: A method for stochastic optimization</title>
 		<author>
-			<persName><forename type="first">O</forename><surname>Russakovsky</surname></persName>
+			<persName><forename type="first">D</forename><forename type="middle">P</forename><surname>Kingma</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">J</forename><surname>Deng</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">H</forename><surname>Su</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Krause</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Satheesh</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Ma</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Z</forename><surname>Huang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Karpathy</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Khosla</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">M</forename><surname>Bernstein</surname></persName>
+			<persName><forename type="first">J</forename><forename type="middle">L</forename><surname>Ba</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="j">International journal of computer vision</title>
+		<title level="j">ICLR</title>
 		<imprint>
-			<biblScope unit="volume">115</biblScope>
-			<biblScope unit="issue">3</biblScope>
-			<biblScope unit="page" from="211" to="252" />
-			<date type="published" when="2015">2015</date>
+			<date type="published" when="2015-05">May 2015</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b26">
 	<analytic>
-		<title level="a" type="main">Grad-cam: Visual explanations from deep networks via gradient-based localization</title>
+		<title level="a" type="main">Auto-encoding variational bayes</title>
 		<author>
-			<persName><forename type="first">R</forename><forename type="middle">R</forename><surname>Selvaraju</surname></persName>
+			<persName><forename type="first">D</forename><forename type="middle">P</forename><surname>Kingma</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">M</forename><surname>Cogswell</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Das</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">R</forename><surname>Vedantam</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">D</forename><surname>Parikh</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">D</forename><surname>Batra</surname></persName>
+			<persName><forename type="first">M</forename><surname>Welling</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE international conference on computer vision</title>
-		<meeting>the IEEE international conference on computer vision</meeting>
+		<title level="j">ICLR</title>
 		<imprint>
-			<date type="published" when="2017">2017</date>
-			<biblScope unit="volume">5</biblScope>
-			<biblScope unit="page" from="618" to="626" />
+			<date type="published" when="2014">2014</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b27">
 	<analytic>
-		<title level="a" type="main">Conceptual captions: A cleaned, hypernymed, image alt-text dataset for automatic image captioning</title>
+		<title level="a" type="main">Improving variational inference with inverse autoregressive flow</title>
 		<author>
-			<persName><forename type="first">P</forename><surname>Sharma</surname></persName>
+			<persName><forename type="first">D</forename><forename type="middle">P</forename><surname>Kingma</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">N</forename><surname>Ding</surname></persName>
+			<persName><forename type="first">T</forename><surname>Salimans</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Goodman</surname></persName>
+			<persName><forename type="first">R</forename><surname>Jozefowicz</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">R</forename><surname>Soricut</surname></persName>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">I</forename><surname>Sutskever</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Welling</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics</title>
-		<meeting>the 56th Annual Meeting of the Association for Computational Linguistics</meeting>
+		<title level="j">NeurIPS</title>
 		<imprint>
-			<publisher>Long Papers</publisher>
-			<date type="published" when="2018">2018</date>
-			<biblScope unit="volume">1</biblScope>
-			<biblScope unit="page" from="2556" to="2565" />
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="4743" to="4751" />
+			<date type="published" when="2016">2016</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b28">
+	<analytic>
+		<title level="a" type="main">Mask-specific inpainting with deep neural networks</title>
+		<author>
+			<persName><forename type="first">R</forename><surname>Köhler</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Schuler</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Schölkopf</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Harmeling</surname></persName>
+		</author>
+	</analytic>
 	<monogr>
-		<author>
-			<persName><forename type="first">A</forename><surname>Suhr</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Zhou</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Zhang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">I</forename><surname>Zhang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">H</forename><surname>Bai</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Artzi</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:1811.00491</idno>
-		<title level="m">A corpus for reasoning about natural language grounded in photographs</title>
+		<title level="m">German Conf. Pattern Recognition</title>
 		<imprint>
-			<date type="published" when="2018">2018</date>
+			<publisher>Springer</publisher>
+			<date type="published" when="2014">2014</date>
+			<biblScope unit="page" from="523" to="534" />
 		</imprint>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
 <biblStruct xml:id="b29">
 	<monogr>
-		<title level="m" type="main">Neural discrete representation learning. Advances in neural information processing systems</title>
+		<title level="m" type="main">Joint 3D proposal generation and object detection from view aggregation</title>
 		<author>
-			<persName><forename type="first">A</forename><surname>Van Den Oord</surname></persName>
+			<persName><forename type="first">J</forename><surname>Ku</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">O</forename><surname>Vinyals</surname></persName>
+			<persName><forename type="first">M</forename><surname>Mozifian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Harakeh</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">L</forename><surname>Waslander</surname></persName>
 		</author>
 		<imprint>
-			<date type="published" when="2017">2017</date>
-			<biblScope unit="volume">30</biblScope>
+			<date type="published" when="2018">2018</date>
+			<publisher>IEEE</publisher>
+			<biblScope unit="page" from="1" to="8" />
 		</imprint>
+		<respStmt>
+			<orgName>IROS</orgName>
+		</respStmt>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b30">
 	<analytic>
-		<title level="a" type="main">Extracting and composing robust features with denoising autoencoders</title>
+		<title level="a" type="main">Autoencoding beyond pixels using a learned similarity metric</title>
 		<author>
-			<persName><forename type="first">P</forename><surname>Vincent</surname></persName>
+			<persName><forename type="first">A</forename><forename type="middle">B L</forename><surname>Larsen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">K</forename><surname>Sønderby</surname></persName>
 		</author>
 		<author>
 			<persName><forename type="first">H</forename><surname>Larochelle</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">Y</forename><surname>Bengio</surname></persName>
+			<persName><forename type="first">O</forename><surname>Winther</surname></persName>
 		</author>
-		<author>
-			<persName><forename type="first">P.-A</forename><surname>Manzagol</surname></persName>
-		</author>
-		<idno>1096-1103. 2</idno>
+		<ptr target="http://yann.lecun.com/exdb/mnist" />
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the 25th international conference on Machine learning</title>
-		<meeting>the 25th international conference on Machine learning</meeting>
+		<title level="m">The MNIST database of handwritten digits</title>
+		<meeting><address><addrLine>LeCun, Y.</addrLine></address></meeting>
 		<imprint>
-			<date type="published" when="2008">2008</date>
+			<date type="published" when="1998">2016. 1998</date>
+			<biblScope unit="volume">32</biblScope>
+			<biblScope unit="page" from="1558" to="1566" />
 		</imprint>
 	</monogr>
+	<note>ICML</note>
 </biblStruct>
 
 <biblStruct xml:id="b31">
+	<analytic>
+		<title level="a" type="main">DenseFuse: A fusion approach to infrared and visible images</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><forename type="middle">J</forename><surname>Wu</surname></persName>
+		</author>
+	</analytic>
 	<monogr>
-		<title level="m" type="main">Vlmo: Unified vision-language pre-training with mixture-of-modalityexperts</title>
-		<author>
-			<persName><forename type="first">W</forename><surname>Wang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">H</forename><surname>Bao</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L</forename><surname>Dong</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">F</forename><surname>Wei</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:2111.02358</idno>
+		<title level="j">IEEE TIP</title>
 		<imprint>
-			<date type="published" when="2021">2021</date>
-			<biblScope unit="volume">1</biblScope>
-			<biblScope unit="page">2</biblScope>
+			<biblScope unit="volume">28</biblScope>
+			<biblScope unit="issue">5</biblScope>
+			<biblScope unit="page" from="2614" to="2623" />
+			<date type="published" when="2018">2018</date>
 		</imprint>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
 <biblStruct xml:id="b32">
 	<analytic>
-		<title level="a" type="main">Masked feature prediction for self-supervised visual pre-training</title>
+		<title level="a" type="main">Infrared and visible image fusion with ResNet and zero-phase component analysis</title>
 		<author>
-			<persName><forename type="first">C</forename><surname>Wei</surname></persName>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">H</forename><surname>Fan</surname></persName>
+			<persName><forename type="first">X</forename><forename type="middle">J</forename><surname>Wu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Xie</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">C.-Y</forename><surname>Wu</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Yuille</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">C</forename><surname>Feichtenhofer</surname></persName>
+			<persName><forename type="first">T</forename><forename type="middle">S</forename><surname>Durrani</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</title>
-		<meeting>the IEEE/CVF Conference on Computer Vision and Pattern Recognition</meeting>
+		<title level="j">Infrared Physics &amp; Technology</title>
 		<imprint>
-			<date type="published" when="2022">2022</date>
-			<biblScope unit="page" from="14668" to="14678" />
+			<biblScope unit="volume">102</biblScope>
+			<biblScope unit="page">103039</biblScope>
+			<date type="published" when="2019">2019</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b33">
 	<monogr>
-		<title level="m" type="main">Visual entailment: A novel task for fine-grained image understanding</title>
+		<title level="m" type="main">Infrared and visible image fusion using a deep learning framework</title>
 		<author>
-			<persName><forename type="first">N</forename><surname>Xie</surname></persName>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">F</forename><surname>Lai</surname></persName>
+			<persName><forename type="first">X</forename><forename type="middle">J</forename><surname>Wu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">D</forename><surname>Doran</surname></persName>
+			<persName><forename type="first">J</forename><surname>Kittler</surname></persName>
 		</author>
-		<author>
-			<persName><forename type="first">A</forename><surname>Kadav</surname></persName>
-		</author>
-		<idno type="arXiv">arXiv:1901.06706.5</idno>
 		<imprint>
-			<date type="published" when="2019">2019</date>
+			<date type="published" when="2018">2018</date>
+			<publisher>IEEE</publisher>
+			<biblScope unit="page" from="2705" to="2710" />
 		</imprint>
+		<respStmt>
+			<orgName>ICPR</orgName>
+		</respStmt>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
 </biblStruct>
 
 <biblStruct xml:id="b34">
-	<analytic>
-		<title level="a" type="main">Simmim: A simple framework for masked image modeling</title>
-		<author>
-			<persName><forename type="first">Z</forename><surname>Xie</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Z</forename><surname>Zhang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Cao</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Y</forename><surname>Lin</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Bao</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Z</forename><surname>Yao</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">Q</forename><surname>Dai</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">H</forename><surname>Hu</surname></persName>
-		</author>
-	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</title>
-		<meeting>the IEEE/CVF Conference on Computer Vision and Pattern Recognition</meeting>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><forename type="middle">H</forename><surname>Yang</surname></persName>
+		</author>
+		<title level="m">Generative face completion</title>
 		<imprint>
-			<date type="published" when="2022">2022</date>
-			<biblScope unit="page" from="9653" to="9663" />
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="3911" to="3919" />
 		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b35">
 	<analytic>
-		<title level="a" type="main">Vision-Language Pre-Training with Triple Contrastive Learning</title>
+		<title level="a" type="main">A medical image fusion method based on convolutional neural networks</title>
 		<author>
-			<persName><forename type="first">J</forename><surname>Yang</surname></persName>
+			<persName><forename type="first">Y</forename><surname>Liu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">J</forename><surname>Duan</surname></persName>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Tran</surname></persName>
+			<persName><forename type="first">J</forename><surname>Cheng</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">Y</forename><surname>Xu</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">S</forename><surname>Chanda</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">L</forename><surname>Chen</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">B</forename><surname>Zeng</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">T</forename><surname>Chilimbi</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">J</forename><surname>Huang</surname></persName>
+			<persName><forename type="first">H</forename><surname>Peng</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</title>
-		<meeting>the IEEE/CVF Conference on Computer Vision and Pattern Recognition</meeting>
+		<title level="m">Int. Conf. Information Fusion</title>
 		<imprint>
-			<date type="published" when="2007">2022. 15671-15680. 1, 2, 3, 5, 6, 7</date>
+			<publisher>IEEE</publisher>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="1" to="7" />
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b36">
 	<analytic>
-		<title level="a" type="main">Mattnet: Modular attention network for referring expression comprehension</title>
+		<title level="a" type="main">Multi-focus image fusion with a deep convolutional neural network</title>
 		<author>
-			<persName><forename type="first">L</forename><surname>Yu</surname></persName>
+			<persName><forename type="first">Y</forename><surname>Liu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">Z</forename><surname>Lin</surname></persName>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">X</forename><surname>Shen</surname></persName>
+			<persName><forename type="first">H</forename><surname>Peng</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">J</forename><surname>Yang</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">X</forename><surname>Lu</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">M</forename><surname>Bansal</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">T</forename><forename type="middle">L</forename><surname>Berg</surname></persName>
+			<persName><forename type="first">Z</forename><surname>Wang</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</title>
-		<meeting>the IEEE Conference on Computer Vision and Pattern Recognition</meeting>
+		<title level="j">Information Fusion</title>
 		<imprint>
-			<date type="published" when="2018">2018</date>
-			<biblScope unit="volume">5</biblScope>
-			<biblScope unit="page" from="1307" to="1315" />
+			<biblScope unit="volume">36</biblScope>
+			<biblScope unit="page" from="191" to="207" />
+			<date type="published" when="2017">2017</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b37">
 	<analytic>
-		<title level="a" type="main">Modeling context in referring expressions</title>
+		<title level="a" type="main">Deep learning face attributes in the wild</title>
 		<author>
-			<persName><forename type="first">L</forename><surname>Yu</surname></persName>
+			<persName><forename type="first">Z</forename><surname>Liu</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">P</forename><surname>Poirson</surname></persName>
+			<persName><forename type="first">P</forename><surname>Luo</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">S</forename><surname>Yang</surname></persName>
+			<persName><forename type="first">X</forename><surname>Wang</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">A</forename><forename type="middle">C</forename><surname>Berg</surname></persName>
-		</author>
-		<author>
-			<persName><forename type="first">T</forename><forename type="middle">L</forename><surname>Berg</surname></persName>
+			<persName><forename type="first">X</forename><surname>Tang</surname></persName>
 		</author>
 	</analytic>
 	<monogr>
-		<title level="m">European Conference on Computer Vision</title>
+		<title level="j">ICCV</title>
 		<imprint>
-			<publisher>Springer</publisher>
-			<date type="published" when="2016">2016</date>
-			<biblScope unit="page" from="69" to="85" />
+			<date type="published" when="2015-12">Dec 2015</date>
 		</imprint>
 	</monogr>
 </biblStruct>
 
 <biblStruct xml:id="b38">
-	<monogr>
+	<analytic>
+		<title level="a" type="main">SGDR: Stochastic gradient descent with warm restarts</title>
 		<author>
-			<persName><forename type="first">Y</forename><surname>Zeng</surname></persName>
+			<persName><forename type="first">I</forename><surname>Loshchilov</surname></persName>
 		</author>
 		<author>
-			<persName><forename type="first">X</forename><surname>Zhang</surname></persName>
+			<persName><forename type="first">F</forename><surname>Hutter</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ICLR</title>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b39">
+	<analytic>
+		<title level="a" type="main">Infrared and visible image fusion via detail preserving adversarial learning</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Liang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Information Fusion</title>
+		<imprint>
+			<biblScope unit="volume">54</biblScope>
+			<biblScope unit="page" from="85" to="98" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b40">
+	<analytic>
+		<title level="a" type="main">DDcGAN: A dual-discriminator conditional generative adversarial network for multi-resolution image fusion</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Mei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><forename type="middle">P</forename><surname>Zhang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE TIP</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="4980" to="4995" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b41">
+	<analytic>
+		<title level="a" type="main">FusionGAN: A generative adversarial network for infrared and visible image fusion</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Liang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Information Fusion</title>
+		<imprint>
+			<biblScope unit="volume">48</biblScope>
+			<biblScope unit="page" from="11" to="26" />
+			<date type="published" when="2019">2019</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b42">
+	<analytic>
+		<title level="a" type="main">BIVA: A very deep hierarchy of latent variables for generative modeling</title>
+		<author>
+			<persName><forename type="first">L</forename><surname>Maaløe</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Fraccaro</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">V</forename><surname>Liévin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">O</forename><surname>Winther</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">NeurIPS</title>
+		<imprint>
+			<biblScope unit="volume">32</biblScope>
+			<biblScope unit="page" from="6551" to="6562" />
+			<date type="published" when="2019">2019</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b43">
+	<monogr>
+		<title level="m" type="main">Bayesian image reconstruction using deep generative models</title>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">V</forename><surname>Marinescu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Moyer</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Golland</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:2012.04567[cs.CV</idno>
+		<imprint>
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b44">
+	<monogr>
+		<title level="m" type="main">Dual contradistinctive generative autoencoder</title>
+		<author>
+			<persName><forename type="first">G</forename><surname>Parmar</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">K</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Tu</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2021">2021</date>
+			<biblScope unit="page" from="823" to="832" />
+		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b45">
+	<monogr>
+		<title level="m" type="main">Context encoders: Feature learning by inpainting</title>
+		<author>
+			<persName><forename type="first">D</forename><surname>Pathak</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Krahenbuhl</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Donahue</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Darrell</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><forename type="middle">A</forename><surname>Efros</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2016">2016</date>
+			<biblScope unit="page" from="2536" to="2544" />
+		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b46">
+	<monogr>
+		<title level="m" type="main">DeepFuse: A deep unsupervised approach for exposure fusion with extreme exposure image pairs</title>
+		<author>
+			<persName><forename type="first">K</forename><forename type="middle">R</forename><surname>Prabhakar</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">V</forename><forename type="middle">S</forename><surname>Srikar</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><forename type="middle">V</forename><surname>Babu</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="4714" to="4722" />
+		</imprint>
+		<respStmt>
+			<orgName>ICCV</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b47">
+	<analytic>
+		<title level="a" type="main">Searching for activation functions</title>
+		<author>
+			<persName><forename type="first">P</forename><surname>Ramachandran</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">B</forename><surname>Zoph</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><forename type="middle">V</forename><surname>Le</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ICLR</title>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b48">
+	<monogr>
+		<author>
+			<persName><forename type="first">H</forename><surname>Sadeghi</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">E</forename><surname>Andriyash</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Vinci</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Buffoni</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><forename type="middle">H</forename><surname>Amin</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1908.09948[cs.CV</idno>
+		<title level="m">PixelVAE++: Improved PixelVAE with discrete prior</title>
+		<imprint>
+			<date type="published" when="2019">2019</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b49">
+	<analytic>
+		<title level="a" type="main">PixelCNN++: Improving the PixelCNN with discretized logistic mixture likelihood and other modifications</title>
+		<author>
+			<persName><forename type="first">T</forename><surname>Salimans</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Karpathy</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><forename type="middle">P</forename><surname>Kingma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ICLR</title>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b50">
+	<analytic>
+		<title level="a" type="main">Very deep convolutional networks for large-scale image recognition</title>
+		<author>
+			<persName><forename type="first">K</forename><surname>Simonyan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Zisserman</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ICLR</title>
+		<imprint>
+			<date type="published" when="2015">2015</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b51">
+	<analytic>
+		<title level="a" type="main">Learning structured output representation using deep conditional generative models</title>
+		<author>
+			<persName><forename type="first">K</forename><surname>Sohn</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Yan</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">NeurIPS</title>
+		<imprint>
+			<biblScope unit="volume">28</biblScope>
+			<biblScope unit="page" from="3483" to="3491" />
+			<date type="published" when="2015">2015</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b52">
+	<analytic>
+		<title level="a" type="main">Ladder variational autoencoders</title>
+		<author>
+			<persName><forename type="first">C</forename><forename type="middle">K</forename><surname>Sønderby</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><surname>Raiko</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Maaløe</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><forename type="middle">K</forename><surname>Sønderby</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">O</forename><surname>Winther</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">NeurIPS</title>
+		<imprint>
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="3738" to="3746" />
+			<date type="published" when="2016">2016</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b53">
+	<monogr>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Song</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Huang</surname></persName>
 		</author>
 		<author>
 			<persName><forename type="first">H</forename><surname>Li</surname></persName>
 		</author>
-		<idno type="arXiv">arXiv:2111.08276.2</idno>
-		<title level="m">Multi-Grained Vision Language Pre-Training: Aligning Texts with Visual Concepts</title>
+		<author>
+			<persName><forename type="first">C</forename><forename type="middle">C J</forename><surname>Kuo</surname></persName>
+		</author>
+		<title level="m">Contextualbased image inpainting: Infer, match, and translate</title>
 		<imprint>
-			<date type="published" when="2021">2021</date>
+			<publisher>ECCV</publisher>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="3" to="19" />
 		</imprint>
 	</monogr>
-	<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b54">
+	<monogr>
+		<title level="m" type="main">SPG-Net: Segmentation prediction and guidance network for image inpainting</title>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Song</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Shen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><forename type="middle">C J</forename><surname>Kuo</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<publisher>BMVC</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b55">
+	<analytic>
+		<title level="a" type="main">NVAE: A deep hierarchical variational autoencoder</title>
+		<author>
+			<persName><forename type="first">A</forename><surname>Vahdat</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Kautz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">NeurIPS</title>
+		<imprint>
+			<biblScope unit="volume">33</biblScope>
+			<biblScope unit="page" from="19667" to="19679" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b56">
+	<monogr>
+		<title level="m" type="main">DVAE++: Discrete variational autoencoders with overlapping transformations</title>
+		<author>
+			<persName><forename type="first">A</forename><surname>Vahdat</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Macready</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Bian</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Khoshaman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">E</forename><surname>Andriyash</surname></persName>
+		</author>
+		<idno>PMLR</idno>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="5035" to="5044" />
+		</imprint>
+		<respStmt>
+			<orgName>ICML</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b57">
+	<analytic>
+		<title level="a" type="main">Bayesian context aggregation for neural processes</title>
+		<author>
+			<persName><forename type="first">M</forename><surname>Volpp</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><surname>Flürenbrock</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Grossberger</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Daniel</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">G</forename><surname>Neumann</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">ICLR</title>
+		<imprint>
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b58">
+	<monogr>
+		<title level="m" type="main">An uncertain future: Forecasting from static images using variational autoencoders</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Walker</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Doersch</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">A</forename><surname>Gupta</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Hebert</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2016">2016</date>
+			<publisher>Springer</publisher>
+			<biblScope unit="page" from="835" to="851" />
+		</imprint>
+		<respStmt>
+			<orgName>ECCV</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b59">
+	<monogr>
+		<title level="m" type="main">DenseFusion: 6D object pose estimation by iterative dense fusion</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">D</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Zhu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">R</forename><surname>Martín-Martín</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">C</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">L</forename><surname>Fei-Fei</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Savarese</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2019">2019</date>
+			<biblScope unit="page" from="3343" to="3352" />
+		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b60">
+	<analytic>
+		<title level="a" type="main">GraspFusionNet: a two-stage multi-parameter grasp detection network based on RGB-XYZ fusion in dense clutter</title>
+		<author>
+			<persName><forename type="first">W</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Hu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Fang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Q</forename><surname>Shao</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Qi</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Machine Vision and Applications</title>
+		<imprint>
+			<biblScope unit="volume">31</biblScope>
+			<biblScope unit="issue">7</biblScope>
+			<biblScope unit="page" from="1" to="19" />
+			<date type="published" when="2020">2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b61">
+	<analytic>
+		<title level="a" type="main">Learning a generative model for fusing infrared and visible images via conditional generative adversarial network with dual discriminators</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">P</forename><surname>Liang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IJCAI</title>
+		<imprint>
+			<date type="published" when="2019">2019</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b62">
+	<analytic>
+		<title level="a" type="main">FusionDN: A unified densely connected network for image fusion</title>
+		<author>
+			<persName><forename type="first">H</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Jiang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Guo</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">AAAI</title>
+		<imprint>
+			<biblScope unit="volume">34</biblScope>
+			<biblScope unit="page" from="12484" to="12491" />
+			<date type="published" when="2020-04">04 2020</date>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b63">
+	<analytic>
+		<title level="a" type="main">Shift-Net: Image inpainting via deep feature rearrangement</title>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Yan</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">M</forename><surname>Li</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">W</forename><surname>Zuo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">S</forename><surname>Shan</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ECCV</title>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="1" to="17" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b64">
+	<monogr>
+		<title level="m" type="main">High-resolution image inpainting using multi-scale neural patch synthesis</title>
+		<author>
+			<persName><forename type="first">C</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">E</forename><surname>Shechtman</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">O</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">H</forename><surname>Li</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2017">2017</date>
+			<biblScope unit="page" from="6721" to="6729" />
+		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b65">
+	<monogr>
+		<title level="m" type="main">D-CVF: Generating joint camera and lidar features using cross-view spatial feature fusion for 3D object detection</title>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">H</forename><surname>Yoo</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Y</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><forename type="middle">W</forename><surname>Choi</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2020">2020</date>
+			<publisher>Springer</publisher>
+			<biblScope unit="volume">3</biblScope>
+			<biblScope unit="page" from="720" to="736" />
+		</imprint>
+		<respStmt>
+			<orgName>ECCV</orgName>
+		</respStmt>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b66">
+	<monogr>
+		<title level="m" type="main">Generative image inpainting with contextual attention</title>
+		<author>
+			<persName><forename type="first">J</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">Z</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">J</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Shen</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">X</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">T</forename><forename type="middle">S</forename><surname>Huang</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2018">2018</date>
+			<biblScope unit="page" from="5505" to="5514" />
+		</imprint>
+		<respStmt>
+			<orgName>CVPR</orgName>
+		</respStmt>
+	</monogr>
 </biblStruct>
 
 				</listBibl>
