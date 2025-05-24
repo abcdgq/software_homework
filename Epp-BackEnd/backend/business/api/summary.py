@@ -263,8 +263,6 @@ def create_abstract_report(request):
         if os.path.exists(local_path) == False:
             # 下载下来
             downloadPaper(url=pdf_url, filename=str(p.paper_id))
-            # processor = PDFProcessor()
-            # local_path = processor.download_with_repair(pdf_url,str(p.paper_id))
         content_type = '.pdf'
         title = str(p.paper_id)
         paper_title = p.title

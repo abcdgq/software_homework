@@ -1,19 +1,59 @@
 import requests
 import os
-import re
-from urllib.parse import urlparse, urlunparse
-# from backend.settings import PAPERS_PATH
+from urllib.parse import urlparse, urlunparse  # 用于安全处理URL
 
-# Clash代理配置（与您的配置文件对应）
-CLASH_PROXY = {
-    "http": "http://127.0.0.1:7890",   # HTTP代理端口
-    "https": "http://127.0.0.1:7890",  # HTTPS代理端口
-    "socks5": "socks5://127.0.0.1:7890" # SOCKS5代理端口
-}
+if not os.path.exists(PAPERS_PATH):
+    os.makedirs(PAPERS_PATH)
+
 
 def downloadPaper(url, filename):
-    # 预处理URL和文件名
-    url = re.sub(r'^http://', 'https://', url, flags=re.IGNORECASE)
+    """
+    下载文献到服务器
+    """
+    # path = os.path.join(PAPERS_PATH, filename) if filename.endswith('.pdf') else os.path.join(PAPERS_PATH, filename + '.pdf')
+    # if os.path.exists(path):
+    #     return path
+    # response = requests.get(url)
+    # if response.status_code == 200:
+    #     print(filename)
+    #     if not filename.endswith('.pdf'):
+    #         filepath = os.path.join(PAPERS_PATH, filename + '.pdf')
+    #     else:
+    #         filepath = os.path.join(PAPERS_PATH, filename)
+    #     with open(filepath, 'wb') as f:
+    #         f.write(response.content)
+    #     return filepath
+    # else:
+    #     print('下载失败')
+    #     return None
+    
+    # # 确保路径存在
+    # os.makedirs(PAPERS_PATH, exist_ok=True)
+
+    # # 处理文件名
+    # if not filename.endswith('.pdf'):
+    #     filename += '.pdf'
+    # path = os.path.join(PAPERS_PATH, filename)
+
+    # # 检查文件是否已存在
+    # if os.path.exists(path):
+    #     return path
+
+    # try:
+    #     # 流式下载（避免超时和内存问题）
+    #     response = requests.get(url, stream=True, timeout=30)
+    #     response.raise_for_status()  # 检查 HTTP 错误
+
+    #     with open(path, 'wb') as f:
+    #         for chunk in response.iter_content(chunk_size=8192):
+    #             if chunk:
+    #                 f.write(chunk)
+    #     return path
+    # except requests.exceptions.RequestException as e:
+    #     print(f'下载失败: {e}')
+    #     return None
+    
+    # 安全处理URL（移除末尾斜杠）
     parsed_url = urlparse(url)
     cleaned_url = urlunparse((
         parsed_url.scheme,
@@ -30,8 +70,6 @@ def downloadPaper(url, filename):
  
     # 文件已存在则直接返回路径
     if os.path.exists(save_path):
-        is_valid, needs_repair = repair_pdf(save_path)
-  
         return save_path
  
     try:
@@ -61,7 +99,6 @@ def downloadPaper(url, filename):
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:  # 过滤keep-alive块
                         f.write(chunk)
-        
         return save_path
  
     except requests.exceptions.RequestException as e:
@@ -71,25 +108,3 @@ def downloadPaper(url, filename):
         if os.path.exists(save_path):
             os.remove(save_path)
         return None
-
-    except Exception as e:
-        print(f"未知错误: {url}")
-        if os.path.exists(save_path):
-            os.remove(save_path)
-        return None
-    
-def check_proxy_connectivity():
-    test_url = "https://api.ipify.org?format=json"
-    try:
-        response = requests.get(test_url, 
-            proxies=CLASH_PROXY,
-            timeout=5
-        )
-        print(f"当前出口IP: {response.json()['ip']}")
-        return True
-    except Exception as e:
-        print(f"代理连接失败: {str(e)}")
-        return False
-
-# 运行验证
-# check_proxy_connectivity()
