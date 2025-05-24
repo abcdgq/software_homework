@@ -120,34 +120,34 @@ def parse_grobid_xml(xml_content):
         result["sections"].append(section)
 
     # ========== 提取参考文献 ==========
-    for bibl in root.findall('.//tei:listBibl/tei:biblStruct', ns):
-        ref = {
-            "id": bibl.get("{http://www.w3.org/XML/1998/namespace}id", ""),
-            "title": "",
-            "authors": [],
-            "date": "",
-            "journal": ""
-        }
+    # for bibl in root.findall('.//tei:listBibl/tei:biblStruct', ns):
+    #     ref = {
+    #         "id": bibl.get("{http://www.w3.org/XML/1998/namespace}id", ""),
+    #         "title": "",
+    #         "authors": [],
+    #         "date": "",
+    #         "journal": ""
+    #     }
 
-        # 提取标题
-        if (title := bibl.find('tei:analytic/tei:title', ns)) is not None:
-            ref["title"] = title.text.strip()
+    #     # 提取标题
+    #     if (title := bibl.find('tei:analytic/tei:title', ns)) is not None:
+    #         ref["title"] = title.text.strip()
 
-        # 提取作者
-        ref_authors = []
-        for author in bibl.findall('tei:analytic/tei:author', ns):
-            ref_authors.append(" ".join([
-                author.findtext('tei:persName/tei:forename', '', ns).strip(),
-                author.findtext('tei:persName/tei:surname', '', ns).strip()
-            ]))
-        ref["authors"] = ref_authors
+    #     # 提取作者
+    #     ref_authors = []
+    #     for author in bibl.findall('tei:analytic/tei:author', ns):
+    #         ref_authors.append(" ".join([
+    #             author.findtext('tei:persName/tei:forename', '', ns).strip(),
+    #             author.findtext('tei:persName/tei:surname', '', ns).strip()
+    #         ]))
+    #     ref["authors"] = ref_authors
 
-        # 提取期刊信息
-        if (monogr := bibl.find('tei:monogr', ns)) is not None:
-            ref["journal"] = monogr.findtext('tei:title', '', ns).strip()
-            ref["date"] = monogr.findtext('tei:imprint/tei:date', '', ns).strip()
+    #     # 提取期刊信息
+    #     if (monogr := bibl.find('tei:monogr', ns)) is not None:
+    #         ref["journal"] = monogr.findtext('tei:title', '', ns).strip()
+    #         ref["date"] = monogr.findtext('tei:imprint/tei:date', '', ns).strip()
 
-        result["references"].append(ref)
+    #     result["references"].append(ref)
 
     return result
 
