@@ -6,7 +6,7 @@ from alibabacloud_tea_util import models as util_models
 import json
 import uuid
 
-from reply import success
+from business.utils import reply
 
 # 内容安全API(阿里绿网) 7.5r/万次
 # 用来是检测评论的合法性的方法，在scripts/aliyun_test中进行测试
