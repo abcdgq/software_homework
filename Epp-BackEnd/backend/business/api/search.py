@@ -1168,57 +1168,11 @@ def kb_ask_ai(conversation_history, query, tmp_kb_id):
                     origin_docs.append(doc)
     return ai_reply, origin_docs
 
-def get_final_answer(conversation_history, query, tmp_kb_id):
-    from scripts.routing_agent import generate_subtasks,get_expert_weights
-    q_type, subtasks = generate_subtasks(query)
-    print("多智能体：完成子问题生成")
-    print(q_type, subtasks)
-
-    print("多智能体：开始问题分发")
-    if q_type == "other":
-        print("other type")
-        # llm
-        return kb_ask_ai(conversation_history, query, tmp_kb_id)
-    else:
-        # api
-        api_query = subtasks.get("api")
-        api_reply = ''
-        api_reply, docs_from_api = get_api_reply(api_query)
-        print(api_reply)
-        print("多智能体：已获取api专家回答")
-
-        # search
-        search_query = subtasks.get("search")
-        search_reply = ''
-        search_reply, docs_from_search = get_search_reply(search_query)
-        print(search_reply)
-        print("多智能体：已获取搜索引擎专家回答")
-
-        # llm
-        llm_query = subtasks.get("llm")
-        print(conversation_history)
-        llm_reply, origin_docs = kb_ask_ai(conversation_history, llm_query, tmp_kb_id)
-        print(llm_reply)
-        print("多智能体：已获取原生LLM专家回答")
-
-    # 整合
-    from scripts.gennerate_result import aggregate_answers
-    weight = get_expert_weights(q_type)
-    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
-    print("多智能体：已完成问题整合")
-
-    # 整合docs  
-    for doc in docs_from_api: #规范docs格式
-        origin_docs.append(" " + doc)
-    for doc in docs_from_search: #规范docs格式
-        origin_docs.append(" " + doc)
-    docs = origin_docs
-    print(origin_docs)
-    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-    # docs.append(doc)
-    print("多智能体：已完成来源整合")
+def self_check(query, reply):
     # 2. 自反馈机制
     # 2.1 检查回答质量
+    # 2.2 TODO 可以持久化检测报告，返回给多智能体，从而实现自反馈
+    ai_reply = reply
     quality_check_prompt = f"""
        请评估以下回答的质量，指出存在的问题：
        问题：{query}
@@ -1267,17 +1221,50 @@ def get_final_answer(conversation_history, query, tmp_kb_id):
                """
             ai_reply = queryGLM(correction_prompt)
             print("修正后的回答:", ai_reply)
+            return ai_reply
     except:
         print("质量评估解析失败，使用原始回答")
+        return reply
 
 
-    # 2.2 TODO 可以持久化检测报告，返回给多智能体，从而实现自反馈
+def get_final_answer(conversation_history, query, tmp_kb_id):
+    from scripts.routing_agent import generate_subtasks,get_expert_weights
+    q_type, subtasks = generate_subtasks(query)
+    print("多智能体：完成子问题生成")
+    print(q_type, subtasks)
+
+    print("多智能体：开始问题分发")
+    if q_type == "other":
+        print("other type")
+        # llm
+        return kb_ask_ai(conversation_history, query, tmp_kb_id)
+    else:
+        api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs = three_api_answer(conversation_history, tmp_kb_id, subtasks)
+
+    # 整合
+    from scripts.generate_result import aggregate_answers
+    weight = get_expert_weights(q_type)
+    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
+    print("多智能体：已完成问题整合")
+
+    # 整合docs  
+    for doc in docs_from_api: #规范docs格式
+        origin_docs.append(" " + doc)
+    for doc in docs_from_search: #规范docs格式
+        origin_docs.append(" " + doc)
+    docs = origin_docs
+    print(origin_docs)
+    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+    # docs.append(doc)
+    print("多智能体：已完成来源整合")
+
+    ai_reply = self_check(query, ai_reply)
 
     return ai_reply, docs
 
-def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
+def get_api_reply(api_query):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
     from scripts.test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
-    return test_localvdb_and_scholarapi(api_auery)
+    return test_localvdb_and_scholarapi(api_query)
 
 
 def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
@@ -1347,7 +1334,48 @@ def get_search_reply2(search_query): #获取tavily搜索引擎专家的结果
     return summarized_search_reply, docs
 
 
+import concurrent.futures
+import time
+def three_api_answer(conversation_history, tmp_kb_id, subtasks):
+    # 使用多线程执行三个任务
+    start_time = time.time()  # 记录开始时间
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        # 提交API任务
+        api_future = executor.submit(get_api_reply, subtasks.get("api"))
+        
+        # 提交搜索任务
+        search_future = executor.submit(get_search_reply, subtasks.get("search"))
+        
+        # 提交LLM任务
+        print()
+        llm_future = executor.submit(kb_ask_ai, 
+                                     conversation_history, 
+                                     subtasks.get("llm"), 
+                                     tmp_kb_id)
+        
+        # 获取API结果
+        api_reply, docs_from_api = api_future.result()
+        
+        # 获取搜索结果
+        search_reply, docs_from_search = search_future.result()
+        
+        # 获取LLM结果
+        llm_reply, origin_docs = llm_future.result()
+    
+    end_time = time.time()  # 记录结束时间
+    
+    # 打印最终结果
+    print(f"\n==== 最终结果（总耗时: {end_time - start_time:.2f}秒） ====")
+    print("API回复:", api_reply)
+    print("搜索回复:", search_reply)
+    print("LLM回复:", llm_reply)
+    print("\n引用文档:")
+    print("API:", docs_from_api)
+    print("搜索:", docs_from_search)
+    print("LLM:", origin_docs)
 
+    return api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs
 
 @require_http_methods(["POST"])
 def dialog_query(request):

@@ -17,7 +17,7 @@ def detect_language(text):
 def text_summarizer(text, sentences_count=3):
     """基于TextRank的摘要生成"""
     language = detect_language(text)
-    print("language:", language)
+    # print("language:", language)
     parser = PlaintextParser.from_string(text, Tokenizer(language))
     summarizer = TextRankSummarizer()
     summary = summarizer(parser.document, sentences_count)
