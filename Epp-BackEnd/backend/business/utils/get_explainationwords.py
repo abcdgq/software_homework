@@ -30,8 +30,15 @@ def get_keywords(answers):
         r = json.loads(result)
         words = []
         for w in r.keys():
-            words.append({"start": answers.find(w),
-                          "end": answers.find(w) + len(w),
+            start = answers.find(w)
+            end = answers.find(w) + len(w)
+            for ww in words:
+                if answers.find(w) >= ww["start"] and answers.find(w) <= ww["end"]: 
+                    start = answers.find(start=ww["end"])
+                    end = start + len(w)
+            if end <= len(answers):
+                words.append({"start": start,
+                          "end": end,
                           "word": w,
                           "tooltip": r[w]
                           })
