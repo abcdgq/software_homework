@@ -114,6 +114,13 @@
             </el-card>
           </div>
         </div>
+        <div class="summary-panel">
+          <h3 class="summary-title">资讯总结</h3>
+          <el-button type="primary" size="small" @click="fetchSummary">获取总结</el-button>
+          <div class="summary-content">
+            <p style="white-space: pre-line;">{{ summaryText }}</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -139,8 +146,100 @@ export default {
         '分布式与并行计算',
         '人机交互'
       ],
-      newsList: [],
-      selectedNews: null
+      // newsList: [],
+      newsList: [
+        {
+          title: '示例新闻标题',
+          summary: '这是一个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '人工智能',
+          published: '2023-10-01',
+          link: 'https://example.com/news1',
+          authors: '张三, 李四',
+          time: '三天内'
+        }, {
+          title: '示例新闻标题2',
+          summary: '这是另一个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '机器学习',
+          published: '2023-10-02',
+          link: 'https://example.com/news2',
+          authors: '王五, 赵六',
+          time: '五天内'
+        }, {
+          title: '示例新闻标题3',
+          summary: '这是第三个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '计算机视觉与模式识别',
+          published: '2023-10-03',
+          link: 'https://example.com/news3',
+          authors: '钱七, 孙八',
+          time: '一周内'
+        }, {
+          title: '示例新闻标题4',
+          summary: '这是第四个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '自然语言处理',
+          published: '2023-10-04',
+          link: 'https://example.com/news4',
+          authors: '周九, 吴十',
+          time: '三天内'
+        }, {
+          title: '示例新闻标题5',
+          summary: '这是第五个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '密码学与安全',
+          published: '2023-10-05',
+          link: 'https://example.com/news5',
+          authors: '郑十一, 冯十二',
+          time: '五天内'
+        }, {
+          title: '示例新闻标题6',
+          summary: '这是第六个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '软件工程',
+          published: '2023-10-06',
+          link: 'https://example.com/news6',
+          authors: '陈十三, 褚十四',
+          time: '一周内'
+        }, {
+          title: '示例新闻标题7',
+          summary: '这是第七个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '分布式与并行计算',
+          published: '2023-10-07',
+          link: 'https://example.com/news7',
+          authors: '卫十五, 蒋十六',
+          time: '三天内'
+        }, {
+          title: '示例新闻标题8',
+          summary: '这是第八个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '人机交互',
+          published: '2023-10-08',
+          link: 'https://example.com/news8',
+          authors: '沈十七, 韩十八',
+          time: '五天内'
+        }, {
+          title: '示例新闻标题9',
+          summary: '这是第九个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '人工智能',
+          published: '2023-10-09',
+          link: 'https://example.com/news9',
+          authors: '杨十九, 朱二十',
+          time: '一周内'
+        }, {
+          title: '示例新闻标题10',
+          summary: '这是第十个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '机器学习',
+          published: '2023-10-10',
+          link: 'https://example.com/news10',
+          authors: '刘二十一, 郑二十二',
+          time: '三天内'
+        }, {
+          title: '示例新闻标题11',
+          summary: '这是第十一个示例新闻摘要，用于展示新闻列表的样式。',
+          source: '计算机视觉与模式识别',
+          published: '2023-10-11',
+          link: 'https://example.com/news11',
+          authors: '王二十三, 赵二十四',
+          time: '五天内'
+        }
+      ],
+      selectedNews: null,
+      summaryText: ''
     }
   },
   created () {
@@ -190,6 +289,25 @@ export default {
       }).catch(error => {
         console.error('Error fetching news:', error)
       })
+    },
+    fetchSummary () {
+      this.$message({
+        message: '正在获取总结，请稍候...',
+        type: 'info'
+      })
+      axios.get(this.$BASE_API_URL + '/news/getSummary')
+        .then(response => {
+          this.summaryText = response.data.summary
+          this.$message({
+            message: '总结加载成功',
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          this.summaryText = '获取失败，请稍后再试。'
+          console.error('获取总结失败:', error)
+          this.$message.error('获取总结失败')
+        })
     }
   }
 }
@@ -245,25 +363,27 @@ export default {
 .news-layout {
   display: flex;
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   gap: 20px;
+  height: calc(100vh - 120px); /* 保证撑满视口高度，考虑 header 和 margin */
 }
 
 .news-main-wrapper {
   margin-left: 250px;
   padding-top: 60px;  /* 给固定搜索栏留空间 */
-  flex: 1;
+  /* flex: 1; */
   display: flex;
-  flex-direction: column;
-  height: calc(100vh - 60px); /* 减去导航栏高度 */
+  /* flex-direction: column; */
+  /* height: calc(100vh - 60px); 减去导航栏高度 */
   /* overflow: hidden; */
 }
 
 .news-main {
-  flex: 1;
+  width: 900px;
+  height: 100%;
   overflow-y: auto;
   padding-right: 10px;
-  background-color: #f5f7fa; /* 和整体背景色保持一致 */
+  background-color: #f5f7fa;
 }
 
 .news-sidebar {
@@ -349,7 +469,7 @@ export default {
 
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -404,6 +524,32 @@ export default {
 
 .news-detail-card h2 {
   margin-bottom: 10px;
+}
+
+.summary-panel {
+  width: 360px; /* 原来是 300px，适当放宽 */
+  flex-shrink: 0;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.summary-content {
+  margin-top: 15px;
+  max-height: calc(100% - 70px); /* 减去按钮和标题的高度 */
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: #333;
 }
 
 </style>
