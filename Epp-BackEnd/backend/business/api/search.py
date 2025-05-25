@@ -1460,7 +1460,7 @@ def dialog_query(request):
         f.write(json.dumps(history))
 
     from business.utils.get_explainationwords import get_keywords
-    words = get_keywords(ai_reply)
+    words = get_keywords(content)
 
     res = {
         'dialog_type': dialog_type,
