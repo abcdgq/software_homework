@@ -309,7 +309,7 @@ def create_abstract_report(request):
     print("查询是否存在解读", local_path)
 
     # PDF分块
-    from scripts.grobid_test import getXml, parse_grobid_xml, reorganize_sections
+    from utils.grobid import getXml, parse_grobid_xml, reorganize_sections
     xml = getXml(local_path, None, None)
     parsed_data = parse_grobid_xml(xml)
     sections = reorganize_sections(parsed_data)
@@ -413,7 +413,7 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
             for qa in uselist
             ])
     
-        from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+        from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
         summarized_search_reply = text_summarizer(search_reply)
 
         docs = []
@@ -474,7 +474,7 @@ class abs_gen_thread(threading.Thread):
         summary += '# 摘要报告\n'
 
         from business.api.paper_interpret import do_file_chat
-        from scripts.text_summary import text_summarizer
+        from business.utils.text_summarizer import text_summarizer
 
         #### 研究现状
         if self.isend:
