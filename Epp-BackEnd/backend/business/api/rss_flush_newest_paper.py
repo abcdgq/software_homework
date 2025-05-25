@@ -1,8 +1,4 @@
 from django.db import transaction
-from django.http import JsonResponse
-from django.views import View
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 import feedparser
 import requests
 from datetime import datetime, timedelta
