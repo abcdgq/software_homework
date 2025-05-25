@@ -1,6 +1,8 @@
 import requests
 import os
 from urllib.parse import urlparse, urlunparse  # 用于安全处理URL
+from backend.settings import PAPERS_PATH
+import re
 
 if not os.path.exists(PAPERS_PATH):
     os.makedirs(PAPERS_PATH)
@@ -54,6 +56,7 @@ def downloadPaper(url, filename):
     #     return None
     
     # 安全处理URL（移除末尾斜杠）
+    url = re.sub(r'^http://', 'https://', url, flags=re.IGNORECASE)
     parsed_url = urlparse(url)
     cleaned_url = urlunparse((
         parsed_url.scheme,
@@ -63,6 +66,8 @@ def downloadPaper(url, filename):
         parsed_url.query,
         parsed_url.fragment
     ))
+    print("cleaned_url:")
+    print(cleaned_url)
 
     if not filename.lower().endswith('.pdf'):
         filename += '.pdf'
@@ -75,22 +80,12 @@ def downloadPaper(url, filename):
     try:
         # 使用Session保持连接（推荐用于多次请求）
         with requests.Session() as session:
-            # 配置Clash代理
-            session.proxies = {
-                "http": CLASH_PROXY["http"],
-                "https": CLASH_PROXY["https"]
-            }
             # 配置重试和超时
             response = session.get(
                 cleaned_url,
                 stream=True,
                 timeout=(10, 300),  # 连接超时10秒，读取超时300秒
                 allow_redirects=True,  # 显式允许重定向
-                headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'Accept-Encoding': 'gzip, deflate'
-                },
-                verify=False  # 如果使用自签名证书需要设置
             )
             response.raise_for_status()  # 自动触发HTTPError异常
  
