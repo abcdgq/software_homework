@@ -2,20 +2,36 @@
   <div class="news-page">
     <div class="background-layer"></div>
 
-    <!-- 左侧（仅保留时间筛选） -->
+    <!-- 左侧侧边栏 -->
     <div class="news-sidebar">
-      <div class="filter-section">
-        <h3 class="filter-title">时间范围</h3>
-        <el-radio-group v-model="timeRange" class="vertical-radio-group">
-          <el-radio label="all">全部</el-radio>
-          <el-radio label="latest">三天内</el-radio>
-          <el-radio label="week">一周内</el-radio>
-          <el-radio label="month">一月内</el-radio>
-        </el-radio-group>
+      <div class="filter-container">
+        <!-- 来源筛选 -->
+        <div class="filter-section">
+          <h3 class="filter-title">来源筛选</h3>
+          <el-select v-model="sourceFilter" placeholder="选择来源" size="small" class="source-select" style="width: 100%;">
+            <el-option
+              v-for="source in sources"
+              :key="source"
+              :label="source"
+              :value="source === '全部' ? 'all' : source"
+            />
+          </el-select>
+        </div>
+
+        <!-- 时间筛选 -->
+        <div class="filter-section">
+          <h3 class="filter-title">时间范围</h3>
+          <el-radio-group v-model="timeRange" class="vertical-radio-group">
+            <el-radio label="all">全部</el-radio>
+            <el-radio label="latest">三天内</el-radio>
+            <el-radio label="week">五天内</el-radio>
+            <el-radio label="month">一周内</el-radio>
+          </el-radio-group>
+        </div>
       </div>
     </div>
 
-    <!-- 右侧区域 -->
+    <!-- 主内容区域 -->
     <div class="news-main-wrapper">
       <!-- 顶部搜索栏 -->
       <div class="news-header">
@@ -38,7 +54,6 @@
       <div class="news-layout">
         <!-- 主内容区 -->
         <div class="news-main">
-          <!-- 列表视图 -->
           <div v-if="!selectedNews" class="news-grid">
             <el-card
               v-for="(news, index) in filteredNews"
@@ -64,7 +79,7 @@
             </el-card>
           </div>
 
-          <!-- 详情视图 -->
+          <!-- 新闻详情页 -->
           <div v-else class="news-detail">
             <el-button
               type="primary"
@@ -76,15 +91,10 @@
             </el-button>
 
             <el-card class="news-detail-card">
-              <!-- 标题 -->
               <h2>{{ selectedNews.title }}</h2>
-
-              <!-- 作者 -->
               <p class="news-authors" style="margin: 10px 0; font-weight: 500; color: #606266;">
                 作者：{{ selectedNews.authors }}
               </p>
-
-              <!-- 原文链接 -->
               <div style="margin: 10px 0;">
                 <el-link
                   :href="selectedNews.link"
@@ -96,11 +106,7 @@
                   查看原文
                 </el-link>
               </div>
-
-              <!-- 摘要 -->
               <p class="news-desc">{{ selectedNews.summary }}</p>
-
-              <!-- 来源与时间 -->
               <div class="news-footer">
                 <span class="news-source">{{ selectedNews.source }}</span>
                 <span class="news-time">{{ selectedNews.published }}</span>
@@ -121,53 +127,19 @@ export default {
     return {
       searchQuery: '',
       timeRange: 'all',
-      newsList: [
-        {
-          title: 'NeuroAgent: Brain-Inspired Autonomous Agents with Meta-Learning Capabilities',
-          link: 'https://arxiv.org/abs/2505.14789',
-          published: 'May-20',
-          time: '三天内',
-          summary: 'arXiv:2505.14789v1 Announce Type: new \nAbstract: We propose NeuroAgent...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'EdgeSense: Real-Time Multimodal Perception for IoT Devices at the Edge',
-          link: 'https://arxiv.org/abs/2505.14502',
-          published: '5-19',
-          time: '一周内',
-          summary: 'arXiv:2505.14502v1 Announce Type: cross \nAbstract: EdgeSense leverages...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'Ego4D-Social: Benchmarking Social Interaction Understanding in Egocentric Videos',
-          link: 'https://arxiv.org/abs/2505.14276',
-          published: 'May-18',
-          time: '一周内',
-          summary: 'arXiv:2505.14276v1 Announce Type: new \nAbstract: We introduce a large-scale...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'DiffusionKit: A Toolkit for Deploying Diffusion Models on Mobile Devices',
-          link: 'https://arxiv.org/abs/2505.14033',
-          published: '5-15',
-          time: '一月内',
-          summary: 'arXiv:2505.14033v2 Announce Type: replace \nAbstract: DiffusionKit achieves...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        },
-        {
-          title: 'ChatUIX: Automatic UI Generation for LLM-Based Conversational Agents',
-          link: 'https://arxiv.org/abs/2505.13894',
-          published: 'May-12',
-          time: '一月内',
-          summary: 'arXiv:2505.13894v1 Announce Type: new \nAbstract: ChatUIX dynamically renders...',
-          source: 'TypeScript社区',
-          authors: 'Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang Xing, Zhenyu Yan'
-        }
+      sourceFilter: 'all',
+      sources: [
+        '全部',
+        '人工智能',
+        '机器学习',
+        '计算机视觉与模式识别',
+        '自然语言处理',
+        '密码学与安全',
+        '软件工程',
+        '分布式与并行计算',
+        '人机交互'
       ],
+      newsList: [],
       selectedNews: null
     }
   },
@@ -185,10 +157,13 @@ export default {
         const matchesTime =
           this.timeRange === 'all' ||
           (this.timeRange === 'latest' && news.time === '三天内') ||
-          (this.timeRange === 'week' && (news.time === '三天内' || news.time === '一周内')) ||
-          (this.timeRange === 'month' && (news.time === '三天内' || news.time === '一周内' || news.time === '一月内'))
+          (this.timeRange === 'week' && (news.time === '三天内' || news.time === '五天内')) ||
+          (this.timeRange === 'month' && (news.time === '三天内' || news.time === '五天内' || news.time === '一周内'))
 
-        return matchesSearch && matchesTime
+        const matchesSource =
+          this.sourceFilter === 'all' || news.source === this.sourceFilter
+
+        return matchesSearch && matchesTime && matchesSource
       })
     }
   },
@@ -201,14 +176,20 @@ export default {
       this.selectedNews = null
     },
     fetchNews () {
+      this.$message({
+        message: '正在更新新闻数据，请稍候...',
+        type: 'warning'
+      })
       axios.get(this.$BASE_API_URL + '/news/fetchNews').then(response => {
         this.newsList = response.data.papers
+        console.log('新闻数据已更新:', this.newsList)
+        this.$message({
+          message: '新闻数据已更新',
+          type: 'success'
+        })
       }).catch(error => {
         console.error('Error fetching news:', error)
       })
-      // 这里可以添加获取新闻列表的逻辑
-      // 例如通过API请求获取数据
-      // this.newsList = fetchedData
     }
   }
 }
@@ -303,9 +284,10 @@ export default {
 }
 
 .filter-section {
-  width: 100%;      /* 或者 max-width: 160px; */
-  max-width: 160px; /* 限制最大宽度 */
-  text-align: center; /* 内容居中 */
+  width: 100%;
+  max-width: 160px;
+  text-align: center;
+  margin-bottom: 24px; /* 添加垂直间距 */
 }
 
 .vertical-radio-group {
