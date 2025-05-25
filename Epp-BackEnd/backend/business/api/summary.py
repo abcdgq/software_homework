@@ -309,7 +309,7 @@ def create_abstract_report(request):
     print("查询是否存在解读", local_path)
 
     # PDF分块
-    from utils.grobid import getXml, parse_grobid_xml, reorganize_sections
+    from business.utils.grobid import getXml, parse_grobid_xml, reorganize_sections
     xml = getXml(local_path, None, None)
     parsed_data = parse_grobid_xml(xml)
     sections = reorganize_sections(parsed_data)
