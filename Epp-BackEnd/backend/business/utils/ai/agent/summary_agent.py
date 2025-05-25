@@ -1,0 +1,1 @@
+#该文件存储多智能体中的summary_agent，用于内容整合，在scripts/test_classifyAndGenerate.py进行测试
