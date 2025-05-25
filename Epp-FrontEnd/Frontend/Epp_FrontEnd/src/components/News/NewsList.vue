@@ -176,8 +176,17 @@ export default {
       this.selectedNews = null
     },
     fetchNews () {
+      this.$message({
+        message: '正在更新新闻数据，请稍候...',
+        type: 'warning'
+      })
       axios.get(this.$BASE_API_URL + '/news/fetchNews').then(response => {
         this.newsList = response.data.papers
+        console.log('新闻数据已更新:', this.newsList)
+        this.$message({
+          message: '新闻数据已更新',
+          type: 'success'
+        })
       }).catch(error => {
         console.error('Error fetching news:', error)
       })

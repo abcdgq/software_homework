@@ -60,7 +60,7 @@ def get_newest_paper(request):
     # category = request.GET.get('category')
     # if not category:
     #     return fail(msg="缺少分类参数")
-    category = "机器学习"
+    category = "自然语言处理"
 
     # 检查分类是否存在
     if category not in RSS_FEEDS:
@@ -70,9 +70,12 @@ def get_newest_paper(request):
     parsed, error = _fetch_rss(RSS_FEEDS[category])
     if error:
         return fail(msg=f"获取数据失败: {error}")
-
+    
+    # print(f"获取到 {parsed} 分类的最新论文数据")
     # 解析数据
     entries = [_parse_entry(entry, category) for entry in parsed.entries]
+
+    print(f"获取到 {len(entries)} 条最新论文")
 
     # 返回成功响应
     return success(
