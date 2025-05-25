@@ -269,3 +269,24 @@ export const userVisitRecord = async () => {
     throw new Error(error.response.data.message)
   }
 }
+
+export const fetchFurtherReadingPapers = (paperId) => {
+  // return request({
+  //   method: 'get',
+  //   url: 'api/relatedPaper',
+  //   params: {
+  //     paper_id: paperId
+  //   }
+  // })
+  try {
+    const response = api.get('relatedPaper', {
+      params: {
+        paper_id: paperId
+      }
+    })
+    console.log(response)
+    return response
+  } catch (error) {
+    throw new Error(error.response.data.message)
+  }
+}

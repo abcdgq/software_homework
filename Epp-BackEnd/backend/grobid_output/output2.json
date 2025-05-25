@@ -1,249 +1,193 @@
 {
     "metadata": {
-        "title": "FusionVAE: A Deep Hierarchical Variational Autoencoder for RGB Image Fusion",
+        "title": "Location-Sensitive Visual Recognition with Cross-IOU Loss",
         "authors": [
             {
-                "name": "Fabian Duffhauss",
+                "name": "Kaiwen Duan",
                 "affiliations": [
                     {
-                        "name": "Bosch Center for Artificial Intelligence",
-                        "type": "department"
-                    }
-                ]
-            },
-            {
-                "name": "Ngo Vien",
-                "affiliations": [
-                    {
-                        "name": "Bosch Center for Artificial Intelligence",
-                        "type": "department"
-                    }
-                ]
-            },
-            {
-                "name": "Hanna Ziesche",
-                "affiliations": [
-                    {
-                        "name": "Bosch Center for Artificial Intelligence",
-                        "type": "department"
-                    }
-                ]
-            },
-            {
-                "name": "Gerhard Neumann",
-                "affiliations": [
-                    {
-                        "name": "Karlsruhe Institute of Technology",
+                        "name": "University of Chinese Academy of Sciences",
                         "type": "institution"
                     }
                 ]
             },
             {
-                "name": "{fabian Duffhauss"
+                "name": "Lingxi Xie",
+                "affiliations": [
+                    {
+                        "name": "Huawei Inc",
+                        "type": "institution"
+                    }
+                ]
             },
             {
-                "name": "Anhvien Ngo"
+                "name": "Honggang Qi",
+                "affiliations": [
+                    {
+                        "name": "University of Chinese Academy of Sciences",
+                        "type": "institution"
+                    }
+                ]
             },
             {
-                "name": "Hanna Ziesche}"
+                "name": "Song Bai",
+                "affiliations": [
+                    {
+                        "name": "Huazhong University of Science and Technology",
+                        "type": "institution"
+                    }
+                ]
             },
             {
-                "name": "@ Bosch"
+                "name": "Qingming Huang",
+                "affiliations": [
+                    {
+                        "name": "University of Chinese Academy of Sciences",
+                        "type": "institution"
+                    }
+                ]
             },
             {
-                "name": "Com"
+                "name": "Qi Tian",
+                "affiliations": [
+                    {
+                        "name": "Huawei Inc",
+                        "type": "institution"
+                    }
+                ]
             }
         ],
-        "abstract": "Sensor fusion can significantly improve the performance of many computer vision tasks. However, traditional fusion approaches are either not data-driven and cannot exploit prior knowledge nor find regularities in a given dataset or they are restricted to a single application. We overcome this shortcoming by presenting a novel deep hierarchical variational autoencoder called FusionVAE that can serve as a basis for many fusion tasks. Our approach is able to generate diverse image samples that are conditioned on multiple noisy, occluded, or only partially visible input images. We derive and optimize a variational lower bound for the conditional log-likelihood of FusionVAE. In order to assess the fusion capabilities of our model thoroughly, we created three novel datasets for image fusion based on popular computer vision datasets. In our experiments, we show that FusionVAE learns a representation of aggregated information that is relevant to fusion tasks. The results demonstrate that our approach outperforms traditional methods significantly. Furthermore, we present the advantages and disadvantages of different design choices."
+        "abstract": "Object detection, instance segmentation, and pose estimation are popular visual recognition tasks which require localizing the object by internal or boundary landmarks. This paper summarizes these tasks as locationsensitive visual recognition and proposes a unified solution named location-sensitive network (LSNet). Based on a deep neural network as the backbone, LSNet predicts an anchor point and a set of landmarks which together define the shape of the target object. The key to optimizing the LSNet lies in the ability of fitting various scales, for which we design a novel loss function named cross-IOU loss that computes the cross-IOU of each anchor-landmark pair to approximate the global IOU between the prediction and ground-truth. The flexibly located and accurately predicted landmarks also enable LSNet to incorporate richer contextual information for visual recognition. Evaluated on the MS-COCO dataset, LSNet set the new state-of-theart accuracy for anchor-free object detection (a 53.5% box AP) and instance segmentation (a 40.2% mask AP), and shows promising performance in detecting multi-scale human poses. Code is available at"
     },
     "sections": {
         "Introduction": [
             {
                 "title": "Introduction",
                 "content": [
-                    "Sensor fusion is a popular technique in computer vision as it allows to combine the advantages from multiple information sources. It is especially gainful in scenarios where a single sensor is not able to capture all necessary data to perform a task satisfactorily. Over the last years, we have seen many examples, where the accuracy of computer vision tasks was significantly improved by sensor fusion, e.g. in environmental perception for autonomous driving [7,30,67], for 6D pose estimation [16,17,61], and for robotic grasping [62,72]. However, traditional fusion methods usually focus more on the beneficial merging of multiple modalities and less on teaching the model to obtain profound prior knowledge about the used dataset.",
-                    "Our work tries to fill in this research gap by proposing a deep hierarchical variational autoencoder called FusionVAE that is able to perform both tasks: fusing information from multiple sources and supplementing it with prior knowledge about the data gained while training. As shown in Fig. 1, FusionVAE merges a varying number of input images for reconstructing the original target image using"
+                    "Object recognition is a fundamental task in computer vision. Beyond image classification [16] that depicts an image using a single semantic label, there exist other recognition tasks that not only predict the class of the object but also localize it using fine-scaled information. In this paper, we consider three popular examples including object detection [19,36], instance segmentation [19,13], and human pose estimation [1,36]. We notice that, despite the fact that the rapid progress of deep learning [32] has introduced"
                 ]
             }
         ],
         "RelatedWork": [
             {
-                "title": "Introduction",
+                "title": "Related Work",
                 "content": [
-                    "Sensor fusion is a popular technique in computer vision as it allows to combine the advantages from multiple information sources. It is especially gainful in scenarios where a single sensor is not able to capture all necessary data to perform a task satisfactorily. Over the last years, we have seen many examples, where the accuracy of computer vision tasks was significantly improved by sensor fusion, e.g. in environmental perception for autonomous driving [7,30,67], for 6D pose estimation [16,17,61], and for robotic grasping [62,72]. However, traditional fusion methods usually focus more on the beneficial merging of multiple modalities and less on teaching the model to obtain profound prior knowledge about the used dataset.",
-                    "Our work tries to fill in this research gap by proposing a deep hierarchical variational autoencoder called FusionVAE that is able to perform both tasks: fusing information from multiple sources and supplementing it with prior knowledge about the data gained while training. As shown in Fig. 1, FusionVAE merges a varying number of input images for reconstructing the original target image using"
+                    "Deep neural networks have been widely applied for visual recognition tasks. Among them, image classification [16] is the fundamental task that facilitates the design of powerful network backbones [25,60,20]. Beyond image-level description, there exist fine-scaled tasks, including object detection, instance segmentation, and pose estimation, which focus on depicting different aspects of the object. For example, the bounding boxes locate objects simply and efficiently but lack the details, while masks and keypoints reflect the shape and pose of the objects but usually need the bounding boxes to locate object firstly. According to the different properties of different tasks, many representative methods have been developed.",
+                    "The object detection methods can be roughly categorized into anchor-based and anchor-free. The anchor-based methods detect objects by placing a pre-defined set of anchor boxes, predicting the class and score for each anchor, and finally regressing the preserved boxes tightly around the objects. The representative methods include Fast R-CNN [21], Faster RCNN [49], R-FCN [14], SSD [38], Reti-naNet [35], Cascade R-CNN [4], etc. On another line, the anchor-free methods usually represent an object as a combination of geometry. Among them, CornerNet [30] and DeNet [55] generated a bounding box by predicting a pair of corner keypoints, and CenterNet (keypoint triplets) [17] and CPNDet [18] applied semantic information within the objects to filter out the incorrect corner pairs. FCOS [52], RepPoints [61], FoveaBox [29], SAPD [68], CenterNet (objects as points) [66], YOLO [47], etc., defined a bounding box by placing a single point (called anchor point) within the object and predicting its distances to the object boundary.",
+                    "For instance segmentation, there are mainly two kinds of methods, namely, the pixel-based and the contour-based methods. The pixel-based methods consider the segmentation problem as predicting the class of each single pixel. One of the representative work is Mask R-CNN [24], which first predicted the bounding box to help locating the objects, and then used pixel-wise classification to determine the object mask. The contour-based methods instead represent an object by the contour. They often start with a set points that are roughly located around the object boundary, and the points gradually get closer to the object boundary under iteration. The early representative methods are the snake series [27,11,23,12] and the recent efforts include using deep neural network [22] and the idea of anchor-free to improve the features, such as DeepSnake [44] and PolarMask [59].",
+                    "There are two mainstreams for human pose estimation, namely, the bottom-up methods [3,10,26,39,5] and topdown methods [66,54,58,37]. The bottom-up methods first detect the human parts and then locates the keypoints in each object, while the top-down first locates all the keypoints in the human body and then composes the individual parts into a person. The keypoints are often sparsely distributed in an image and thus are difficult to be accurately located. A practical solution is to detect the keypoints in a high-resolution feature map, called heatmap [40,10,10]. However, applying the heatmap makes the optimization hard and introduces a complex post-processing operation. CenterNet [66] proposes a neat and simple method, which only predicts a center heatmap and the keypoints are obtained by regressing the vector from the center within objects to the keypoints.",
+                    "This paper particularly focuses on the anchor-free methods for visual recognition. These methods originated from object detection and have drawn a lot of attention recently. They do not rely on the pre-defined anchor boxes to locate objects but by points and distance. Therefor, the anchor-free methods enjoy the ability to extend into any directions. This offers the researchers a possibility to unify the visual recognition tasks. Recent trends have spent effort in extending the anchor-free methods in object detection into other tasks, e.g., PolarMask [59] tries to extend the anchor-free into instance segmentation, while Center-Net [66] applies it into the pose estimation. Compared with our framework, both of them have limitations, which we will give a detailed discussion in section 3.2."
                 ]
             }
         ],
         "Methodology": [
             {
-                "title": "FusionVAE Inputs Target Predictions",
+                "title": "Our Approach",
+                "content": []
+            },
+            {
+                "title": "Location-Sensitive Visual Recognition",
                 "content": [
-                    "Fig. 1: Overview of our FusionVAE approach. The network receives up to three partly occluded input images, fuses them together with prior knowledge, and predicts different hypothesis of how the target images could look like.",
-                    "prior knowledge about the dataset. To the best of our knowledge, FusionVAE is the first approach that combines these two tasks. Therefore, we developed three challenging benchmarks based on well-known computer vision datasets to evaluate the performance of our approach. In addition, we perform comparisons to baselines by extending traditional approaches to perform the same tasks. FusionVAE outperforms all these traditional methods on all proposed benchmark tasks significantly. We show that FusionVAE can generate high-quality images given few input images with partial observability. We provide ablation studies to illustrate the impact of commonly used information aggregation operations and to prove the benefits of the employed posterior distribution. We can summarize the four main contributions of our paper as follows: i) We create three challenging image fusion tasks for generative models. ii) We develop a deep hierarchical VAE called FusionVAE that is able to perform image-based data fusion while employing prior knowledge of the used dataset. iii) We show that FusionVAE produces high-quality fused output images and outperforms traditional methods by a large margin. iv) We perform ablation studies showing the benefits of our design choices regarding both the posterior distribution and commonly used aggregation methods. and expressiveness and thus, when applied to image generation leads to oversmoothed results lacking fine-grained details. Over the last years much work has been invested into the effort of improving the generative performance of VAEs. One stream of work is based on introducing a hierarchy into the latent space of the VAE and scaling this hierarchy to greater and greater depth. First introduced in [54] many hierarchical VAEs are based on coupling the inference and generative processes by introducing a deterministic bottom-up path combined with a stochastic top-down process in the inference network and sharing the latter with the generative model. This setting has been extended by an additional deterministic top-down path and bidirectional inference in [44]. Recently, very deep hierarchical VAEs were realized in [8] by introducing residual bottlenecks with dedicated scaling, update skipping, and nearest neighbour up-sampling. Closest to our work is the recently proposed NVAE architecture [57], which relies on depth-wise convolution, residual posterior parametrization, and spectral regularization to enhance stability.",
-                    "Other approaches propose increasing the expressiveness of VAEs by combining them with auto-regressive models like RNNs or PixelCNNs [6,11,13,50], conditioning contexts (CVAE) [53,60], normalizing flows [28], generative adversarial networks (GANs) [31,46], or variational generative adversarial networks (CVAE-GAN) [1]."
+                    "Visual recognition tasks start with an image, X. Image classification aims to assign a class label c for the entire image, yet there are more challenging tasks for finescaled recognition. These tasks often focus on the instances (i.e., individual objects) in the image and depict the object properties from different aspects. Typical examples include object detection that uses a rectangular box that tightly cover the object, instance segmentation that finds out each pixel that belongs to the object, and human pose estimation that localizes the landmarks of the object (i.e., human keypoints). We use b ∈ R 4 , s ∈ [0, 1] W ×H , and k ∈ R K×2 to indicate the target of these tasks, where W and H are the image width and height, and K is the number of keypoints.",
+                    "An important motivation of our work is that, although these tasks differ from each other in the form of description, they share the common requirement that the model should be sensitive to the location of the anchor and/or landmarks. Throughout the remaining part of this paper, we refer to these tasks as location-sensitive visual recognition and design a unified framework for them."
                 ]
             },
             {
-                "title": "Fusion of Multiple Images",
+                "title": "LSNet: A Unified Framework",
                 "content": [
-                    "Image fusion has long been dominated by classical computer vision. Only lately deep learning methods entered the domain with the CNN-based approach proposed by Liu et al. [38]. In a subsequent publication the authors extended their work to a multi-scale setting [37]. Shortly afterwards, Prabhakar et al. developed a fusion method based on a siamese network architecture, called DeepFuse [48] which was improved in subsequent work [33] by employing the DenseNet architecture [20]. Concurrently, Li et al. [35] proposed a fusion architecture based on VGG [52] and in order to scale to even greater depth another one [34] based on ResNet-50 [15]. The aforementioned methods use CNNs as feature extractors and as decoders, while the fusion operations themselves are restricted to classical methods like averaging or addition of feature maps or weighted source images. A fully CNN-based feature-map fusion mechanism was proposed in [24].",
-                    "While all previous publications target only a specific fusion task (e.g. multifocus fusion, multi-resolution fusion, etc.) or were limited to specific domains (e.g. medical images), two very recent works propose novel multi-purpose fusion networks, which are applicable to many fusion tasks and image types [64,71]. Very recently also GAN-based methods entered the domain of image fusion, starting with the work by Ma et al. on infrared-visible fusion [41,43] and with [42,63] on multi-resolution image fusion. Most recent are two publications on GAN-based multi-focus image fusion [14,21]. While GAN-based approaches can generate high-fidelity images, it is known that they suffer from the mode collapse problem. VAE-based methods in contrast are known to generate more faithful data distribution [57]. Different from previous work, this paper proposes a VAE-based multi-purpose fusion framework."
+                    "The proposed location-sensitive network (LSNet) starts with a backbone (e.g., the ResNet [25], ResNeXt [60], etc.) that extracts features from the input image. We denote the process using x = f (X). Next, an anchor point and a few landmarks are predicted on top of x, denoted as p = g(x).",
+                    "Here we define p ∈ R (N +1)×2 where N is the number of landmarks, p 0 ∈ Rfoot_1 is the anchor point, and",
+                    "As a unified framework, the key is to relate the prediction targets (i.e., b ∈ R 4 , s ∈ [0, 1] W ×H , and k ∈ R K×2 as aforementioned) to p. For object detection, this is done by finding an extreme point (a pixel that belongs to the object and is tangent to the bounding box) on each edge of the bounding boxfoot_0 , i.e., N = 4. For instance segmenta-tion, we locate a fixed number (e.g., 36 in the experiments, N = 36) of landmarks along the contour and thus use the formed polygon to approximate the shape of the object 2 . For human pose estimation, we follow the definition of the dataset to learn a fixed number of keypoints, e.g., in the MS-COCO dataset, N = 17.",
+                    "Figure 2 shows the pipeline of LSNet. It belongs to the category of anchor-free methods, i.e., there is no need to pre-define a set of anchor boxes for localizing the object. LSNet is partitioned into two stages, where the first stage predicts an anchor point from the FPN head and relates it with a set of landmarks, and the second stage composes the landmarks into an object with the desired geometry (e.g., a bounding box). To facilitate accurate localization, we use the ATSS assigner [64] to assign more anchor points for each object and extract features with deformable convolution (DCN) upon the predicted landmarks. The entire model is an end-to-end trainable learnable function.",
+                    "LSNet receives two sources of supervision for localization and classification, elaborated in Sections 3.3 and 3.4, respectively. The localization loss is added to both stages, where the major contribution is a unified loss that fits the properties of different tasks, and the classification loss is added to the second stage upon the DCN features.",
+                    "LSNet extends the border of anchor-free methods for location-sensitive visual recognition. We briefly review two counterparts. (i) CenterNet predicted horizontal or vertical offsets beyond the anchor point for object detection. This limits its ability in finding the extreme points and extracting discriminative features, yet it cannot perform instance segmentation. (ii) PolarMask used a polar coordinate system for instance segmentation, making it difficult to process the situation that a ray intersects the object multiple times at some direction. In comparison, LSNet easily handles the challenging scenarios and report superior performance (see the experimental part, section 4)."
                 ]
             },
             {
-                "title": "Image Completion",
+                "title": "Cross IOU Loss",
                 "content": [
-                    "Similar to image fusion, also image completion has only recently become a playing field for deep learning methods. First approaches based on simple multilayer perceptrons (MLPs) [29] or CNNs [12] were targeted only to filling small holes in an image. However, with the introduction of GANs [10], the area quickly became dominated by GAN-based approaches, starting with the context encoders presented by Pathak et al. [47]. Many subsequent papers proposed extensions to this model in order to obtain fine-grained completions while preserving global coherence by introducing additional discriminators [22], searching for closest samples to the corrupted image in a latent embedding space conditioning on semantic labels [56], or designing additional specialized loss functions [36]. High resolution results were obtained recently by multi-scale approaches [66], iterative upsampling [70], and the application of contextual attention [55,65,68]. Another stream of current work focuses on multi-hypothesis image completion, leveraging probabilistic problem formulations [45,73]."
+                    "The unified framework raises new challenges to the supervision of localization, because the function needs to consider both the global and local properties of the object. To clarify, we notice that the evaluation of object detection and instance segmentation judges if an object is correctly recognized by the global IOU between the prediction and the ground-truth, while pose estimation measures the accuracy by each individual keypoint.",
+                    "To this end, we design the cross-IOU loss as the unified supervision.",
+                    "The loss is defined upon the predicted and ground-truth objects, and we use p , where p = (p x , p y ), to denote the corresponding ground-truth of the anchor point and landmarks. In the left part, C3-C5 denote the feature maps in the backbone that are connected to the feature pyramid [34], and P3-P7 denote the FPN layers used for final prediction. LSNet is partitioned into two stages. In the first stage, we predict a set of offset vectors that relate the anchor point to the extreme points under the supervision of the cross-IOU loss. In the second stage, the predicted vectors are used as the offsets of the deformable convolution (DCN) [15] to extract complementary visual features around the extreme points. These features are used for refining the localization and predicting the object class.",
+                    "We compute the offset from the anchor point to the landmarks in a cross-coordinate system, i.e., q n = (p n,x -p 0,x ) -, (p n,x -p 0,x ) + , (p n,y -p 0,y ) -, (p n,y -p 0,y )",
+                    "for n = 1, 2, . . . , N , where (a)",
+                    "-and (a)",
+                    "+ denotes max{-a, 0} and max{a, 0}, respectively. Finally, we write the cross-IOU loss as:",
+                    "where |•| 1 indicates the 1 -norm. In other words, the cross-IOU function rewards the components (q n and q n ) of similar length (in which case the prediction and the groundtruth maximally overlap) and penalizes the components on different directions. Based on the Eqn (1), we define the cross-IOU loss as",
+                    "Obviously, when p n = p n for all n, we have L cIOU = 0 as expected 3 .",
+                    "The cross-IOU loss brings a direct benefit that it fits different scales of features without the need of specific parameter tuning. This alleviates the difficulty of integrating multi-scale information, e.g., using the feature pyramid [34]. In comparison, the smooth-1 loss [21] is sensitive to the scale of vector (e.g., the loss value tends to be large when the feature resolution is large) and neglects the relationship between the components that are from the same vector. Moreover, by approximating the IOU using individual components, the cross-IOU loss is flexibly transplanted to instance segmentation and human pose estimation, unlike the original IOU loss [63] that is difficult to compute on polygons (for segmentation) and undefined for discrete keypoints (for pose estimation)."
                 ]
             },
             {
-                "title": "Background",
-                "content": [
-                    "In this section, we outline the fundamentals of standard VAEs, conditional VAEs, and hierarchical VAEs upon which we build our approach. Another section is dedicated to aggregation methods for data fusion."
-                ]
+                "title": "FPN layers",
+                "content": []
             },
             {
-                "title": "Standard VAE",
+                "title": "Pyramid DCN",
                 "content": [
-                    "A variational autoencoder (VAE) [27] is a neural network consisting of a probabilistic encoder q(z|y) and a generative model p(y|z). The generator models a distribution over the input data y, conditioned on a latent variable z with prior distribution p θ (z). The encoder approximates the posterior distribution p(z|y) of the latent variables z given input data y and is trained along with the generative model by maximizing the evidence lower bound (ELBO) ELBO(y) = E q(z|y) [log p(y|z)] -KL(q(z|y)||p(z)), (1) where KL is the Kullback-Leibler divergence and log p(y) ≥ ELBO(y)."
-                ]
-            },
-            {
-                "title": "Conditional VAE",
-                "content": [
-                    "In VAEs, the generative model p(y|z) is unconditional. In contrast, conditional VAEs (CVAE) [53] consider a generative model for a conditional distribution p(y|x, z) where y is the target data, x is the conditional input variable, and z is a latent variable. The prior of the latent variable is p(z|x), while its approximate posterior distribution is given by q(z|x, y). The variational lower bound of the conditional log-likelihood can be written as follows log p(y|x) ≥ E q(z|x,y) [log p(y|x, z)] -KL(q(z|x, y)||p(z|x)).",
-                    "(2)"
-                ]
-            },
-            {
-                "title": "Hierarchical VAE",
-                "content": [
-                    "In hierarchical VAEs [25,54,57], the latent variables z are divided into L disjoint groups z 1 , ..., z L in order to increase the expressiveness of both prior and approximate posterior which become",
-                    "p(z l |z <l ) and q(z|y)",
-                    "where z <l denotes the latent variables in all previous hierarchies. All the conditionals in the prior p(z l |z <l ) and in the approximate posterior q(z l |z <l , y) are modeled by factorial Gaussian distributions. Under this modelling choice, the ELBO from Eq. ( 1) turns into"
-                ]
-            },
-            {
-                "title": "Aggregation Methods",
-                "content": [
-                    "For fusing data within our approach, we consider different aggregation methods, such as mean aggregation, max aggregation, Bayesian aggregation [59] and pixelwise addition. All described aggregation methods fuse a set of feature tensors f 1 , ..., f K , obtained by encoding K input images {x i } K i=1 in a permutation invariant way [69]. In mean aggregation, multiple feature vectors are fused by taking the pixel-wise average f = 1 K K i=1 f i . For max aggregation, we take the pixel-wise maximum instead f = max i (f i ). Bayesian aggregation (BA) [59] considers an uncertainty estimate for the fused feature vectors. In order to obtain such an uncertainty estimate, the encoder has to predict means µ i and variances σ i of a factorized Gaussian distribution over the latent feature vectors",
-                    "instead of f i directly. Here enc µ and enc σ represent the encoding process which generates means and variances respectively. The predicted distributions over latent feature vectors for multiple input images can be fused iteratively using the Bayes rule [2] (detailed derivation is given in Appendix B)",
-                    "where 7) ⊘ and ⊙ denote element-wise division and multiplication respectively."
-                ]
-            },
-            {
-                "title": "Conditional Generative Models for Image Fusion",
-                "content": [
-                    "We propose a deep hierarchical conditional variational autoencoder, called Fusion-VAE (Fusion Variational Auto-Encoder), that is able to fuse information from multiple sources and to infer the missing information in the images from a prior learned from the dataset. To the best of our knowledge, it is the first model that combines the generative ability of a hierarchical VAE to learn the underlying distribution of complex datasets with the ability to fuse multiple input images."
-                ]
-            },
-            {
-                "title": "Problem Formulation",
-                "content": [
-                    "We consider image fusion problems that are concerned with generating the fused target image from multiple source images. Each source image contains partial information of the target image and the goal of the task is to recover the original target image given a finite set of source images. In particular, we denote the target image as y and the set of K source images as context x = {x 1 , x 2 , . . . , x K }, where each x i is one source image. Given training sample (x, y), we aim to maximize the conditional likelihood p(y|x)."
-                ]
-            },
-            {
-                "title": "FusionVAE",
-                "content": [
-                    "Our approach is designed to maximize the conditional likelihood p(y|x). However, optimizing this objective directly is intractable. Therefore, we derive a variational lower bound as follows (detailed derivation can be found in Appendix C)",
-                    "where we split the latent variables z into L disjoint groups {z 1 , z 2 , . . . , z L }. β and α l are annealing parameters that control the warming-up of the KL terms as in [57]. Inspired by [54], β is increased linearly from 0 to 1 during the first few training epochs to start training the reconstruction before introducing the KL term, which is increased gradually. α l is a KL balancing coefficient [58] that is used during the warm-up period to encourage the equal use of all latent groups and to avoid posterior collapse. FusionVAE consists of three main networks and a latent space as illustrated in Fig. 2: 1) a context encoder network which models the conditional prior p ϕ (z l |x, z <l ), 2) a target encoder which models the approximate posterior q ϕ (z|y), 3) a latent space comprising the L latent groups, and 4) a generator network p θ (y|x, z) that aims to reconstruct the target image."
-                ]
-            },
-            {
-                "title": "Network Architecture",
-                "content": [
-                    "Fig. 2 illustrates the network architecture of our FusionVAE for training. It is built in a hierarchical way inspired by [57]. In each latent hierarchy l ∈ 1, . . . , L we have a set of feature maps f lx , f ly and latent distributions p l , q l . The first gray box contains the context encoder network that obtains a stack of source images x and employs residual cells [15] as in [57] to extract features f lx . The second gray box shows the target encoder network that encodes the target Fig. 2: Overview of the proposed network architecture. h is a trainable parameter vector, ⊕ denotes concatenation, ⊕ max aggregation, and ⊕ pixel-wise addition.",
-                    "r r is a residual network like in [57]. The dotted lines between the residual networks indicate shared parameters.",
-                    "image y into the feature map f ly using the same residual cells as the context encoder. The third gray box illustrates the latent space which contains the prior distributions p ϕ (z l |x, z <l ) (denoted p 1 , ..., p L in Fig. 2) and the approximate posterior distributions q ϕ (z l |y, z <l ) (denoted q 1 , ..., q L in Fig. 2). The fourth gray box contains the generator network which aims to create different output samples ŷ. It employs a trainable parameter vector h, concatenates the information from all hierarchies, and decodes them using residual cells.",
-                    "In each latent hierarchy, we aggregate the context features f lx using pixelwise max aggregation. In all but the first hierarchy, we pixel-wisely add the corresponding feature map from the generator network to the aggregated context features and to the target image features f ly . Using 2D convolutional layers, we learn the prior distributions p l and the approximate posterior distributions q l . We propose to use the approximate posterior distributions q l as target distributions in order to learn good prior distributions p l . Therefore, q ϕ (z l |y, z <l ) is created from the target image features f ly as well as information from the generator network.",
-                    "During training the generator network aims to create a prediction ŷ based on samples of the posterior distributions q l and a trainable parameter vector h.",
-                    "For evaluation, we can omit the target image input y and sample from the prior distributions p l . In case no input image is given, we set p 1 to a standard normal distribution. Based on the samples and the trainable parameter vector h, our FusionVAE can generate new output images."
+                    "To enhance discriminative information for recognition, we use deformable convolution (DCN) [15,70] to extract features from the landmarks. The standard DCN has 9 off-sets, while the number of offsets is 4, 36, and 17 for detection, segmentation, and pose estimation, respectively. In the latter two cases, to avoid redundant features extracted from close areas, we sample 9 landmarks uniformly from the candidates. We further build the feature extraction module upon the feature pyramid [34]. The offsets are adjusted to different stages by accordingly rescaling the vectors.",
+                    "We name the proposed method Pyramid-DCN, and illustrate it in Figure 3. As shown in experiments, both feature extraction from the landmarks and using the pyramid structure improve recognition accuracy."
                 ]
             }
         ],
         "Experiments": [
             {
-                "title": "Experimental Setup",
+                "title": "Experiments",
+                "content": []
+            },
+            {
+                "title": "Dataset and Evaluation Metrics",
                 "content": [
-                    "To evaluate our approach, we conduct a series of experiments on three different datasets using data augmentation. Furthermore, we adapt traditional architec-tures for solving the same tasks in order to compare our results. Finally, we perform an ablation study to show the effects of specific design choices."
+                    "We evaluate our framework on the MS-COCO 2017 dataset [36], which is a popular, large-scale object detection, segmentation, and human pose dataset. For object detection and segmentation, it contains over 118K training images, 5K validation images and 20K test-dev images covering 80 object categories. For human pose, the person instance is labeled with 17 keypoints, containing over 57K training images with 150K person instances, 5K validation images and 20K test-dev images.",
+                    "The average precision (AP) metric is applied to characterize the performance of our method as well as other competitors. There are subtle differences in the definition of AP for different tasks. For object detection, AP is calculated the average precision under different bounding box IOU thresholds(from 0.5 to 0.95), while the bounding box IOU is replaced with the mask IOU in instance segmentation. In the human pose task, AP is calculated based on the object keypoint similarity (OKS), which reflects the distance between the predicted keypoints and the annotations."
                 ]
             },
             {
-                "title": "Datasets",
+                "title": "Implementation Details",
                 "content": [
-                    "For training and evaluating our approach, we create three novel fusion datasets based on MNIST [32], CelebA [39], and T-LESS [18] as described in the following.",
-                    "FusionMNIST. Based on the dataset MNIST [32], we create an image fusion dataset called FusionMNIST. For each target image, it contains different noisy representations where only random parts of the target image are visible. The first three columns of Fig. 3 show different examples of FusionMNIST corresponding to the target images in the fourth column. To generate FusionMNIST, we applied zero padding to all MNIST images to obtain a resolution of 32 × 32. For creating a noisy representation, we generate a mask composed of the union of a varying number of ellipses with random size, shape and position. All parts of the given images outside the mask are blackened. Finally, we add Gaussian noise with a fixed variance and clip the pixel values afterwards to stay within [0, 1].",
-                    "FusionCelebA. We generate a similar fusion dataset based on the aligned and cropped version of CelebA [39] which we call FusionCelebA. Fig. 4 depicts different example images in the first three columns which belong to the target image in the fourth column. To generate FusionCelebA, we center-crop the CelebA images to 148 × 148 before scaling them down to 64 × 64 as proposed by [31]. As in Fusion-MNIST, we create different representations by using masks based on random ellipses."
+                    "We use ResNet [25], ResNeXt [60] and Res2Net [20] with the weights pre-trained on ImageNet [16] as our backbones, respectively. The feature pyramid network (FPN) [34] is applied to deal with objects with different scales. For object detection, we set four vectors for each object to learn to find the four extreme points (top, left, bottom, right). We refer to ExtremeNet [67] to obtain extreme point annotations from the object mask 4 . For instance segmentation and human pose estimation, we set 36 vectors for each instance to regress the location of contour points and 17 vectors to regress the 17 keypoints.",
+                    "Training and Inference. We train our framework on eight NVIDIA Tesla-V100 GPUs with two images on each GPU. The initial learning rate is set as 0.01, the weight decay as 0.0001 and momentum as 0.9. In the ablation study, we use a ResNet-50 [25] pre-trained on ImageNet [16] as the backbone, and fine-tune the model for 12 epochs using a single-scale of [800, 1333] and augment the training images with random horizontal flipping. The learning rate decays by a factor of 10 at after the 8th and 11th epochs, respectively. We also use stronger backbones and longer training epochs (24 epochs for object detection, 30 epochs for instance segmentation and 60 epochs for human pose with the learning rate decayed by a factor of 10 after the 16th, 22nd, and 50th epochs, respectively) and multi-scale input images (from [400, 1333] to [960, 1333]) to further improve the recognition accuracy. In the first stage, we only select the anchor point closest to the center of the object as a positive sample. In the second stage, we use the ATSS [64] assigner to assign the anchor points for each object. The overall loss function is",
+                    "where L cls and L vector denote the Focal loss [35] and our cross-IOU loss, respectively. We set the balancing coefficients, β and γ, to be 1.0 and 2.0 in the experiments. During the inference, both the single-scale testing and multi-scale testing strategy are applied. We use the scale of [800, 1333] for single-scale testing. For the multi-scale testing, we refer to ATSS [64] to set the image scales. We also use the nonmaximum suppression (NMS) strategy with a threshold of 0.6 to remove the redundant results."
                 ]
             },
             {
-                "title": "FusionT-LESS.",
+                "title": "Object Detection",
                 "content": [
-                    "A promising area of application for our FusionVAE is robot vision. Scenes in robotics settings can be very difficult to understand due to texture-less or reflective objects and occlusions. To examine the performance of our FusionVAE in this area, we create an object dataset with challenging occlusions based on T-LESS [18] which we call FusionT-LESS. To generate FusionT-LESS, we use the real training images of T-LESS and take all images of classes 19 -24 as basis for the target images. This selection contains all objects with power sockets and therefore images with many similarities. Every tenth image is removed from the training set and used for evaluation. In order to create challenging occlusions, we cut all objects from images of other classes using a Canny edge detector [5] and overlay each target image with a random number between five and eight cropped objects. We select all images from classes 1, 2, 5 -7, 11 -14, and 25 -27 as occluding objects for training and classes 3, 4, 8 -10, 15 -18, and 28 -30 for evaluation."
+                    "Comparisons to SOTA. We evaluate the detection accuracy of LSNet on the MS-COCO test-dev set, the results are shown in Table 1. As Table 1 shows, our method is an anchor-free detector, with a backbone of ResNet-50, LSNet achieves a box AP of 44.8% with 12.7 FPS, which has been competitive with other detectors that equipped with deeper backbones. When equipped with stronger backbones, LSNet performs even better. This benefits from our proposed cross-IOU loss. It helps the LSNet to locate the landmarks with high accuracy, the rich global information contained in the landmarks further promote the cross-IOU loss to regress the landmarks more accurately. With the additional corner point verification (CPV) [9] and multi-scale testing [64], LSNet achieves a box AP of 53.5%, which outperforms all the anchor-free detectors as we know.",
+                    "Cross-IOU Loss for Vector Regression. To evaluate the performance of cross-IOU loss, we design four contrast experiments on the MS COCO [36] validation set, which are (i) the GIOU loss [50] (a variant of the IOU loss) for rectangle bounding box regression, (ii) the smooth-1 loss for rect- LSNet surpasses all competitors in the anchor-free group. The abbreviations are: 'R' -ResNet [25], 'X' -ResNeXt [60], 'HG' -Hourglass network [40], 'R2' -Res2Net [20], 'CPV' -corner point verification [9], 'MS train ' -multi-scale training, ' †' -multi-scale testing [64].  angle bounding box regression, (iii) the smooth-1 loss for extreme bounding box regression, and (iv) the cross-IOU loss for extreme bounding box regression, respectively. All the experiments are done in the first stage in our framework (shown in Figure 2) with ResNet-50 [25] as the backbone, and we train the model for each experiment for 12 epochs. Table 2 summarizes the results. We can see that the smooth- Table 3: The detection accuracy (%) of using different features. PA, PD, and PP denote using the anchor point features along, anchor point features with the single-scale extreme point features, and with the pyramid extreme point features, respectively.",
+                    "boxes, respectively. This reveals that it is more difficult to regress an angled vector than a straight vector. By contrast, the cross-IOU loss performs much better than the smooth-",
+                    "Figure 4: The detection classification loss and average IOU with respect to the number of elapsed epochs. 'DCN feat', 'point feat' and 'extreme feat' denote the features adaptively learned by the DCN kernel, the features at the anchor points and extreme points, respectively. 'Smooth', 'GIOU' and 'Ours' denote the smooth-1 loss, the GIOU loss [50], and the cross-IOU loss, respectively. tion of the cross-IOU loss and landmark feature extraction significantly boosts recognition accuracy.",
+                    "Landmark Features Improve Precision. The landmarks (in particular, the extreme points in the detection task) are often related to discriminative appearance features, which may benefit visual recognition. To confirm this, we investigate different settings by using the anchor point features alone and integrating the anchor point features with either DCN or extreme point features, respectively. We still report the detection accuracy with all other settings remaining the same as in the previous experiments (studying the cross IOU loss). The results are shown in Figure 4. For the smooth-1 loss and the GIOU loss, we regress the rectangle bounding boxes, and the DCN features are extracted by the adaptively learned DCN kernel; for the cross-IOU loss, we use two sets of vectors both of which regress the extreme bounding boxes -the first set is trained to predict the extreme points and extract the extreme features, and we use the extreme features along with the anchor point features to train the second set from scratch. As shown in Figure 4, both the extreme and DCN features boost the classification accuracy. Recall that the prior experiments suggested the usefulness of the extreme features are useful for localization, combining the current results, we verify that the features around the landmarks are discriminative and thus benefit visual recognition.",
+                    "Pyramid DCN Improves Precision. We further equip the LSNet with the pyramid DCN to extract the multi-scale features around the landmarks. Table 3 shows our method achieves an AP of 36.2% with the features extracted by the Pyramid DCN, which outperforms the AP with single-scale features by a margin of 0.7%."
                 ]
             },
             {
-                "title": "Data Augmentation",
+                "title": "Instance Segmentation",
                 "content": [
-                    "During training we apply different augmentation methods on the datasets to avoid overfitting. For FusionMNIST, we apply the elliptical mask generation and the addition of Gaussian noise live during training so that we obtain an infinite number of different fusion tasks. For FusionT-LESS, almost the entire creation of occluded images is performed during training. We apply horizontal flips, rotations, scaling and movement of target and occluding images with random parameters before composing the different occluded representations. Solely the object cutting with the Canny edge detector is performed offline as a pre-processing step to keep the training time low. For FusionCelebA, we apply a horizontal flip of all images randomly in 50% of all occasions and also the elliptical mask generation is done live during training."
+                    "Comparisons to SOTA. We show the instance segmentation inference results evaluated on the MS-COCO test-dev set [36] on Table 4. LSNet achieves a mask AP of 38.0% and 40.2% using the single-scale and multi-scale testing protocols, respectively, surpassing all published contourbased methods to the best of our knowledge, and the accuracy is even competitive among the pixel-based approaches.",
+                    "Comparisons with PolarMask [59]. It is interesting to further compare our method with PolarMask, the previous best contour-based approach for instance segmentation. The major difference is that PolarMask assumed the entire object boundary to be seen by the anchor point, but this may not be the case especially for some complicated objects. Once the ray along some direction intersects with the border more than once, the method considered only one and thus in-  curred accuracy loss (a typical example is the 'motorcycle' contour in Figure 5). In our approach, this issue is solved by ranking the landmarks more flexibly, being compatible to complicated shapes. The Number of Landmarks. LSNet represents each instance using a polygon. Using a larger number of landmarks improves the upper-bound of accuracy, but can also incur heavy computational costs and cause the landmark prediction module difficult to be optimized. To choose a proper number of landmarks, we refer to the ground-truth masks of the MS-COCO validation set and quantize each mask into a polygon that best describes it. We find that using 18, 36, and 72 landmarks achieves APs of 89.0%, 97.4%, and 99.2%, respectively, and we consider N = 36 to be a nice tradeoff."
                 ]
             },
             {
-                "title": "Architectures for Comparison",
+                "title": "Human Pose Estimation",
                 "content": [
-                    "To the best of our knowledge, FusionVAE is the first fusion network for multiple images with a generative ability to fill areas without input information based on prior knowledge about the dataset under consideration. For lack of a suitable other model from the literature which would allow a fair comparison on our multi-image fusion tasks, we compare our approach with standard architectures that we adapted to support our tasks.",
-                    "The first architecture for comparison is a CVAE with residual layers as employed in [57]. We use a shared encoder for processing the input images and applied max aggregation before the latent space as we did in our FusionVAE. The second architecture for comparison is a fully convolutional network (FCN) with shared encoder and max aggregation before the decoder.",
-                    "For both baseline architectures, we created a version with skip connections (+S) and a version without. When using skip connections, we applied max aggregation at each shortcut for merging the features from the encoder with the decoder's features. To allow for a fair comparison, we designed all architectures so that they have a similar number of trainable parameters."
+                    "Comparisons to SOTA. Unlike most of the human pose estimation methods that predict the keypoints using the heatmaps, LSNet predicts the keypoints using regression only. In the experiment, we use the object bounding boxes ('obj-box') and keypoint-boxes ('kps-box') to assign training samples, respectively. We will give a detailed discussion of the difference between the two methods in the Appendix B. On the MS-COCO test-dev set, LSNet reports an AP of 55.7% w/ obj-box and 59.0% w/ kps-box, respectively, which outperform CenterNet-reg [66] with the Hourglass-104 backbone. However, LSNet does not perform as well as the heatmap-based methods, and we analyze the reason as follows.",
+                    "Error Analysis. We can observe that the LSNet struggles particularly in the high OKS regimes, e.g., compared to Pose-AE [39], the deficit of AP 50 (for LSNet w/ obj-box) is 3.3% while that of AP 75 grows to 9.0%. Note that using keypoint regression is not as accurate as using the heatmaps for refinement, and thus LSNet is less sensitive in the pixellevel prediction. However, the AP metric of pose estimation is largely impacted by this factor. To show this, we artificially add an average deviation of 1, 2, and 3 pixels to the prediction results of CenterNet-jd [66] (with a backbone of Hourglass-104). The AP on the MS-COCO validation set is significantly reduced from 64.0% (corresponding to the test AP of 63.0% in Table 5) to 61.1%, 53.4%, and 44.0%, respectively.",
+                    "On the other hand, we use the heatmaps produced by CenterNet-jd (Hourglass-104) to refine the prediction of LSNet w/ obj-box. As a result, the AP on the MS-COCO validation set is improved from 56.5% (corresponding to the test AP of 55.7% in Table 5) to 60.7%. This suggests that LSNet still needs further manipulation of high-resolution features towards higher pixel-level accuracy. The Benefit of LSNet. Despite the relatively weak pixellevel localization, LSNet (w/ obj-box) enjoys the ability of perceiving multi-scale human instances, many of which are not annotated in the dataset. Some examples are shown in the right side of the Table 5. Since the ground-truth is not available to evaluate the impact, we refer to the heatmaps of CenterNet-jd (Hourglass-104) to deliberately remove these 'false positives'. Consequently, AP is further improved from 60.7% to 63.0%, comparable with the heatmap-based methods, though the improvement seems less meaningful."
                 ]
             },
             {
-                "title": "Training Procedure",
+                "title": "Qualitative results for LSNet",
                 "content": [
-                    "We trained all networks in a supervised manner using the augmented target images y as described in Sec. 5.2. In order to teach the networks both to fuse information from a different number of input images and to learn prior knowledge about the dataset, we vary the number of input images x during the entire training. Specifically, we select a uniformly distributed random number between zero and three for each batch."
-                ]
-            },
-            {
-                "title": "Evaluation Metrics",
-                "content": [
-                    "For evaluation, we estimate the negative log-likelihood (NLL) in bits per dimension (BPD) using weighted importance sampling [4]. We use 100 samples for all experiments with FusionCelebA as well as FusionT-LESS and 1000 samples for FusionMNIST. Since we cannot estimate the NLL of the FCN, we used the minimum over all samples of the mean squared error (MSE min ) as second metric."
-                ]
-            },
-            {
-                "title": "Results",
-                "content": [
-                    "This section presents and discusses the quantitative and qualitative results of our research in comparison to the baseline methods mentioned in Sec. 5.3."
-                ]
-            },
-            {
-                "title": "Quantitative Results",
-                "content": [
-                    "Tabs. 1 to 3 show the NLL and the MSE min of all architectures on FusionMNIST, FusionCelebA, and FusionT-LESS respectively. The results are divided into the results based on zero to three input images and the average (avg) of it. We see that our FusionVAE outperforms all baseline methods on average. Regarding the NLL, our model surpasses the others additionally for 0 and 1 input images. For 2 and 3 images, CVAE+S reaches sometimes slightly better NLL values. However, our approach reaches the best MSE min values for each number of input images."
-                ]
-            },
-            {
-                "title": "Qualitative Results",
-                "content": [
-                    "The outstanding performance of our architecture in comparison to the others is also obvious when looking at the qualitative results in Figs. 3 to 5. For every row, these figures show the input, target, and up to three output predictions for all architectures. For the FCN, we depict just a single output prediction per row as all of them look almost identical.",
-                    "In the first three rows when the network does not receive any input image, we see that our network provides very realistic images. This indicates that it is able to capture the underlying distribution of the used datasets very well and much better than the other architectures. Due to the difficulty of the FusionT-LESS dataset, none of the models is able to produce realistic images without any input. Still our model shows much better performance in generating object-like shapes. In case the models receive at least one input image (cf. rows 4 -12), all architectures are able to extract the available information from the given input images. In addition, all VAE approaches, ours included, are able to complete the given input data based on prior knowledge. It is clearly visible, however, that the predictions of our model are much more realistic than the ones of the standard CVAE approaches especially for the more difficult datasets like FusionCelebA and FusionT-LESS. Fig. 5: Predictions on FusionT-LESS for zero to three input images."
-                ]
-            },
-            {
-                "title": "Ablation Studies",
-                "content": [
-                    "We conducted ablation studies to show the effect of certain design choices, such as the selection of the approximate posterior and the aggregation method. All experiments are run on the FusionCelebA dataset. Tab. 4 compares the performance of our FusionVAE for two different approximate posterior distributions q. The approximate posterior we selected for our FusionVAE q(y), depends only on the given target image y. It performs slightly better on average compared to the same method using a posterior that is computed based on the input images x as well as the target image y. However, the latter approach is superior when fusing two or three input images.   Tab. 5 shows the performance of different aggregation methods which are applied to create the prior distributions p l of every latent group. In our Fusion-VAE, the prior is created by fusing the input image features f lx using max aggregation (MaxAgg) and adding them to the decoded features of the same latent group before applying a 2D convolution. We abbreviate that method with MaxAggAdd.",
-                    "In addition to MaxAgg, we examined mean aggregation (MeanAgg) and Bayesian aggregation (BayAgg) [59] for comparison. For each aggregation principle, we tried two different versions: 1) aggregation of the input image features f lx adding the corresponding information from the decoder in a pixel-wise manner (denoted by suffix Add), and 2) directly aggregating all features, i.e. both input image features f lx and decoder features (denoted by suffix All).",
-                    "For creating the prior p i when using BayAgg, we moved the 2D convolutions before the aggregation in order to create the parameters µ and σ of a latent Gaussian distribution. Unlike MaxAgg and MeanAgg, BayAgg directly outputs a new Gaussian distribution that does not need to be processed any further by a convolution.",
-                    "We can see that all variations of mean and max aggregation are significantly better than Bayesian aggregation. Also their training procedures are less often impaired due to numeric instabilities. Interestingly, the NLL is very similar independent of whether the aggregation is performed on all features or not. However, the MSE min is much better for the aggregation with addition. Since the expressiveness of the metrics is limited, we provide additional visualizations of this ablation in Appendix D."
+                    "We show some visualized results of LSNet in Figure 5, inlcuding object detection, instance segmentation and human pose estimation. Please refer to the appendix for more qualitative results."
                 ]
             }
         ],
         "Conclusion": [
             {
-                "title": "Conclusion",
+                "title": "Conclusions",
                 "content": [
-                    "We have presented a novel deep hierarchical variational autoencoder for generative image fusion called FusionVAE. Our approach fuses multiple corrupted input images together with prior knowledge obtained during training. We created three challenging image fusion benchmarks based on common computer vision datasets. Moreover, we implemented four standard methods that we modified to support our tasks. We showed that our FusionVAE outperforms all other methods significantly while having a similar number of trainable parameters. The predicted images of our approach look very realistic and incorporate given input information almost perfectly. During ablation studies, we revealed the benefits of our design choices regarding the applied aggregation method and the used posterior distribution. In future work, our research could be extended by enabling the fusion of different modalities e.g. by using multiple encoders. Additionally, an explicit uncertainty estimation could be implemented that helps to weigh the impact of input information according to its uncertainty."
+                    "This paper unifies three location-sensitive visual recognition tasks (object detection, instance segmentation, and human pose estimation) using the location-sensitive network (LSNet). The key module that supports the framework is a novel cross-IOU loss that is friendly to receiving supervision from multiple scales. Equipped with a pyramid DCN, LSNet achieves the state-of-the-art performance on anchor-free detection and segmentation. This work suggests that using keypoints to define and localize objects is a promising direction, and we hope to extend our approach to achieve a stronger ability of generalization."
                 ]
             }
         ]

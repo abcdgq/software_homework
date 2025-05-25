@@ -138,7 +138,8 @@ DATABASES = {
 
 MIGRATION_MODULES = {
     # 格式：'app_name': 'custom_migration_module_path'
-    'business': 'migrations.business',  # 将 business 应用的迁移文件存到 shared_migrations/business
+    # 'business': 'migrations.business',  # 将 business 应用的迁移文件存到 shared_migrations/business
+    'business': 'business.migrations',
 }
 
 # Password validation

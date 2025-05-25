@@ -1,10 +1,14 @@
 """
 摘要报告表
 """
+import uuid
+
 from django.db import models
 import uuid
 
 from .user import User
+
+from business.models import User
 
 
 class AbstractReport(models.Model):
@@ -30,7 +34,8 @@ class AbstractReport(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     file_local_path = models.CharField(max_length=255)
     report_path = models.CharField(max_length=255, unique=True)
-    date = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=255)
+    date = models.DateTimeField(auto_now=True)
     status = models.CharField(
         max_length=2,
         choices=STATUS_CHOICES,

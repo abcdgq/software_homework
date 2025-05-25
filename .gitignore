@@ -2,3 +2,6 @@ node_modules/
 package.json
 package-lock.json
 .idea/
+Epp-BackEnd/backend/grobid_output/output.xml
+Epp-BackEnd/backend/grobid_output/output1.json
+Epp-BackEnd/backend/grobid_output/output2.json

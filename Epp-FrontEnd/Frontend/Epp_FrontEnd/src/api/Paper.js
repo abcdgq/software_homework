@@ -9,3 +9,23 @@ export const translateAbstract = (paperId) => {
     }
   })
 }
+
+export const collectPaper = (paperId) => {
+  return request({
+    method: 'post',
+    url: 'api/collectPaper',
+    data: {
+      paper_id: paperId
+    }
+  })
+}
+
+export const fetchFurtherReadingPapers = (paperId) => {
+  return request({
+    method: 'get',
+    url: 'api/relatedPaper',
+    params: {
+      paper_id: paperId
+    }
+  })
+}

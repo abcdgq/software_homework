@@ -40,6 +40,10 @@
                             {{ isSummaryVisible ? '隐藏摘要' : '翻译摘要' }}
                         </el-button>
                     </el-row>
+                    <el-divider />
+                    <el-row>
+                      <further-reading :paperId="this.paper_id" />
+                    </el-row>
                 </el-container>
 
                 <!-- 评分部分 -->
@@ -182,6 +186,7 @@
 import axios from 'axios'
 import ReportModal from './ReportModal.vue'
 import {translateAbstract} from '../../api/Paper'
+import FurtherReading from './FurtherReading.vue'
 export default {
   props: {
     paper_id: {
@@ -190,6 +195,7 @@ export default {
     }
   },
   components: {
+    FurtherReading,
     'report-modal': ReportModal
   },
   computed: {
@@ -219,13 +225,21 @@ export default {
   },
   created () {
     this.paper_id = this.$route.params.paper_id
-    this.fetchPaperInfo()
-    this.fetchComments1()
-    this.fetchUserPaperInfo()
+    this.loadPaperInfo()
+  },
+  watch: {
+    paper_id() {
+      this.loadPaperInfo()
+    }
   },
   methods: {
     fullURL (url) {
       return this.$BASE_URL + url
+    },
+    loadPaperInfo() {
+      this.fetchPaperInfo()
+      this.fetchComments1()
+      this.fetchComments2()
     },
     fetchUserPaperInfo () {
       axios.get(this.$BASE_API_URL + '/getUserPaperInfo?paper_id=' + this.paper_id)

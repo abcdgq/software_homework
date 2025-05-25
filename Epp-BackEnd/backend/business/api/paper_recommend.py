@@ -2,6 +2,7 @@
 用于热门文献推荐，热门文献推荐基于用户的搜索历史，点赞历史，收藏历史
 '''
 from business.api.search import do_string_search
+from business.api.user_info import collected_papers_list
 
 # -*- coding: utf-8 -*-
 """
@@ -281,3 +282,35 @@ def get_unique_recommendation(request):
     print(filtered_papers_list)
 
     return reply.success(data={'papers': filtered_papers_list}, msg='success')
+
+
+@require_http_methods("GET")
+def get_related_paper(request):
+    # print("------------------------------------------------")
+    # print(request.session.items())
+    username = request.session.get('username')
+    # print('recommend username:' + username)
+    user = User.objects.filter(username=username).first()
+    collected_papers_list = user.collected_papers.all()
+
+    paper_id = request.GET.get('paper_id')
+    paper = Paper.objects.filter(paper_id=paper_id).first()
+    title = paper.title
+
+    data = {
+        'papers': []
+    }
+
+    # papers = get_filtered_paper(title, 5)
+    papers = do_string_search(title, 5)
+    papers = papers[1:]
+    for p in papers:
+        data['papers'].append({
+            'id': str(p.paper_id),
+            'title': p.title,
+            'summary': '无',
+            'collected': p in collected_papers_list
+        })
+    # print("data:")
+    # print(data)
+    return reply.success(data=data, msg='获取成功')

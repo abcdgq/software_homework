@@ -23,7 +23,8 @@
             element-loading-spinner="el-icon-loading" style="width: 100px; height: 40px;">
           </div>
           <div v-else>
-            <p style="white-space: pre-wrap;" v-html="message.text"></p>
+            <!-- <p style="white-space: pre-wrap;" v-html="message.text"></p> -->
+             <p style="white-space: pre-wrap;" v-html="renderMessageText(message)"></p>
             <el-button type="text" @click="regenerateAnswer"
               v-show="index == chatMessages.length - 1 && answerFinished">
               <i class="fas fa-refresh"></i>
@@ -56,8 +57,8 @@
 
 <script>
 import axios from 'axios'
-import markdownIt from 'markdown-it'
-import hljs from 'highlight.js'
+// import markdownIt from 'markdown-it'
+// import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css' // 选择你喜欢的样式
 
 export default {
@@ -83,24 +84,31 @@ export default {
     }
   },
   mounted () {
-    this.md = markdownIt({
-      highlight: function (str, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-          try {
-            return '<pre class="hljs"><code class="code-block">' +
-                    hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-                    '</code></pre>'
-          } catch (__) {}
-        }
-        return '<pre class="hljs"><code class="code-block">' + this.md.utils.escapeHtml(str) + '</code></pre>'
-      }
-    })
+    // this.md = markdownIt({
+    //   highlight: function (str, lang) {
+    //     if (lang && hljs.getLanguage(lang)) {
+    //       try {
+    //         return '<pre class="hljs"><code class="code-block">' +
+    //                 hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+    //                 '</code></pre>'
+    //       } catch (__) {}
+    //     }
+    //     return '<pre class="hljs"><code class="code-block">' + this.md.utils.escapeHtml(str) + '</code></pre>'
+    //   }
+    // })
     this.fileReadingID = this.fileReadingId
     if (this.fileReadingID > 0) {
       this.restorePaperStudy()
     } else {
       this.initialize()
     }
+    this.$el.addEventListener('click', e => {
+      const target = e.target
+      if (target.classList.contains('highlight-word')) {
+        const word = target.dataset.word
+        this.onWordClick(word)
+      }
+    })
   },
   methods: {
     initialize () {
@@ -114,7 +122,7 @@ export default {
         this.createPaperStudy()
       }
     },
-    createPaperStudy () {
+    async createPaperStudy () {
       const loadingInstance = this.$loading({
         lock: true,
         text: '正在创建知识库...',
@@ -122,7 +130,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)',
         target: '.read-assistant' // 指定加载动画的目标
       })
-      axios.post(this.$BASE_API_URL + '/study/createPaperStudy', { 'paper_id': this.paperID, 'file_type': 2 })
+      await axios.post(this.$BASE_API_URL + '/study/createPaperStudy', { 'paper_id': this.paperID, 'file_type': 2 })
         .then((response) => {
           if (response.status === 200) {
             this.fileReadingID = response.data.file_reading_id
@@ -141,7 +149,7 @@ export default {
           loadingInstance.close()
         })
     },
-    restorePaperStudy () {
+    async restorePaperStudy () {
       const loadingInstance = this.$loading({
         lock: true,
         text: '正在恢复研读对话...',
@@ -150,12 +158,13 @@ export default {
         target: '.read-assistant' // 指定加载动画的目标
       })
       console.log('恢复研读对话的id, ', this.fileReadingID)
-      axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', { 'file_reading_id': this.fileReadingID })
+      await axios.post(this.$BASE_API_URL + '/study/restorePaperStudy', { 'file_reading_id': this.fileReadingID })
         .then((response) => {
           const history = response.data.conversation_history.conversation
+          console.log('history is...', history)
           for (const message of history) {
             const sender = message.role === 'user' ? 'user' : 'ai'
-            const text = message.role === 'user' ? message.content : this.md.render(message.content)
+            const text = message.role === 'user' ? message.content : message.content
             this.chatMessages.push({ sender: sender, text: text, loading: false })
           }
           this.$message({
@@ -185,6 +194,7 @@ export default {
       let loadingMessage = { sender: 'ai', text: 'AI正在思考...', loading: true }
       this.chatMessages.push(loadingMessage)
       let answer = ''
+      let highlights = []
       //   Add user message to chat
       // 有一些很奇怪的bug
       if (!this.fileReadingID) {
@@ -203,6 +213,8 @@ export default {
         await this.$axios.post(this.$BASE_API_URL + '/study/doPaperStudy', { 'query': chatMessage, 'file_reading_id': this.fileReadingID })
           .then(response => {
             answer = response.data.ai_reply
+            highlights = response.data.highlights
+            loadingMessage.highlights = highlights
             this.docs = response.data.docs
             this.probQuestions = response.data.prob_question
             loadingMessage.loading = false
@@ -213,15 +225,16 @@ export default {
         loadingMessage.text = ''
         answer = '抱歉, 无法从AI获取回应。'
         loadingMessage.loading = false
+        loadingMessage.highlights = []
       } finally {
         this.answerFinished = false
         let cur = 0
         while (cur < answer.length) {
           loadingMessage.text += answer.charAt(cur)
           cur++
-          await this.delay(10)
+          await this.delay(50)
         }
-        loadingMessage.text = this.md.render(loadingMessage.text)
+        // loadingMessage.text = this.md.render(loadingMessage.text)
         this.answerFinished = true
       }
     },
@@ -235,10 +248,13 @@ export default {
       lastMessage.loading = true
       this.answerFinished = false
       let answer = ''
+      let highlights = []
       console.log('file_reading_id', this.fileReadingID)
       await axios.post(this.$BASE_API_URL + '/study/reDoPaperStudy', { 'file_reading_id': this.fileReadingID })
         .then((response) => {
           answer = response.data.ai_reply
+          highlights = response.data.highlights
+          lastMessage.highlights = highlights
           this.probQuestions = response.data.prob_question
           lastMessage.text = ''
           lastMessage.loading = false
@@ -248,6 +264,7 @@ export default {
           lastMessage.text = ''
           answer = '抱歉, 无法从AI获取回应。'
           lastMessage.loading = false
+          lastMessage.highlights = []
         })
       let cur = 0
       while (cur < answer.length) {
@@ -285,17 +302,21 @@ export default {
     renderMarkdown () {
       axios.post(this.$BASE_API_URL + '/study/generateAbstractReport', { document_id: '', paper_id: this.paperID })
         .then((response) => {
-          if (response.data.summary) {
-            const summary = response.data.summary
-            this.markdownFile = this.md.render(summary)
-            this.showSummaryModal = true
-          } else {
-            this.$message({
-              message: '正在为您生成摘要，请稍等...',
-              type: 'warning'
-            })
-            this.summaryFinished = false
-          }
+          // if (response.data.summary) {
+          //   const summary = response.data.summary
+          //   this.markdownFile = this.md.render(summary)
+          //   this.showSummaryModal = true
+          // } else {
+          //   this.$message({
+          //     message: '正在为您生成摘要，请稍等...',
+          //     type: 'warning'
+          //   })
+          //   this.summaryFinished = false
+          // }
+          this.$message({
+            message: '正在为您生成摘要，请稍等...',
+            type: 'warning'
+          })
         })
         .catch(() => {
           this.$message({
@@ -321,6 +342,73 @@ export default {
         .catch((error) => {
           console.error('清除对话失败', error)
         })
+    },
+    renderMessageText (message) {
+      if (!message.highlights || message.highlights.length === 0) {
+        return message.text
+      }
+
+      const text = message.text
+      const highlights = message.highlights.sort((a, b) => a.start - b.start)
+      let result = ''
+      let cur = 0
+
+      highlights.forEach(hl => {
+        if (cur < hl.start) {
+          result += text.slice(cur, hl.start)
+        }
+
+        const word = text.slice(hl.start, hl.end)
+        // 给特定词加上 span 和 data-* 属性
+        result += `<span class="highlight-word" data-word="${word}" title="${hl.tooltip}">${word}</span>`
+        cur = hl.end
+      })
+
+      if (cur < text.length) {
+        result += text.slice(cur)
+      }
+
+      return result
+    },
+    async onWordClick (highlight) {
+      console.log('Clicked word payload:')
+      const chatMessage = '请具体解释其中的:' + highlight
+      // this.chatInput = ''
+      this.answerFinished = false
+      this.chatMessages.push({sender: 'user', text: chatMessage, loading: false})
+
+      let loadingMessage = { sender: 'ai', text: 'AI正在思考...', loading: true }
+      this.chatMessages.push(loadingMessage)
+      let answer = ''
+      let highlights = []
+      //   Add user message to chat
+      try {
+        await this.$axios.post(this.$BASE_API_URL + '/study/doPaperStudy', { 'query': chatMessage, 'file_reading_id': this.fileReadingID })
+          .then(response => {
+            answer = response.data.ai_reply
+            highlights = response.data.highlights
+            loadingMessage.highlights = highlights
+            this.docs = response.data.docs
+            this.probQuestions = response.data.prob_question
+            loadingMessage.loading = false
+            loadingMessage.text = ''
+          })
+      } catch (error) {
+        console.error('Error:', error)
+        loadingMessage.text = ''
+        answer = '抱歉, 无法从AI获取回应。'
+        loadingMessage.loading = false
+        loadingMessage.highlights = []
+      } finally {
+        this.answerFinished = false
+        let cur = 0
+        while (cur < answer.length) {
+          loadingMessage.text += answer.charAt(cur)
+          cur++
+          await this.delay(50)
+        }
+        this.answerFinished = true
+      }
     }
   }
 
@@ -414,5 +502,12 @@ export default {
 .read-assistant pre code hljs {
     word-break: break-word !important;
     white-space: pre-wrap;
+}
+
+/deep/ .highlight-word {
+  text-decoration: underline wavy #1e90ff; /* 使用常见的蓝色 (DodgerBlue) */
+  text-underline-offset: 2px;              /* 微调下划线的位置 */
+  /* text-decoration-thickness: 2px;             加粗下划线 */
+  cursor: pointer;
 }
 </style>

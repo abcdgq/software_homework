@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from backend.settings import USER_REPORTS_PATH, BASE_DIR, USER_READ_CONSERVATION_PATH
 
-from business.models import User
+from business.models import User, AbstractReport
 from business.models import SearchRecord
 from business.models import SummaryReport
 from business.models import FileReading
@@ -355,8 +355,7 @@ def get_summary_report(request):
         return reply.fail(msg="请先正确登录")
     
     report_id = request.GET.get('report_id')
-    data = json.loads(request.body)
-    type = data.get('type', None)
+    type = request.GET.get('type')
     if type == 'summary':
         # 多篇论文综述
         report = SummaryReport.objects.filter(report_id=report_id, user_id=user).first()
@@ -376,7 +375,6 @@ def get_summary_report(request):
         else:
             return reply.fail(msg='文件综述报告不存在')
 
-    
     # report = SummaryReport.objects.filter(report_id=report_id, user_id=user).first()
     # if report:
     #     with open(report.report_path, 'r', encoding='utf-8') as f:

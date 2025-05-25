@@ -16,12 +16,14 @@ from business.models import User, Paper, PaperScore, CommentReport, FirstLevelCo
 from business.models.auto_check_record import AutoCheckRecord
 from business.models.auto_check_risk import AutoRiskRecord
 from business.models.auto_check_undo import AutoUndoRecord
+from business.models.auto_note_check_record import AutoNoteCheckRecord
+from business.models.auto_note_check_risk import AutoNoteRiskRecord
 from business.models.paper_annotation import FileAnnotation
 from business.models.paper_note import FileNote
 from business.utils import reply
 from business.utils.download_paper import downloadPaper
-from scripts.aliyun_test import auto_comment_detection
-from scripts.text_translate_test import connect as text_translate_tool
+from business.utils.aliyun_detect import auto_comment_detection
+from business.utils.text_translate import connect as text_translate_tool
 
 if not os.path.exists(BATCH_DOWNLOAD_PATH):
     os.makedirs(BATCH_DOWNLOAD_PATH)
@@ -448,9 +450,8 @@ def save_paper_note(request):
     保存用户的笔记和批注
     '''
     data = json.loads(request.body)
-    print("*******************************************************")
-    print(data)
     params = data.get('params')
+
     x = params.get('x')
     y = params.get('y')
     width = params.get('width')
@@ -468,6 +469,27 @@ def save_paper_note(request):
     note = FileNote(user_id=user, paper_id=paper, x=x, y=y, width=width, height=height, pageNum=pageNum,
                     comment=comment, username=username, isPublic=isPublic)
     note.save()
+
+    # 启动自动审核程序
+    if_success, status_code, labels, reason = auto_comment_detection(comment)
+
+    if if_success:
+        auto_record = AutoNoteCheckRecord(note=note, labels=labels, reason=reason)
+        auto_record.save()
+
+        safe = True
+        if len(labels) == 0 or labels.isspace():
+            note.visibility = True
+            auto_record.security = True
+            note.save()
+            auto_record.save()
+        else:
+            # 将不安全审核记录到表中
+            safe = False
+            risk_record = AutoNoteRiskRecord(check_record=auto_record)
+            risk_record.save()
+            return reply.fail(msg='存在非绿色内容')
+
     if isPublic:
         # 将笔记公开
         annotation = FileAnnotation(note=note, user_id=user, paper_id=paper)
@@ -533,7 +555,32 @@ def get_paper_annotation(request):
             'date': date
         })
 
-    return reply.success(data=data, msg="成功获取公开批注")
+    username = request.session.get('username')
+    note_list = FileNote.objects.filter(paper_id=paper, username=username,  isPublic=False)
+    for note in note_list:
+        x = note.x
+        y = note.y
+        width = note.width
+        height = note.height
+        pageNum = note.pageNum
+        comment = note.comment
+        isPublic = note.isPublic
+        id = note.note_id
+        date = note.date
+        data['annotations'].append({
+            'x': x,
+            'y': y,
+            'width': width,
+            'height': height,
+            'pageNum': pageNum,
+            'comment': comment,
+            'userName': username,
+            'isPublic': isPublic,
+            'id': id,               # id为note_id
+            'date': date
+        })
+
+    return reply.success(data=data, msg="成功获取批注")
 
 
 @require_http_methods('POST')

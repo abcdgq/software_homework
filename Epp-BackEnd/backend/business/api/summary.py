@@ -63,6 +63,31 @@ def queryGLM(msg: str, history=None) -> str:
         print(f"RequestException: {e}")
         return f"错误: {e}"
 
+def get_summary2(paper_ids, report_id):
+    print("开始生成多篇综述2")
+    print('report_id:', report_id)
+    import time
+    start_time = time.time()
+    report = SummaryReport.objects.get(report_id=report_id)
+    report.status = SummaryReport.STATUS_IN_PROGRESS
+    papers = ""
+    for id in paper_ids:
+        p = Paper.objects.filter(paper_id=id).first()
+        papers += "Title: " + p.title + "\nAbstract: " + p.abstract + "\n\n"
+    try:
+        from scripts.summary_test import generate_summary
+        summary = generate_summary(papers)
+        md_path = settings.USER_REPORTS_PATH + '/' + str(report.report_id) + '.md'
+        with open(md_path, 'w', encoding='utf-8') as f:
+            f.write(summary)
+        report.report_path = md_path
+        report.status = SummaryReport.STATUS_COMPLETED
+        report.save()
+        print(f"综述生成完毕2, 总用时：{(time.time() - start_time):.2f}s")
+    except Exception as e:
+        print(e)
+        report.delete()
+
 
 def get_summary(paper_ids, report_id):
     print("开始生成多篇综述")
@@ -164,10 +189,13 @@ def generate_summary(request):
         #     return fail('创建临时知识库失败')
         # 开始生成综述
         # keywords = ['现状', '问题', '方法', '结果', '结论', '展望']
-        if len(paper_ids) > 8:
-            return fail(msg='综述生成输入文章数目过多')
+
+        # if len(paper_ids) > 8:
+        #     return fail(msg='综述生成输入文章数目过多')
+        
         # 先把每篇论文需要的信息生成好了
-        threading.Thread(target=get_summary, args=(paper_ids, report.report_id)).start()
+        # threading.Thread(target=get_summary, args=(paper_ids, report.report_id)).start()
+        threading.Thread(target=get_summary2, args=(paper_ids, report.report_id)).start()
         return JsonResponse({'message': "综述生成成功", 'report_id': report.report_id}, status=200)
     except Exception as e:
         print(e)
@@ -263,6 +291,8 @@ def create_abstract_report(request):
         if os.path.exists(local_path) == False:
             # 下载下来
             downloadPaper(url=pdf_url, filename=str(p.paper_id))
+            # processor = PDFProcessor()
+            # local_path = processor.download_with_repair(pdf_url,str(p.paper_id))
         content_type = '.pdf'
         title = str(p.paper_id)
         paper_title = p.title
@@ -270,15 +300,16 @@ def create_abstract_report(request):
     print('下载完毕')
 
     from business.models.abstract_report import AbstractReport
+    print(title)
     report_path = os.path.join(settings.USER_REPORTS_PATH, str(title) + '.md')
     print(report_path)
 
     # 先查询存不存在响应的解读
 
     print("查询是否存在解读", local_path)
-    
+
     # PDF分块
-    from scripts.grobid_test import getXml, parse_grobid_xml, reorganize_sections
+    from business.utils.grobid import getXml, parse_grobid_xml, reorganize_sections
     xml = getXml(local_path, None, None)
     parsed_data = parse_grobid_xml(xml)
     sections = reorganize_sections(parsed_data)
@@ -297,7 +328,7 @@ def create_abstract_report(request):
     output_file1 = os.path.join(output_dir, "output1.json")
     with open(output_file1, "w", encoding="utf-8") as f:
         json.dump(parsed_data, f, ensure_ascii=False, indent=4)
-    
+
     sections = reorganize_sections(parsed_data)
     output_file2 = os.path.join(output_dir, "output2.json")
     with open(output_file2, "w", encoding="utf-8") as f:
@@ -315,15 +346,17 @@ def create_abstract_report(request):
     # 不存在
     if ar is None:
         # 创建一个线程，直接开始创建
-               
+
         # 判断逻辑可能有问题，不确定是否需要删除
         ar2 = AbstractReport.objects.filter(report_path=report_path).first()
         if ar2:
             print("同名文章解读已存在，将重新生成")
             ar2.delete()
-            
+
         ## 先创建一个知识库
         ar = AbstractReport.objects.create(file_local_path=local_path, report_path=report_path, user_id=user)
+        ar.title = '综述' + str(ar.report_id)
+        ar.save()
         upload_temp_docs_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/upload_temp_docs'
         local_path = local_path[1:] if local_path.startswith('/') else local_path
         print(local_path)
@@ -380,7 +413,7 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
             for qa in uselist
             ])
     
-        from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+        from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
         summarized_search_reply = text_summarizer(search_reply)
 
         docs = []
@@ -441,7 +474,7 @@ class abs_gen_thread(threading.Thread):
         summary += '# 摘要报告\n'
 
         from business.api.paper_interpret import do_file_chat
-        from scripts.text_summary import text_summarizer
+        from business.utils.text_summarizer import text_summarizer
 
         #### 研究现状
         if self.isend:
