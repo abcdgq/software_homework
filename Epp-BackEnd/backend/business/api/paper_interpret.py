@@ -631,7 +631,7 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
         for qa in uselist
         ])
     
-    from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+    from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
     summarized_search_reply = text_summarizer(search_reply)
 
     docs = []
@@ -791,13 +791,12 @@ def do_paper_study(request):
         add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
         print("对话历史已添加")
 
-        #TODO:
-        from scripts.get_keywords import get_keywords
+        from business.utils.get_explainationwords import get_keywords
         words = get_keywords(ai_reply)
 
         # 返回成功响应
         print("返回成功响应")
-        return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
+        return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply, "highlights": words}, msg="成功")
 
     except Exception as e:
         print(f"发生错误: {e}")

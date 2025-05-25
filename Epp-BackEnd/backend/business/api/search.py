@@ -1305,7 +1305,7 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
         for qa in uselist
         ])
     
-    from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+    from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
     summarized_search_reply = text_summarizer(search_reply)
 
     docs = []
@@ -1406,7 +1406,7 @@ def dialog_query(request):
         
         # filtered_paper = do_string_search(search_content=search_content, max_results=5)   # 字符串匹配，检索效果较差
         # 若以下方法报错，请先运行business\utils\paper_vdb_init.py中的local_vdb_init方法对本地向量库进行初始化,初始化之后注掉这个方法即可
-        #local_vdb_init(None)
+        # local_vdb_init(None)
         filtered_paper=[]
         if conditions == None:
             filtered_paper = get_filtered_paper(text=message, k=5)
@@ -1459,14 +1459,14 @@ def dialog_query(request):
     with open(conversation_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(history))
 
-    #TODO:
-    from scripts.get_keywords import get_keywords
-    words = get_keywords(ai_reply)
+    from business.utils.get_explainationwords import get_keywords
+    words = get_keywords(content)
 
     res = {
         'dialog_type': dialog_type,
         'papers': papers,
-        'content': content
+        'content': content,
+        'highlights': words
     }
     return reply.success(res, msg='成功返回对话')
 
