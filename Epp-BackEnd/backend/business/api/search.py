@@ -1519,7 +1519,7 @@ def dialog_query(request):
     with open(conversation_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(history))
 
-    from business.utils.get_explainationwords import get_keywords
+    from business.utils.ai.get_explainationwords import get_keywords
     words = get_keywords(content)
 
     res = {

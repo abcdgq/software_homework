@@ -898,7 +898,7 @@ def do_paper_study(request):
         add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
         print("对话历史已添加")
 
-        from business.utils.get_explainationwords import get_keywords
+        from business.utils.ai.get_explainationwords import get_keywords
         words = get_keywords(ai_reply)
 
         # 返回成功响应
