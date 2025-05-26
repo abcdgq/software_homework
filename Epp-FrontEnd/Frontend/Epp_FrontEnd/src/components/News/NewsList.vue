@@ -11,9 +11,9 @@
           <el-select v-model="sourceFilter" placeholder="选择来源" size="small" class="source-select" style="width: 100%;">
             <el-option
               v-for="source in sources"
-              :key="source"
-              :label="source"
-              :value="source === '全部' ? 'all' : source"
+              :key="source.value"
+              :label="source.label"
+              :value="source.value"
             />
           </el-select>
         </div>
@@ -23,9 +23,8 @@
           <h3 class="filter-title">时间范围</h3>
           <el-radio-group v-model="timeRange" class="vertical-radio-group">
             <el-radio label="all">全部</el-radio>
-            <el-radio label="latest">三天内</el-radio>
-            <el-radio label="week">五天内</el-radio>
-            <el-radio label="month">一周内</el-radio>
+            <el-radio label="latest">一天内</el-radio>
+            <el-radio label="threeDays">三天内</el-radio>
           </el-radio-group>
         </div>
       </div>
@@ -136,107 +135,27 @@ export default {
       timeRange: 'all',
       sourceFilter: 'all',
       sources: [
-        '全部',
-        '人工智能',
-        '机器学习',
-        '计算机视觉与模式识别',
-        '自然语言处理',
-        '密码学与安全',
-        '软件工程',
-        '分布式与并行计算',
-        '人机交互'
+        { label: '全部', value: 'all' },
+        { label: '人工智能', value: 'AI' },
+        { label: '机器学习', value: 'ML' },
+        { label: '计算机视觉与模式识别', value: 'CV' },
+        { label: '自然语言处理', value: 'NLP' },
+        { label: '密码学与安全', value: 'CR' },
+        { label: '软件工程', value: 'SE' },
+        { label: '分布式与并行计算', value: 'DC' },
+        { label: '人机交互', value: 'HC' }
       ],
       // newsList: [],
       newsList: [
-        {
-          title: '示例新闻标题',
-          summary: '这是一个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '人工智能',
-          published: '2023-10-01',
-          link: 'https://example.com/news1',
-          authors: '张三, 李四',
-          time: '三天内'
-        }, {
-          title: '示例新闻标题2',
-          summary: '这是另一个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '机器学习',
-          published: '2023-10-02',
-          link: 'https://example.com/news2',
-          authors: '王五, 赵六',
-          time: '五天内'
-        }, {
-          title: '示例新闻标题3',
-          summary: '这是第三个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '计算机视觉与模式识别',
-          published: '2023-10-03',
-          link: 'https://example.com/news3',
-          authors: '钱七, 孙八',
-          time: '一周内'
-        }, {
-          title: '示例新闻标题4',
-          summary: '这是第四个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '自然语言处理',
-          published: '2023-10-04',
-          link: 'https://example.com/news4',
-          authors: '周九, 吴十',
-          time: '三天内'
-        }, {
-          title: '示例新闻标题5',
-          summary: '这是第五个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '密码学与安全',
-          published: '2023-10-05',
-          link: 'https://example.com/news5',
-          authors: '郑十一, 冯十二',
-          time: '五天内'
-        }, {
-          title: '示例新闻标题6',
-          summary: '这是第六个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '软件工程',
-          published: '2023-10-06',
-          link: 'https://example.com/news6',
-          authors: '陈十三, 褚十四',
-          time: '一周内'
-        }, {
-          title: '示例新闻标题7',
-          summary: '这是第七个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '分布式与并行计算',
-          published: '2023-10-07',
-          link: 'https://example.com/news7',
-          authors: '卫十五, 蒋十六',
-          time: '三天内'
-        }, {
-          title: '示例新闻标题8',
-          summary: '这是第八个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '人机交互',
-          published: '2023-10-08',
-          link: 'https://example.com/news8',
-          authors: '沈十七, 韩十八',
-          time: '五天内'
-        }, {
-          title: '示例新闻标题9',
-          summary: '这是第九个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '人工智能',
-          published: '2023-10-09',
-          link: 'https://example.com/news9',
-          authors: '杨十九, 朱二十',
-          time: '一周内'
-        }, {
-          title: '示例新闻标题10',
-          summary: '这是第十个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '机器学习',
-          published: '2023-10-10',
-          link: 'https://example.com/news10',
-          authors: '刘二十一, 郑二十二',
-          time: '三天内'
-        }, {
-          title: '示例新闻标题11',
-          summary: '这是第十一个示例新闻摘要，用于展示新闻列表的样式。',
-          source: '计算机视觉与模式识别',
-          published: '2023-10-11',
-          link: 'https://example.com/news11',
-          authors: '王二十三, 赵二十四',
-          time: '五天内'
-        }
+        // {
+        //   title: '示例新闻标题',
+        //   summary: '这是一个示例新闻摘要，用于展示新闻列表的样式。',
+        //   source: '人工智能',
+        //   published: '2023-10-01',
+        //   link: 'https://example.com/news1',
+        //   authors: '张三, 李四',
+        //   time: '三天内'
+        // }
       ],
       selectedNews: null,
       summaryText: ''
@@ -255,10 +174,8 @@ export default {
 
         const matchesTime =
           this.timeRange === 'all' ||
-          (this.timeRange === 'latest' && news.time === '三天内') ||
-          (this.timeRange === 'week' && (news.time === '三天内' || news.time === '五天内')) ||
-          (this.timeRange === 'month' && (news.time === '三天内' || news.time === '五天内' || news.time === '一周内'))
-
+          (this.timeRange === 'latest' && news.time === '一天内') ||
+          (this.timeRange === 'threeDays' && (news.time === '一天内' || news.time === '三天内'))
         const matchesSource =
           this.sourceFilter === 'all' || news.source === this.sourceFilter
 

@@ -24,21 +24,24 @@ def _fetch_rss(feed_url):
     """统一RSS获取方法"""
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        response = requests.get(feed_url, headers=headers, timeout=15)
+        response = requests.get(feed_url, headers=headers, timeout=20)
         response.raise_for_status()
         return feedparser.parse(response.content), None
     except Exception as e:
         return None, str(e)
+
+from django.utils.timezone import make_naive
 
 def _parse_entry(entry, feed_title):
     """统一数据解析格式"""
     published_str = entry.get('published', datetime.now().isoformat())
     dt_utc = datetime.strptime(published_str, "%a, %d %b %Y %H:%M:%S %z").replace(tzinfo=UTC)
     beijing_time = dt_utc.astimezone(timezone("Asia/Shanghai"))
+    naive_time = make_naive(beijing_time)
     return {
         'title': entry.get('title', 'Untitled'),
         'link': entry.get('link', ''),
-        'published': beijing_time,  # 完整时间（带时区）
+        'published': naive_time, # beijing_time,  # 完整时间（带时区）
         'publish_date': beijing_time.date(),
         'summary': entry.get('summary', ''),
         'source': feed_title,
@@ -47,7 +50,7 @@ def _parse_entry(entry, feed_title):
             # 'timestamp': datetime.now().isoformat()
     }
 
-@require_http_methods("POST")
+# @require_http_methods("POST")
 def refresh(request):
     """处理分类查询请求（使用统一响应风格）"""
     result = False
@@ -63,7 +66,7 @@ def refresh(request):
         with transaction.atomic():
             result = True
             count = count + len(parsed.entries)
-            for entry in parsed.entries:
+            for entry in parsed.entries: # [:20]: # 可以限制每个分类最多20条数据，主要是避免太多了，用户看着繁杂。
                 paper_data = _parse_entry(entry, category)
 
                 if not News.objects.filter(news_id=paper_data['id']).exists():
@@ -118,16 +121,30 @@ def save_papers_to_db(category):
 @require_http_methods(["GET"])
 def get_news_by_days(request):
     """返回格式化日期（如`5月22日`）的论文列表"""
-    days = int(request.GET.get('days', 1))
-    category = request.GET.get('category')
+    # days = int(request.GET.get('days', 1))
+    # category = request.GET.get('category')
 
-    # 查询数据库
+    # 获取当前日期和星期信息
+    today = datetime.now().date()
+    current_day_of_week = datetime.now().weekday()  # 0是周一，6是周日
+
+    # 如果今天不是周六周日，检查是否有当天的新闻
+    if current_day_of_week < 5:  # 周一到周五
+        queryset_today = News.objects.filter(
+            publish_date=today
+        )
+        if not queryset_today.exists():
+            refresh(request)  # 如果没有当天数据，尝试刷新最新论文
+
+    # 重新查询以确保数据最新，并获取近一周的全部新闻
     queryset = News.objects.filter(
-        publish_date__gte=datetime.now().date() - timedelta(days=days)
+        publish_date__gte=today - timedelta(days=7)
     ).order_by('-published')
 
-    if category:
-        queryset = queryset.filter(rss_source=category)
+    # if category:
+    #     queryset = queryset.filter(rss_source=category)
+
+    # 格式化查询结果，并添加time字符串
     papers = [{
         'id': paper.news_id,
         'title': paper.title,
@@ -136,6 +153,7 @@ def get_news_by_days(request):
         'link': paper.link,
         'authors': paper.authors,
         'source': paper.rss_source,
+        'time': _get_time_label(paper.published.astimezone(timezone("Asia/Shanghai")), today)
     } for paper in queryset]
 
     return success(
@@ -145,3 +163,12 @@ def get_news_by_days(request):
         },
         msg="最新论文获取成功"
     )
+
+def _get_time_label(published_date, today):
+    """根据发布时间返回时间标签"""
+    if published_date.date() == today:
+        return "一天内"
+    elif today - timedelta(days=3) <= published_date.date() < today:
+        return "三天内"
+    else:
+        return "其他"
