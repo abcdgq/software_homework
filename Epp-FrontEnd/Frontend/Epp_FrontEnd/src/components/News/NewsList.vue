@@ -613,9 +613,8 @@ export default {
   text-align: left !important; /* 确保引用居左 */
 }
 
-.summary-content li {
-  text-align: left !important; /* 关键：强制列表项左对齐 */
-  margin: 0.8em 0;
+#app .summary-content li {
+  text-align: left !important;
 }
 
 </style>
