@@ -16,6 +16,7 @@ from business.models import UserDocument, FileReading, Paper, User
 from business.utils import reply
 
 from business.utils.download_paper import downloadPaper
+from business.utils.ai.llm_queries.queryGLM import queryGLM
 
 # 论文研读模块
 
@@ -546,24 +547,7 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 #     add_conversation_history(conversation_history, query, ai_reply, fr.conversation_path)
 #     return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
 
-import openai
 from django.conf import settings
-def queryGLM(msg: str, history=None) -> str:
-    '''
-    对chatGLM3-6B发出一次单纯的询问(目前改为zhipu-api)
-    '''
-    openai.api_base = f'http://{settings.REMOTE_CHATCHAT_GLM3_OPENAI_PATH}/v1'
-    openai.api_key = "none"
-    if history is None:
-        history = [{'role' : 'user', 'content': msg}]
-    else:
-        history.extend([{'role' : 'user', 'content': msg}])
-    response = openai.ChatCompletion.create(
-        model="zhipu-api",
-        messages=history,
-        stream=False
-    )
-    return response.choices[0].message.content
 
 def self_check(query, reply):
     # 2. 自反馈机制
@@ -614,7 +598,7 @@ def self_check(query, reply):
                6. 修正语法和表达错误
                7. 优化段落结构
                8. 保持原意的完整性
-               返回改进后的回答：
+               返回改进后的回答
                """
             ai_reply = queryGLM(correction_prompt)
             print("修正后的回答:", ai_reply)
@@ -625,7 +609,7 @@ def self_check(query, reply):
     
 def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
     # 分发
-    from scripts.routing_agent import generate_subtasks,get_expert_weights
+    from business.utils.ai.agent.route_agent import generate_subtasks,get_expert_weights
     q_type, subtasks = generate_subtasks(query)
     print("多智能体：完成子问题生成")
     print(q_type, subtasks)

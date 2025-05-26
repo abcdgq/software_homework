@@ -9,6 +9,7 @@ import re
 import Levenshtein
 from django.views.decorators.http import require_http_methods
 from business.models.problem import problem_record
+from business.utils.ai.llm_queries.queryGLM import queryGLM
 
 # def insert_search_record_2_kb(search_record_id, tmp_kb_id):
 #     search_record_id = str(search_record_id)
@@ -92,25 +93,6 @@ def get_tmp_kb_id(search_record_id):
         return s_2_kb_map[str(search_record_id)]
     else:
         return None
-
-
-def queryGLM(msg: str, history=None) -> str:
-    '''
-    对chatGLM3-6B发出一次单纯的询问(目前改为zhipu-api)
-    '''
-    openai.api_base = f'http://{settings.REMOTE_CHATCHAT_GLM3_OPENAI_PATH}/v1'
-    openai.api_key = "none"
-    if history is None:
-        history = [{'role' : 'user', 'content': msg}]
-    else:
-        history.extend([{'role' : 'user', 'content': msg}])
-    response = openai.ChatCompletion.create(
-        model="zhipu-api",
-        messages=history,
-        stream=False
-    )
-    return response.choices[0].message.content
-
 
 def search_papers_by_keywords(keywords):
     # 初始化查询条件，此时没有任何条件，查询将返回所有Paper对象
@@ -1217,7 +1199,7 @@ def self_check(query, reply):
                6. 修正语法和表达错误
                7. 优化段落结构
                8. 保持原意的完整性
-               返回改进后的回答：
+               返回改进后的回答
                """
             ai_reply = queryGLM(correction_prompt)
             print("修正后的回答:", ai_reply)
@@ -1228,7 +1210,7 @@ def self_check(query, reply):
 
 
 def get_final_answer(conversation_history, query, tmp_kb_id):
-    from scripts.routing_agent import generate_subtasks,get_expert_weights
+    from business.utils.ai.agent.route_agent import generate_subtasks,get_expert_weights
     q_type, subtasks = generate_subtasks(query)
     print("多智能体：完成子问题生成")
     print(q_type, subtasks)
