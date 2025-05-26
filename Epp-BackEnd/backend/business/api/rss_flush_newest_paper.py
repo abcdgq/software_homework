@@ -172,3 +172,25 @@ def _get_time_label(published_date, today):
         return "三天内"
     else:
         return "其他"
+
+@require_http_methods(["GET"])
+def get_summary(request):
+    summary = "无咨询可以总结"
+    today = datetime.now().date()
+    """查询今天最新论文"""
+    queryset_today = News.objects.filter(
+        publish_date=today
+    )
+    if not queryset_today.exists():
+        refresh(request)
+
+    # 重新查询以确保数据最新，并获取近一周的全部新闻
+    queryset = News.objects.filter(
+        publish_date__gte=today - timedelta(days=7)
+    ).order_by('-published')
+    return success(
+        data={
+            'summary': summary,
+        },
+        msg="最新论文获取成功"
+    )

@@ -152,5 +152,6 @@ urlpatterns = [
                   # 最新论文获取
                   path("api/news/refresh", rss_flush_newest_paper.refresh),
                   path("api/news/fetchNews", rss_flush_newest_paper.get_news_by_days),
+                  path("api/news/getSummary", rss_flush_newest_paper.get_summary),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
