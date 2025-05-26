@@ -235,8 +235,8 @@ def generate_rss_summary(entries):
 现在开始处理以下论文数据：
 {entries}   
 """
-    from scripts.deepseek import queryDeepSeek
-    from scripts.Kimi import queryKimi
+    from business.utils.ai.llm_queries.queryDeepseek import queryDeepSeek
+    from business.utils.ai.llm_queries.queryKimi import queryKimi
     print("开始生成RSS总结")
     # summary = queryDeepSeek(prompt)
     summary = queryKimi(prompt)
