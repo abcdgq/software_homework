@@ -114,8 +114,8 @@
           </div>
         </div>
         <div class="summary-panel">
-          <h3 class="summary-title">资讯总结</h3>
-          <el-button type="primary" size="small" @click="fetchSummary">获取总结</el-button>
+          <!-- <h3 class="summary-title">资讯总结</h3> -->
+          <el-button type="primary" size="small" @click="fetchSummary">获取资讯总结</el-button>
           <div class="summary-content" v-html="summaryText"></div>
         </div>
       </div>
@@ -457,14 +457,16 @@ export default {
 }
 
 .summary-panel {
-  width: 360px; /* 原来是 300px，适当放宽 */
+  width: 100%; /* 占满父容器宽度 */
+  max-width: 360px; /* 保留最大宽度限制 */
   flex-shrink: 0;
   background-color: #fff;
-  padding: 20px;
+  padding: 0; /* 移除内边距，让内容直接填充 */
   border-radius: 8px;
   height: 100%;
-  overflow-y: auto;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding-top: 24px;
+  /* 移除 overflow-y: auto，让内容自己处理滚动 */
 }
 
 .summary-title {
@@ -479,55 +481,141 @@ export default {
   overflow-y: auto;
   line-height: 1.6;
   color: #333;
+  padding: 16px 24px; /* 增加左右内边距至 24px */
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.summary-content .error-message:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #f56c6c;
+}
+
+.summary-content .error-message h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #f56c6c;
+  font-size: 1.2em;
+  display: flex;
+}
+
+.summary-content .error-message h3::before {
+  content: '⚠️';
+  margin-right: 8px;
+  font-size: 1.1em;
+}
+
+.summary-content .error-message p {
+  margin: 0.8em 0;
+  color: #606266;
+}
+
+/* 错误详情区域优化 */
+.summary-content .error-details {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.summary-content .error-details p {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #909399;
+  font-weight: 500;
+}
+
+.summary-content .error-details pre {
+  margin: 0;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 /* Markdown内容样式 */
-.summary-content >>> h1,
-.summary-content >>> h2,
-.summary-content >>> h3 {
+.summary-content h1,
+.summary-content h2,
+.summary-content h3 {
   margin: 1em 0 0.5em;
   font-weight: bold;
 }
 
-.summary-content >>> h1 { font-size: 1.5em; }
-.summary-content >>> h2 { font-size: 1.3em; }
-.summary-content >>> h3 { font-size: 1.1em; }
+.summary-content h1 { font-size: 1.5em; }
+.summary-content h2 { font-size: 1.3em; }
+.summary-content h3 { font-size: 1.1em; }
 
-.summary-content >>> p {
-  margin: 0.8em 0;
-}
-
-.summary-content >>> ul,
-.summary-content >>> ol {
+.summary-content ul,
+.summary-content ol {
   margin: 0.8em 0;
   padding-left: 2em;
+  text-align: left; /* 确保列表居左 */
 }
 
-.summary-content >>> blockquote {
-  margin: 1em 0;
-  padding: 0.5em 1em;
-  background-color: #f8f8f8;
-  border-left: 4px solid #ddd;
-  color: #666;
-}
-
-.summary-content >>> code {
+.summary-content code {
   font-family: monospace;
   background-color: #f5f5f5;
   padding: 0.2em 0.4em;
   border-radius: 3px;
 }
 
-.summary-content >>> pre {
+.summary-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+</style>
+
+<style>
+.summary-content p {
+  margin: 0.8em 0;
+  text-align: left !important; /* 确保段落居左 */
+}
+
+/* 错误消息样式优化 */
+.summary-content .error-message {
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #fde2e2;
+  background-color: #fef6f6;
+  position: relative;
+  overflow: hidden;
+  text-align: left !important; /* 确保内容居左 */
+}
+.summary-content pre {
   background-color: #f5f5f5;
   padding: 1em;
   border-radius: 4px;
   overflow: auto;
+  text-align: left !important; /* 确保代码块居左 */
+
+}
+.summary-content blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  background-color: #f8f8f8;
+  border-left: 4px solid #ddd;
+  color: #666;
+  text-align: left !important; /* 确保引用居左 */
 }
 
-.summary-content >>> pre code {
-  background-color: transparent;
-  padding: 0;
+.summary-content li {
+  text-align: left !important; /* 关键：强制列表项左对齐 */
+  margin: 0.8em 0;
 }
 
 </style>
