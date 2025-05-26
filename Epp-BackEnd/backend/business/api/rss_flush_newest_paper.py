@@ -70,11 +70,16 @@ def refresh(request):
                 paper_data = _parse_entry(entry, category)
 
                 if not News.objects.filter(news_id=paper_data['id']).exists():
+                    abstract_start = paper_data['summary'].find("Abstract:")
+                    if abstract_start != -1:
+                        abstract = paper_data['summary'][abstract_start:]
+                    else:
+                        abstract = paper_data['summary']
                     News.objects.create(
                         news_id=paper_data['id'],
                         title=paper_data['title'],
                         authors=paper_data['authors'],
-                        summary=paper_data['summary'],
+                        summary=abstract,
                         published=paper_data['published'],  # UTC时间
                         publish_date=paper_data['publish_date'],  # 格式化时间
                         link=paper_data['link'],
@@ -105,6 +110,11 @@ def save_papers_to_db(category):
 
             # 用news_id去重（避免重复存储）
             if not News.objects.filter(news_id=paper_data['id']).exists():
+                abstract_start = paper_data['summary'].find("Abstract:")
+                if abstract_start != -1:
+                    abstract = paper_data['summary'][abstract_start:]
+                else:
+                    abstract = paper_data['summary']
                 News.objects.create(
                     news_id=paper_data['id'],
                     title=paper_data['title'],
@@ -173,6 +183,67 @@ def _get_time_label(published_date, today):
     else:
         return "其他"
 
+def get_latest_news_per_category():
+    # 获取所有分类的唯一值
+    categories = News.CategoryChoices.choices
+
+    latest_news_list = []
+
+    for category in categories:
+        # 对于每个分类，获取最新的 5 篇新闻
+        latest_news = News.objects.filter(rss_source=category[0]).order_by('-published')[:5]
+        for news in latest_news:
+            # 将每篇新闻转换为所需的字典格式
+            latest_news_list.append({
+                "title": news.title,
+                "authors": news.authors,
+                "summary": news.summary,
+                "source": news.rss_source,
+                "publish_date": news.published,
+                # "published": news.published.strftime("%Y-%m-%d %H:%M:%S") if news.published else None,  # 格式化日期
+                "link": news.link,
+            })
+    
+    return latest_news_list
+
+def generate_rss_summary(entries):
+
+    # 不要出现markdown格式？
+
+    prompt = f"""
+请对以下最新学术论文或前沿新闻相关数据进行领域分类总结。
+要求：
+1. 划分领域类别
+2. 每个领域单独建立总结板块
+3. 每个领域总结需包括：
+   - 近期研究趋势概述（2-3个方向）
+   - 代表性成果简述（3项核心突破）
+   - 关键技术关键词列举
+4. 使用学术化中文表达
+5. 时间范围优先考虑最近7天的内容
+
+输入数据格式示例：
+{{
+    title: '标题',
+    authors: '作者',
+    summary: '摘要文本',
+    source: '来源',
+    publish_date: '发表时间',
+    link: '内容原文链接',
+}},
+
+现在开始处理以下论文数据：
+{entries}   
+"""
+    from scripts.deepseek import queryDeepSeek
+    from scripts.Kimi import queryKimi
+    print("开始生成RSS总结")
+    # summary = queryDeepSeek(prompt)
+    summary = queryKimi(prompt)
+    # 删除 # - ** 等 markdown 标记
+    # summary = summary.replace("#", "").replace("- ", "").replace("**", "")
+    return summary
+
 @require_http_methods(["GET"])
 def get_summary(request):
     summary = "无咨询可以总结"
@@ -184,13 +255,17 @@ def get_summary(request):
     if not queryset_today.exists():
         refresh(request)
 
-    # 重新查询以确保数据最新，并获取近一周的全部新闻
-    queryset = News.objects.filter(
-        publish_date__gte=today - timedelta(days=7)
-    ).order_by('-published')
+    # # 重新查询以确保数据最新，并获取近一周的全部新闻
+    # queryset = News.objects.filter(
+    #     publish_date__gte=today - timedelta(days=7)
+    # ).order_by('-published')
+
+    queryset = get_latest_news_per_category()
+    summary = generate_rss_summary(queryset)
+
     return success(
         data={
             'summary': summary,
         },
-        msg="最新论文获取成功"
+        msg="最新总结已生成"
     )
