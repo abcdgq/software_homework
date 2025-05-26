@@ -116,9 +116,7 @@
         <div class="summary-panel">
           <h3 class="summary-title">资讯总结</h3>
           <el-button type="primary" size="small" @click="fetchSummary">获取总结</el-button>
-          <div class="summary-content">
-            <p style="white-space: pre-line;">{{ summaryText }}</p>
-          </div>
+          <div class="summary-content" v-html="summaryText"></div>
         </div>
       </div>
     </div>
@@ -127,10 +125,12 @@
 
 <script>
 import axios from 'axios'
+import MarkdownIt from 'markdown-it' // 引入markdown-it
 
 export default {
   data () {
     return {
+      md: null, // 存储markdown-it实例
       searchQuery: '',
       timeRange: 'all',
       sourceFilter: 'all',
@@ -163,6 +163,7 @@ export default {
   },
   created () {
     this.fetchNews()
+    this.md = new MarkdownIt() // 初始化markdown-it实例
   },
   computed: {
     filteredNews () {
@@ -214,14 +215,26 @@ export default {
       })
       axios.get(this.$BASE_API_URL + '/news/getSummary')
         .then(response => {
-          this.summaryText = response.data.summary
+          this.summaryText = this.md.render(response.data.summary)
           this.$message({
             message: '总结加载成功',
             type: 'success'
           })
         })
         .catch(error => {
-          this.summaryText = '获取失败，请稍后再试。'
+          // this.summaryText = '<p>获取失败，请稍后再试。</p>'
+          this.summaryText = `
+  <div class="markdown-body">
+    <div class="error-message">
+      <h3 style="color: #f56c6c;">获取总结失败</h3>
+      <p>抱歉，暂时无法加载内容。请稍后再试或联系管理员。</p>
+      <div class="error-details" style="margin-top: 16px; padding: 12px; background-color: #f8f8f8; border-radius: 4px;">
+        <p style="font-size: 14px; color: #606266;">错误信息：</p>
+        <pre style="margin: 8px 0; padding: 8px; background-color: #f0f2f5; border-radius: 4px; font-family: monospace; font-size: 13px;">${'网络不佳'}</pre>
+      </div>
+    </div>
+  </div>
+`
           console.error('获取总结失败:', error)
           this.$message.error('获取总结失败')
         })
@@ -462,11 +475,59 @@ export default {
 
 .summary-content {
   margin-top: 15px;
-  max-height: calc(100% - 70px); /* 减去按钮和标题的高度 */
+  max-height: calc(100% - 70px);
   overflow-y: auto;
-  white-space: pre-wrap;
   line-height: 1.6;
   color: #333;
+}
+
+/* Markdown内容样式 */
+.summary-content >>> h1,
+.summary-content >>> h2,
+.summary-content >>> h3 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+}
+
+.summary-content >>> h1 { font-size: 1.5em; }
+.summary-content >>> h2 { font-size: 1.3em; }
+.summary-content >>> h3 { font-size: 1.1em; }
+
+.summary-content >>> p {
+  margin: 0.8em 0;
+}
+
+.summary-content >>> ul,
+.summary-content >>> ol {
+  margin: 0.8em 0;
+  padding-left: 2em;
+}
+
+.summary-content >>> blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  background-color: #f8f8f8;
+  border-left: 4px solid #ddd;
+  color: #666;
+}
+
+.summary-content >>> code {
+  font-family: monospace;
+  background-color: #f5f5f5;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+.summary-content >>> pre {
+  background-color: #f5f5f5;
+  padding: 1em;
+  border-radius: 4px;
+  overflow: auto;
+}
+
+.summary-content >>> pre code {
+  background-color: transparent;
+  padding: 0;
 }
 
 </style>
