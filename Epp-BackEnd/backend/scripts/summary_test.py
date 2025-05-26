@@ -80,7 +80,7 @@ def queryDeepSeek(message, syshint=None, model="deepseek-chat", max_tokens=4000)
     start_time = time.time()
     openai.api_base = "https://api.deepseek.com"
     openai.api_key = 'sk-f6a474403f6746ed9542367e4b4590b2'
-    print("输入:\n", message)
+    # print("输入:\n", message)
     print("输入长度:" + str(len(message)))
     history=[]
     if syshint:
@@ -306,8 +306,117 @@ def getQueryApplication(theme):
         )
     return query
 
+import concurrent.futures
 
 def generate_summary(papers):
+    start_time = time.time()  # 记录开始时间
+
+    data = {"papers": papers}
+
+    # Init data starting entries: theme & directions
+    theme_and_directions = queryDeepSeek(hints["theme_and_directions"].format(**data))
+    data.update(json.loads(theme_and_directions))
+
+    query = getQueryApplication(data["theme"])
+
+    def inc_by_hint(part: str) -> str:
+        res = query(hints[part].format(**data))
+        data[part] = res  # `data` should take the str format
+        return res
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4 + len(data["directions"])) as executor:
+        # 提交所有异步任务
+        futures = {
+            "introduction": executor.submit(inc_by_hint, "introduction"),
+            "deficiencies": executor.submit(inc_by_hint, "deficiencies"),
+            "future_view": executor.submit(inc_by_hint, "future_view"),
+            "field_summary": executor.submit(inc_by_hint, "field_summary"),
+        }
+        
+        # 提交 directions 任务
+        dds_f = []
+        for d in data["directions"]:
+            future = executor.submit(
+                query,  # 直接提交query函数
+                hints["detailed_directions"].format(direction=d, papers=papers)
+            )
+            dds_f.append(future)
+
+        # 处理 directions 结果
+        detailed_directions = []
+        for i, future in enumerate(dds_f):
+            res = future.result()
+            r = json.loads(res)
+            d = data["directions"][i]  # 通过索引获取对应方向
+            detailed_directions.append("\n".join([
+                f"## {d}",
+                r["技术发展脉络"],
+                r["论文中给出的方法的实现细节"],
+                r["提供的论文中符合这一研究方向的论文之间方法的对比"],
+            ]))
+        data["detailed_directions"] = "\n".join(detailed_directions)
+    
+    mid_time = time.time()
+    print(f"\n==== 优化前结果1（总耗时: {mid_time - start_time:.2f}秒） ====")
+
+    inc_by_hint("solution")
+    
+
+    unopt = [
+        """
+        # {theme}
+
+        # 引言
+
+        {introduction}
+        """.lstrip().format(**data),
+        """
+        # 研究方向
+
+        {detailed_directions}
+        """.lstrip().format(**data),
+        """
+        ## 存在的不足
+
+        {deficiencies}
+        """.lstrip().format(**data),
+        """
+        # 结论
+
+        ## 解决方法
+
+        {solution}
+
+        ## 未来展望
+
+        {future_view}
+
+        ## 领域综述
+
+        {field_summary}
+        """.lstrip().format(**data),
+    ]
+
+    mid_time2 = time.time()
+    print(f"\n==== 优化前结果2（总耗时: {mid_time2 - start_time:.2f}秒） ====")
+
+    if len(unopt) > 32000:  # 过长分块优化
+        summary = "\n".join([query(hints["optimize"].format(msg=part)) for part in unopt])
+    else:
+        summary = query(hints["optimize"].format(msg="\n".join(unopt)))
+
+    result = query(hints["reference"].format(msg=summary, papers=papers))
+    # result = query(hints["reference"].format(msg=test, papers=papers))
+
+    end_time = time.time()  # 记录结束时间
+    print(f"\n==== 优化结果（总耗时: {end_time - start_time:.2f}秒） ====")
+
+    return result
+
+
+def generate_summary2(papers):
+    start_time = time.time()  # 记录开始时间
+
     data = {"papers": papers}
 
     # Init data starting entries: theme & directions
@@ -374,6 +483,9 @@ def generate_summary(papers):
         """.lstrip().format(**data),
     ]
 
+    mid_time = time.time()
+    print(f"\n==== 优化前结果（总耗时: {mid_time - start_time:.2f}秒） ====")
+
     if len(unopt) > 32000:  # 过长分块优化
         summary = "\n".join([query(hints["optimize"].format(msg=part)) for part in unopt])
     else:
@@ -382,7 +494,40 @@ def generate_summary(papers):
     result = query(hints["reference"].format(msg=summary, papers=papers))
     # result = query(hints["reference"].format(msg=test, papers=papers))
 
+    end_time = time.time()  # 记录结束时间
+    print(f"\n==== 优化结果（总耗时: {end_time - start_time:.2f}秒） ====")
+
     return result
+
+def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
+    from test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
+    return test_localvdb_and_scholarapi(api_auery)
+
+def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
+    from tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
+    search_list = tavily_advanced_search(search_query).get("results")
+    # print(search_list)
+
+    from text_summary import text_summarizer
+
+    search_reply = ""
+    docs = []
+    for r in search_list:
+        title = r['title']
+        search_reply += f"- [{title}] "
+
+        content = r['raw_content'] if r['raw_content'] else r['content']
+        cnt = 10
+        while len(content) > 2000 and cnt > 0:
+            content = text_summarizer(content, cnt)
+            cnt -= 1
+        search_reply += f"{content}\n"
+
+        search_reply += f"score: {r['score']}\n\n"
+
+        docs.append(r['title'] + "   "+ r['url'])
+
+    return search_reply, docs
 
 if __name__ == "__main__":
     papers = """
@@ -401,4 +546,15 @@ Abstract:    Learning low-dimensional latent state space dynamics models has bee
 Title:  A Mosquito is Worth 16x16 Larvae: Evaluation of Deep Learning  Architectures for Mosquito Larvae Classification
 Abstract:    Mosquito-borne diseases (MBDs), such as dengue virus, chikungunya virus, andWest Nile virus, cause over one million deaths globally every year. Becausemany such diseases are spread by the Aedes and Culex mosquitoes, tracking theselarvae becomes critical in mitigating the spread of MBDs. Even as citizenscience grows and obtains larger mosquito image datasets, the manual annotationof mosquito images becomes ever more time-consuming and inefficient. Previousresearch has used computer vision to identify mosquito species, and theConvolutional Neural Network (CNN) has become the de-facto for imageclassification. However, these models typically require substantialcomputational resources. This research introduces the application of the VisionTransformer (ViT) in a comparative study to improve image classification onAedes and Culex larvae. Two ViT models, ViT-Base and CvT-13, and two CNNmodels, ResNet-18 and ConvNeXT, were trained on mosquito larvae image data andcompared to determine the most effective model to distinguish mosquito larvaeas Aedes or Culex. Testing revealed that ConvNeXT obtained the greatest valuesacross all classification metrics, demonstrating its viability for mosquitolarvae classification. Based on these results, future research includescreating a model specifically designed for mosquito larvae classification bycombining elements of CNN and transformer architecture.
 """
-    print(generate_summary(papers))
+
+    data = {"papers": papers}
+    theme_and_directions = json.loads(queryDeepSeek(hints["theme_and_directions"].format(**data)))
+
+    print(theme_and_directions)
+    theme = theme_and_directions["theme"]
+
+    # print(get_api_reply(f"{theme} 领域的相关论文"))
+    search_reply, docs = get_search_reply(f"{theme} 领域的相关论文")
+    print(search_reply)
+
+    # print(generate_summary(papers))

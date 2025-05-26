@@ -9,6 +9,7 @@ import re
 import Levenshtein
 from django.views.decorators.http import require_http_methods
 from business.models.problem import problem_record
+from business.utils.ai.llm_queries.queryGLM import queryGLM
 
 # def insert_search_record_2_kb(search_record_id, tmp_kb_id):
 #     search_record_id = str(search_record_id)
@@ -92,25 +93,6 @@ def get_tmp_kb_id(search_record_id):
         return s_2_kb_map[str(search_record_id)]
     else:
         return None
-
-
-def queryGLM(msg: str, history=None) -> str:
-    '''
-    对chatGLM3-6B发出一次单纯的询问(目前改为zhipu-api)
-    '''
-    openai.api_base = f'http://{settings.REMOTE_CHATCHAT_GLM3_OPENAI_PATH}/v1'
-    openai.api_key = "none"
-    if history is None:
-        history = [{'role' : 'user', 'content': msg}]
-    else:
-        history.extend([{'role' : 'user', 'content': msg}])
-    response = openai.ChatCompletion.create(
-        model="zhipu-api",
-        messages=history,
-        stream=False
-    )
-    return response.choices[0].message.content
-
 
 def search_papers_by_keywords(keywords):
     # 初始化查询条件，此时没有任何条件，查询将返回所有Paper对象
@@ -1168,57 +1150,11 @@ def kb_ask_ai(conversation_history, query, tmp_kb_id):
                     origin_docs.append(doc)
     return ai_reply, origin_docs
 
-def get_final_answer(conversation_history, query, tmp_kb_id):
-    from scripts.routing_agent import generate_subtasks,get_expert_weights
-    q_type, subtasks = generate_subtasks(query)
-    print("多智能体：完成子问题生成")
-    print(q_type, subtasks)
-
-    print("多智能体：开始问题分发")
-    if q_type == "other":
-        print("other type")
-        # llm
-        return kb_ask_ai(conversation_history, query, tmp_kb_id)
-    else:
-        # api
-        api_query = subtasks.get("api")
-        api_reply = ''
-        api_reply, docs_from_api = get_api_reply(api_query)
-        print(api_reply)
-        print("多智能体：已获取api专家回答")
-
-        # search
-        search_query = subtasks.get("search")
-        search_reply = ''
-        search_reply, docs_from_search = get_search_reply(search_query)
-        print(search_reply)
-        print("多智能体：已获取搜索引擎专家回答")
-
-        # llm
-        llm_query = subtasks.get("llm")
-        print(conversation_history)
-        llm_reply, origin_docs = kb_ask_ai(conversation_history, llm_query, tmp_kb_id)
-        print(llm_reply)
-        print("多智能体：已获取原生LLM专家回答")
-
-    # 整合
-    from scripts.gennerate_result import aggregate_answers
-    weight = get_expert_weights(q_type)
-    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
-    print("多智能体：已完成问题整合")
-
-    # 整合docs  
-    for doc in docs_from_api: #规范docs格式
-        origin_docs.append(" " + doc)
-    for doc in docs_from_search: #规范docs格式
-        origin_docs.append(" " + doc)
-    docs = origin_docs
-    print(origin_docs)
-    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-    # docs.append(doc)
-    print("多智能体：已完成来源整合")
+def self_check(query, reply):
     # 2. 自反馈机制
     # 2.1 检查回答质量
+    # 2.2 TODO 可以持久化检测报告，返回给多智能体，从而实现自反馈
+    ai_reply = reply
     quality_check_prompt = f"""
        请评估以下回答的质量，指出存在的问题：
        问题：{query}
@@ -1263,23 +1199,86 @@ def get_final_answer(conversation_history, query, tmp_kb_id):
                6. 修正语法和表达错误
                7. 优化段落结构
                8. 保持原意的完整性
-               返回改进后的回答：
+               返回改进后的回答
                """
             ai_reply = queryGLM(correction_prompt)
             print("修正后的回答:", ai_reply)
+            return ai_reply
     except:
         print("质量评估解析失败，使用原始回答")
+        return reply
 
 
-    # 2.2 TODO 可以持久化检测报告，返回给多智能体，从而实现自反馈
+def get_final_answer(conversation_history, query, tmp_kb_id):
+    from business.utils.ai.agent.route_agent import generate_subtasks,get_expert_weights
+    q_type, subtasks = generate_subtasks(query)
+    print("多智能体：完成子问题生成")
+    print(q_type, subtasks)
+
+    print("多智能体：开始问题分发")
+    if q_type == "other":
+        print("other type")
+        # llm
+        return kb_ask_ai(conversation_history, query, tmp_kb_id)
+    else:
+        api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs = three_api_answer(conversation_history, tmp_kb_id, subtasks)
+
+    # 整合
+    from scripts.generate_result import aggregate_answers
+    weight = get_expert_weights(q_type)
+    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
+    print("多智能体：已完成问题整合")
+
+    # 整合docs  
+    for doc in docs_from_api: #规范docs格式
+        origin_docs.append(" " + doc)
+    for doc in docs_from_search: #规范docs格式
+        origin_docs.append(" " + doc)
+    docs = origin_docs
+    print(origin_docs)
+    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
+    # docs.append(doc)
+    print("多智能体：已完成来源整合")
+
+    ai_reply = self_check(query, ai_reply)
 
     return ai_reply, docs
 
-def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
+def get_api_reply(api_query):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
     from scripts.test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
-    return test_localvdb_and_scholarapi(api_auery)
+    return test_localvdb_and_scholarapi(api_query)
+
 
 def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
+    from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
+    search_list = tavily_advanced_search(search_query).get("results")
+    # print(search_list)
+
+    from business.utils.text_summarizer import text_summarizer
+
+    search_reply = ""
+    docs = []
+    for r in search_list:
+        title = r['title']
+        search_reply += f"- [{title}] "
+
+        content = r['raw_content'] if r['raw_content'] else r['content']
+        cnt = 10
+        while len(content) > 2000 and cnt > 0:
+            content = text_summarizer(content, cnt)
+            cnt -= 1
+        search_reply += f"{content}\n"
+
+        search_reply += f"score: {r['score']}\n\n"
+
+        docs.append(r['title'] + "   "+ r['url'])
+
+    summarized_search_reply = text_summarizer(search_reply, 10)
+
+    return summarized_search_reply, docs
+
+
+def get_search_reply2(search_query): #获取tavily搜索引擎专家的结果
     from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
     qa_list = tavily_advanced_search(search_query).get("results")
     uselist = []
@@ -1316,6 +1315,49 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
 
     return summarized_search_reply, docs
 
+
+import concurrent.futures
+import time
+def three_api_answer(conversation_history, tmp_kb_id, subtasks):
+    # 使用多线程执行三个任务
+    start_time = time.time()  # 记录开始时间
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        # 提交API任务
+        api_future = executor.submit(get_api_reply, subtasks.get("api"))
+        
+        # 提交搜索任务
+        search_future = executor.submit(get_search_reply, subtasks.get("search"))
+        
+        # 提交LLM任务
+        print()
+        llm_future = executor.submit(kb_ask_ai, 
+                                     conversation_history, 
+                                     subtasks.get("llm"), 
+                                     tmp_kb_id)
+        
+        # 获取API结果
+        api_reply, docs_from_api = api_future.result()
+        
+        # 获取搜索结果
+        search_reply, docs_from_search = search_future.result()
+        
+        # 获取LLM结果
+        llm_reply, origin_docs = llm_future.result()
+    
+    end_time = time.time()  # 记录结束时间
+    
+    # 打印最终结果
+    print(f"\n==== 最终结果（总耗时: {end_time - start_time:.2f}秒） ====")
+    print("API回复:", api_reply)
+    print("搜索回复:", search_reply)
+    print("LLM回复:", llm_reply)
+    print("\n引用文档:")
+    print("API:", docs_from_api)
+    print("搜索:", docs_from_search)
+    print("LLM:", origin_docs)
+
+    return api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs
 
 @require_http_methods(["POST"])
 def dialog_query(request):
@@ -1459,7 +1501,7 @@ def dialog_query(request):
     with open(conversation_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(history))
 
-    from business.utils.get_explainationwords import get_keywords
+    from business.utils.ai.get_explainationwords import get_keywords
     words = get_keywords(content)
 
     res = {

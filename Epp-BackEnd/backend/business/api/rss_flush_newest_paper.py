@@ -47,7 +47,7 @@ def _parse_entry(entry, feed_title):
         'source': feed_title,
         "id": entry.get('id', ''),
         'authors': ', '.join(author.get('name', '') for author in entry.get('authors', []))
-            # 'timestamp': datetime.now().isoformat()
+        # 'timestamp': datetime.now().isoformat()
     }
 
 # @require_http_methods("POST")
