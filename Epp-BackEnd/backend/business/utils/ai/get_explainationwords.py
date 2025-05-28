@@ -1,23 +1,7 @@
 import json
-import openai
 from django.conf import settings
-
+from business.utils.ai.llm_queries.queryGLM import queryGLM
 #这个文件存储提取ai回答中需要解释的词语的相关方法，在scripts/get_keywords.py文件中进行测试
-
-def queryGLM(msg: str, history=None) -> str:
-    openai.api_base = f"http://{settings.REMOTE_CHATCHAT_GLM3_OPENAI_PATH}/v1"
-    openai.api_key = "none"
-    if history is None:
-        history = [{'role' : 'user', 'content': msg}]
-    else:
-        history.extend([{'role' : 'user', 'content': msg}])
-    response = openai.ChatCompletion.create(
-        model="zhipu-api",
-        messages=history,
-        stream=False
-    )
-    return response.choices[0].message.content
-
 
 def get_keywords(answers):
     prompt = f"""现在给你一段话，请从里边提取出不多于10个专有名词并给出解释：{answers}，注意只能返回None或json，不要输出分析过程
@@ -28,10 +12,22 @@ def get_keywords(answers):
     print("提取的结果:\n"+result)
     try:
         r = json.loads(result)
+    except:
+        r = result.replace("```json", "").replace("```", "") #防止出现```json块包裹的情况
+    try:
         words = []
         for w in r.keys():
-            words.append({"start": answers.find(w),
-                          "end": answers.find(w) + len(w),
+            start = answers.find(w)
+            if start == -1: #保证不会出现-1
+                continue
+            end = answers.find(w) + len(w)
+            for ww in words:
+                if answers.find(w) >= ww["start"] and answers.find(w) <= ww["end"]: 
+                    start = answers.find(w, start=ww["end"])
+                    end = start + len(w)
+            if end <= len(answers):
+                words.append({"start": start,
+                          "end": end,
                           "word": w,
                           "tooltip": r[w]
                           })

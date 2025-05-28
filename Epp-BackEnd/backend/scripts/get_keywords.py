@@ -27,8 +27,15 @@ def get_keywords(answers):
         r = json.loads(result)
         words = []
         for w in r.keys():
-            words.append({"start": answers.find(w),
-                          "end": answers.find(w) + len(w),
+            start = answers.find(w)
+            end = answers.find(w) + len(w)
+            for ww in words: #避免出现解释词包含在已解释词中
+                if answers.find(w) >= ww["start"] and answers.find(w) <= ww["end"]: 
+                    start = answers.find(start=ww["end"])
+                    end = start + len(w)
+            if end <= len(answers) and start <= end:
+                words.append({"start": start,
+                          "end": end,
                           "word": w,
                           "tooltip": r[w]
                           })
@@ -40,9 +47,4 @@ def get_keywords(answers):
 
 
 if __name__ =='__main__':
-    get_keywords("""未来研究可能沿着三个方向突破：一是发展具有因果推理能力的结构化潜在空间，将NewtonianVAE的物理约束思想扩展到更广泛领域[14]；二是探索VAE与新型架构（如Vision Transformer）的深度融合，借鉴"蚊虫分类"研究中CNN与Transformer的混合思路[15]；三是建立跨任务的统一评估基准，解决当前各研究间评价标准不统一的问题[16] 。该领域如同正在组装的精密仪器，基础部件已初具雏形但系统集成尚待完善，正处于从理论验证向工程化应用过渡的关键阶段[17]。通过持续的理论创新与方法迭代，基 于VAE的深度学习有望成为连接感知与决策的智能中枢，为复杂系统的理解与预测提供统一框架[18]。
-[1] Kingma DP, Welling M. Auto-encoding variational bayes. ICLR 2014. https://doi.org/10.48550/arXiv.1312.6114
-
-[2] Rezende DJ, Mohamed S, Wierstra D. Stochastic backpropagation and approximate inference in deep generative models. ICML 2014;32:1278-1286. https://doi.org/10.48550/arXiv.1401.4082
-
-[3] Higgins I, et al. beta-VAE: Learning basic visual concepts with a constrained variational framework. ICLR 2017. https://doi.org/10.48550/arXiv.1804.03599")""")
+    get_keywords("""变分自编码器，简称VAE，主要应用于无监督学习的深度学习技术，并在生成模型领域表现出色。该模型融合了自编码器与概率图模型中的变分推断技术，其中编码器将输入数据转换至潜在空间，并以参数形式，如潜在变量的均值和方差来表示；解码器则将这些参数还原至原始数据形态。综合权重分配矩阵和冲突消解机制所提供的信息，我们得知DC-VAE作为VAE的一种先进形式，通过结合实例级判别损失与集合级对抗损失，显著提高了图像处理和表示学习的性能，成为适用于众多下游任务的强大VAE模型。此外，VAE的原理在机器学习中得到应用，并与其自编码器的根基紧密相连。在无监督学习方面，VAE的图像重建和合成能力尤其值得关注。因此，VAE及其改进型DC-VAE，因其在生成模型工具中的通用性和灵活性，成为了计算机视觉和机器学习领域中不可或缺的技术。""")
