@@ -5,13 +5,11 @@ import router from '../router'
 import message from 'element-ui'
 // import { cat } from 'shelljs'
 axios.defaults.withCredentials = true
-
 Vue.prototype.$axios = axios
 // const baseURL = 'https://epp.buaase.cn/api/'
-const baseURL = 'http://127.0.0.1:8000/api/'
 
 const api = axios.create({
-  baseURL,
+  baseURL: this.$BASE_API_URL,
   timeout: 5000 // 设置超时时间
 })
 
