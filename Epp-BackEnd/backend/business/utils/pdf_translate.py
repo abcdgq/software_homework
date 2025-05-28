@@ -1,4 +1,5 @@
 #该文件存储了pdf翻译的方法，在scripts/pdf_test.py中进行测试
+#TODO:在upload_document.py中使用
 # -*- coding: utf-8 -*-
 import json
 import os

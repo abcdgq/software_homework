@@ -603,9 +603,11 @@ def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
     print("多智能体：已完成来源整合")
 
     from business.utils.ai.agent.refine_agent import self_check
-    ai_reply = self_check(query, ai_reply)
+    result = self_check(query, ai_reply)
+    if result == None:
+        result = ai_reply
 
-    return ai_reply, docs, question_reply
+    return result, docs, question_reply
 
 def get_api_reply(api_query):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
     from scripts.test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
