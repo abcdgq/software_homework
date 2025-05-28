@@ -13,6 +13,7 @@ from business.models import User, UserDocument, Paper, abstract_report, SummaryR
 from django.views.decorators.http import require_http_methods
 import os
 
+#TODO：优化文件结构
 
 ##################################新建一个临时知识库，多问几次，然后通过一个模板生成综述#######################################
 
@@ -387,7 +388,7 @@ def create_abstract_report(request):
         ar.delete()
         return fail(msg="生成摘要失败")
 
-def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
+def get_search_reply(search_query): #获取tavily搜索引擎专家的结果 #TODO:这个方法没有被引用，考虑要不要删除
         from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
         qa_list = tavily_advanced_search(search_query).get("results")
         uselist = []
