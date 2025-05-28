@@ -241,7 +241,7 @@ export default {
       let highlights = []
       //   Add user message to chat
       try {
-        await this.$axios.post(this.$BASE_API_URL + '/study/doPaperStudy', { 'query': chatMessage, 'file_reading_id': this.fileReadingID })
+        await this.$axios.post(this.$BASE_API_URL + '/search/dialogQuery', { 'message': chatMessage, 'paper_ids': this.paperIds, 'search_record_id': this.searchRecordID })
           .then(response => {
             answer = response.data.ai_reply
             highlights = response.data.highlights
