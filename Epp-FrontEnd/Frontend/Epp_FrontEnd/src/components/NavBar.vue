@@ -17,6 +17,8 @@
           <router-link to="/search" class="navbar-item" :class="{ 'selected-tab': selectedTab === 'search'}" @click.native="selectTab('search', $event)">文献调研</router-link>
           <router-link to="/upload" class="navbar-item" :class="{ 'selected-tab': selectedTab === 'upload'}" @click.native="selectTab('upload', $event)">全文解读</router-link>
           <router-link to="/personal" class="navbar-item" :class="{ 'selected-tab': selectedTab === 'personal'}" @click.native="selectTab('personal', $event)">个人中心</router-link>
+          <!-- 添加热门资讯菜单项 -->
+          <router-link to="/news" class="navbar-item" :class="{ 'selected-tab': selectedTab === 'news'}" @click.native="selectTab('news', $event)">热门资讯</router-link>
         </div>
         <transition name="fade-avatar">
           <div class="navbar-end" v-if="selectedTab !== 'personal'">
@@ -102,6 +104,8 @@ export default {
         this.selectedTab = 'upload'
       } else if (this.$route.path.includes('/personal')) {
         this.selectedTab = 'personal'
+      } else if (this.$route.path.includes('/news')) { // 新增判断
+        this.selectedTab = 'news'
       } else {
         this.selectedTab = ''
       }

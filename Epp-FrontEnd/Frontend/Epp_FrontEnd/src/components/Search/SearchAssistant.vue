@@ -126,17 +126,6 @@ export default {
             loadingMessage.text = ''
             answer = response.data.content
             highlights = response.data.highlights
-            if (!highlights || highlights.length === 0) {
-              highlights = [
-                {
-                  start: 0,
-                  end: 2,
-                  word: '抱歉',
-                  tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
-                  // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
-                }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
-              ]
-            }
             loadingMessage.highlights = highlights
           })
       } catch (error) {
@@ -144,15 +133,7 @@ export default {
         loadingMessage.text = ''
         answer = '抱歉, 无法从AI获取回应。'
         loadingMessage.loading = false
-        loadingMessage.highlights = [
-          {
-            start: 0,
-            end: 2,
-            word: '抱歉',
-            tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
-            // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
-          }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
-        ]
+        loadingMessage.highlights = []
       } finally {
         this.answerFinished = false
         let cur = 0
@@ -260,21 +241,10 @@ export default {
       let highlights = []
       //   Add user message to chat
       try {
-        await this.$axios.post(this.$BASE_API_URL + '/study/doPaperStudy', { 'query': chatMessage, 'file_reading_id': this.fileReadingID })
+        await this.$axios.post(this.$BASE_API_URL + '/search/dialogQuery', { 'message': chatMessage, 'paper_ids': this.paperIds, 'search_record_id': this.searchRecordID })
           .then(response => {
             answer = response.data.ai_reply
             highlights = response.data.highlights
-            if (!highlights || highlights.length === 0) {
-              highlights = [
-                {
-                  start: 0,
-                  end: 2,
-                  word: '抱歉',
-                  tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
-                  // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
-                }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
-              ]
-            }
             loadingMessage.highlights = highlights
             this.docs = response.data.docs
             this.probQuestions = response.data.prob_question
@@ -286,15 +256,7 @@ export default {
         loadingMessage.text = ''
         answer = '抱歉, 无法从AI获取回应。'
         loadingMessage.loading = false
-        loadingMessage.highlights = [
-          {
-            start: 0,
-            end: 2,
-            word: '抱歉',
-            tooltip: '这是一个高亮词语，如果后端支持，就把该词语加一个提示，鼠标移到该词语上时，会显示提示，可以加个官方解释等'
-            // ai的原本完整回应，也就是response.data.ai_reply：抱歉，无法从AI获取回应。，其中start是起始位置0，end是结束+1
-          }// 这里我只列了一个词，可以有多个词，如果可以，后端可以按start顺序从小到大排好，不过不是很需要，前端会排序，同时，不该有重复部分，，比如：总共字符串是1234，，其中23是一个高亮词，34是一个高亮词，3重复了，不要有这样的，实际应该也不会有。
-        ]
+        loadingMessage.highlights = []
       } finally {
         this.answerFinished = false
         let cur = 0

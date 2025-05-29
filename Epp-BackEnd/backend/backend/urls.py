@@ -20,7 +20,8 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-from business.api import auth, manage, paper_details, paper_interpret, paper_recommend, search, summary, upload_document, user_info, vector_database
+from business.api import auth, manage, paper_details, paper_interpret, paper_recommend, search, summary, \
+    upload_document, user_info, vector_database, rss_flush_newest_paper
 from business.utils import paper_vdb_init
 
 urlpatterns = [
@@ -146,6 +147,11 @@ urlpatterns = [
                   # 热门文献推荐
                   path("api/paperRecommend", paper_recommend.get_recommendation),
                   path("api/refresh", paper_recommend.get_recommendation),
-                  path("api/paperPrivateRecommend", paper_recommend.get_unique_recommendation)
+                  path("api/paperPrivateRecommend", paper_recommend.get_unique_recommendation),
+
+                  # 最新论文获取
+                  path("api/news/refresh", rss_flush_newest_paper.refresh),
+                  path("api/news/fetchNews", rss_flush_newest_paper.get_news_by_days),
+                  path("api/news/getSummary", rss_flush_newest_paper.get_summary),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

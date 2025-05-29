@@ -63,6 +63,31 @@ def queryGLM(msg: str, history=None) -> str:
         print(f"RequestException: {e}")
         return f"错误: {e}"
 
+def get_summary2(paper_ids, report_id):
+    print("开始生成多篇综述2")
+    print('report_id:', report_id)
+    import time
+    start_time = time.time()
+    report = SummaryReport.objects.get(report_id=report_id)
+    report.status = SummaryReport.STATUS_IN_PROGRESS
+    papers = ""
+    for id in paper_ids:
+        p = Paper.objects.filter(paper_id=id).first()
+        papers += "Title: " + p.title + "\nAbstract: " + p.abstract + "\n\n"
+    try:
+        from scripts.summary_test import generate_summary
+        summary = generate_summary(papers)
+        md_path = settings.USER_REPORTS_PATH + '/' + str(report.report_id) + '.md'
+        with open(md_path, 'w', encoding='utf-8') as f:
+            f.write(summary)
+        report.report_path = md_path
+        report.status = SummaryReport.STATUS_COMPLETED
+        report.save()
+        print(f"综述生成完毕2, 总用时：{(time.time() - start_time):.2f}s")
+    except Exception as e:
+        print(e)
+        report.delete()
+
 
 def get_summary(paper_ids, report_id):
     print("开始生成多篇综述")
@@ -164,10 +189,13 @@ def generate_summary(request):
         #     return fail('创建临时知识库失败')
         # 开始生成综述
         # keywords = ['现状', '问题', '方法', '结果', '结论', '展望']
-        if len(paper_ids) > 8:
-            return fail(msg='综述生成输入文章数目过多')
+
+        # if len(paper_ids) > 8:
+        #     return fail(msg='综述生成输入文章数目过多')
+        
         # 先把每篇论文需要的信息生成好了
-        threading.Thread(target=get_summary, args=(paper_ids, report.report_id)).start()
+        # threading.Thread(target=get_summary, args=(paper_ids, report.report_id)).start()
+        threading.Thread(target=get_summary2, args=(paper_ids, report.report_id)).start()
         return JsonResponse({'message': "综述生成成功", 'report_id': report.report_id}, status=200)
     except Exception as e:
         print(e)
@@ -281,7 +309,7 @@ def create_abstract_report(request):
     print("查询是否存在解读", local_path)
 
     # PDF分块
-    from scripts.grobid_test import getXml, parse_grobid_xml, reorganize_sections
+    from business.utils.grobid import getXml, parse_grobid_xml, reorganize_sections
     xml = getXml(local_path, None, None)
     parsed_data = parse_grobid_xml(xml)
     sections = reorganize_sections(parsed_data)
@@ -385,7 +413,7 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
             for qa in uselist
             ])
     
-        from scripts.text_summary import text_summarizer #对搜索引擎专家产生的结果进行总结
+        from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
         summarized_search_reply = text_summarizer(search_reply)
 
         docs = []
@@ -446,7 +474,7 @@ class abs_gen_thread(threading.Thread):
         summary += '# 摘要报告\n'
 
         from business.api.paper_interpret import do_file_chat
-        from scripts.text_summary import text_summarizer
+        from business.utils.text_summarizer import text_summarizer
 
         #### 研究现状
         if self.isend:

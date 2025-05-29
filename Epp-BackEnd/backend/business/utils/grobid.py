@@ -1,3 +1,4 @@
+#这是文本分割提取相关方法实现，用于综述生成，测试在scripts/grobid_test.py中进行
 import os
 import requests
 
@@ -327,25 +328,3 @@ def run(files_paths, output_file_path):
     for i, file_path in enumerate(files_paths) :
         print("i file_path:", file_path)
         getXml(file_path, output_file_path, i)
-
-if __name__ ==  "__main__":
-    # output_dir = "grobid_output"
-    # # input_path = [os.path.join("sam.pdf")]
-    # input_file_path = "./Epp-BackEnd/backend/resource/uploads/users/documents/2017-NeurIPS-Neural Discrete Representation Learning20250504184945_69.pdf"
-    # print("path: ", input_file_path)
-    # # run(input_path, output_path)
-    # xml = getXml(input_file_path, output_dir, 0)
-
-    # parsed_data = parse_grobid_xml(xml)
-    # print(parsed_data)
-    # output_file = os.path.join(output_dir, "output1.json")
-    # with open(output_file, "w", encoding="utf-8") as f:
-    #     json.dump(parsed_data, f, ensure_ascii=False, indent=4)
-    
-    # sections = reorganize_sections(parsed_data)
-    # output_file = os.path.join(output_dir, "output2.json")
-    # with open(output_file, "w", encoding="utf-8") as f:
-    #     json.dump(sections, f, ensure_ascii=False, indent=4)
-
-    print(get_parent_section_num(str(3.2)))
-

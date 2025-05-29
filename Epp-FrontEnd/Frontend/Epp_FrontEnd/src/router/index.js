@@ -12,6 +12,8 @@ import uploadDocuMain from '@/components/UploadDocuments/UploadDocuMain'
 import PaperReader from '@/components/PaperRead/PaperReader'
 import LocalPaperReader from '@/components/PaperRead/LocalPaperReader'
 
+import NewsList from '@/components/News/NewsList'
+
 import message from 'element-ui'
 
 import { userVisitRecord } from '../request/userRequest'
@@ -104,6 +106,15 @@ const router = new Router({
       props: true,
       meta: {
         hideNavbar: false
+      }
+    },
+    {
+      path: '/news',
+      name: 'news',
+      component: NewsList,
+      props: true,
+      meta: {
+        hideNavbar: false // 显示导航栏
       }
     }
   ]

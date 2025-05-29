@@ -225,13 +225,21 @@ export default {
   },
   created () {
     this.paper_id = this.$route.params.paper_id
-    this.fetchPaperInfo()
-    this.fetchComments1()
-    this.fetchUserPaperInfo()
+    this.loadPaperInfo()
+  },
+  watch: {
+    paper_id() {
+      this.loadPaperInfo()
+    }
   },
   methods: {
     fullURL (url) {
       return this.$BASE_URL + url
+    },
+    loadPaperInfo() {
+      this.fetchPaperInfo()
+      this.fetchComments1()
+      this.fetchComments2()
     },
     fetchUserPaperInfo () {
       axios.get(this.$BASE_API_URL + '/getUserPaperInfo?paper_id=' + this.paper_id)

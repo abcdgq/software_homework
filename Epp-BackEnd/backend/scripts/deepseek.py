@@ -1,25 +1,28 @@
+import json
+import time
 import openai
+openai.api_base = "https://api.deepseek.com"
+openai.api_key = 'sk-f6a474403f6746ed9542367e4b4590b2'
+model = "deepseek-chat"
 
-openai.api_base = "https://api.moonshot.cn/v1"
-openai.api_key = 'sk-Nc04xpjdSvfg9q0iJQMO0nXO7iuIAhyvTo4TpbFIzVCq0bnh'
-
-def queryKimi(message):
+def queryDeepSeek(message):
+    start_time = time.time()
     print("输入:")
     print(message)
     history=[]
-    user_input=message
-    history.append({"role": "user", "content": user_input})
+    history.append({"role": "user", "content": message})
     response = openai.ChatCompletion.create(
-            model="moonshot-v1-128k",
+            model=model,
             messages=history,
             stream=False
     )
     res = response.choices[0].message.content
     print("输出:")
     print(res)
+    print("单次回答用时:", time.time() - start_time)
     return res
 
-def multi_queryKimi():
+def multi_queryDeepSeek():
     history = []
     while True:
         user_input = input("用户：")
@@ -29,14 +32,25 @@ def multi_queryKimi():
         print("输入长度：", len(user_input))
         print("回答：")
         response = openai.ChatCompletion.create(
-            model="moonshot-v1-128k",
+            model=model,
             messages=history,
             stream=False
         )
         res = response.choices[0].message.content
         print(res)
 
+        json_format = json.loads(res)
+        print(json_format)
+        print(json_format["theme"])
+        print(json_format["directions"])
+        print(type(json_format))
+
+
 if __name__ == '__main__':
+    # message = "你好"
+    # queryDeepSeek(message)
+    # multi_queryDeepSeek()
+
     papers = """
 Title:  SocialVAE: Human Trajectory Prediction using Timewise Latents
 Abstract:    Predicting pedestrian movement is critical for human behavior analysis andalso for safe and efficient human-agent interactions. However, despitesignificant advancements, it is still challenging for existing approaches tocapture the uncertainty and multimodality of human navigation decision making.In this paper, we propose SocialVAE, a novel approach for human trajectoryprediction. The core of SocialVAE is a timewise variational autoencoderarchitecture that exploits stochastic recurrent neural networks to performprediction, combined with a social attention mechanism and a backward posteriorapproximation to allow for better extraction of pedestrian navigationstrategies. We show that SocialVAE improves current state-of-the-artperformance on several pedestrian trajectory prediction benchmarks, includingthe ETH/UCY benchmark, Stanford Drone Dataset, and SportVU NBA movementdataset. Code is available at: https://github.com/xupei0610/SocialVAE.
@@ -85,6 +99,10 @@ Abstract:    Mosquito-borne diseases (MBDs), such as dengue virus, chikungunya v
 4. 分析理论框架与领域需求的不匹配
 5. 评估该方向实际应用转化的特殊障碍
 
+注意：
+生成的文本中不要出现markdown格式（如#，**等）
+不要出现项目符号，不要出现分点数字。
+
 输出规范：
 1. 以"当前研究在{{领域主题}}的{{研究方向}}方面..."开头
 2. 保持3-5个实质性观点，每观点含现象+证据+影响
@@ -92,24 +110,14 @@ Abstract:    Mosquito-borne diseases (MBDs), such as dengue virus, chikungunya v
 4. 使用"特别是考虑到...需求时"等领域关联表述
 5. 避免通用描述，突出领域特殊性
 """
-    deficiencies = """
-当前研究在基于VAE的深度学习应用的轨迹预测与行为分析、图像分类与场景理解、物理建模与控制学习方面，尽管取得了一定的进展，但仍存在一些核心矛盾和局限性。
-
-首先，在轨迹预测与行为分析方面，当前研究尚未突破的核心矛盾在于如何准确捕捉和建模行人的不确定性和多模态行为。例如，SocialVAE虽然通过时间化的变分自编码器和社交注意力机制提高了预测性能，但仍然难以完全捕捉行人行为的复杂性和多样性。特别是考虑到安全和高效的人际交互需求时，现有方法在处理复杂场景和动态环境中的行人行为预测方面仍存在局限性。
-
-其次，在图像分类与场景理解方面，当前研究的方法论缺陷主要体现在实验设计上。例如，Fast and Efficient Scene Categorization for Autonomous Driving using VAEs主要关注于生成紧凑的全局描述符，而忽视了场景理解中的细节信息和上下文信息。这导致模型在处理复杂场景和动态变化时，难以准确捕捉场景的细微差别和变化，影响了分类和理解的准确性。
-
-再次，在物理建模与控制学习方面，当前研究制约发展的数据短板主要体现在缺乏领域适配的数据集。例如，NewtonianVAE虽然提出了一种新的物理建模框架，但缺乏大规模、高质量的物理交互 数据集来训练和验证模型。这限制了模型的泛化能力和实际应用价值，特别是在需要精确控制和目标识别的复杂任务中。
-
-此外，当前研究的理论框架与领域需求之间存在不匹配。例如，FusionVAE虽然提出了一种新的深度层次化变分自编码器，但其主要关注于图像融合任务，而忽视了领域特有的需求，如实时性和鲁棒性。这导致模型在实际应用中难以满足领域特有的性能要求。
-
-最后，在实际应用转化方面，当前研究面临一些特殊障碍。例如，A Mosquito is Worth 16x16 Larvae: Evaluation of Deep Learning Architectures for Mosquito Larvae Classification虽 然提出了一种新的基于ViT的分类模型，但其主要关注于模型性能的比较，而忽视了模型部署和应用的实际挑战，如计算资源限制和实时性要求。这限制了模型在实际场景中的应用潜力和价值。  
-
-综上所述，当前基于VAE的深度学习应用研究在轨迹预测与行为分析、图像分类与场景理解、物理建模与控制学习等方面，仍存在一些核心矛盾和局限性。未来研究需要进一步探索和突破这些瓶颈，以推动该领域的持续发展和应用。
-""".replace("\n\n", "\n")
+    deficiencies = ""
+    deficiencies = queryDeepSeek(prompt2).replace("\n\n", "\n")
 
     prompt3 = f"""{deficiencies} \n
 你是一名专业的论文分析与文献综述写作专家,请基于{theme}中{directions}的已有不足分析（见上），结合领域发展需求与前沿技术动态，提出具有突破潜力的解决方案。
+
+注意：
+生成的文本中不要出现markdown格式（如#，**等）。
 
 生成要求：
 
@@ -121,9 +129,9 @@ Abstract:    Mosquito-borne diseases (MBDs), such as dengue virus, chikungunya v
 内容要素
 每个方案需包含：
 ▸ 具体措施（需提及技术载体）
-▸ 理论依据（引用≥2篇论文的发现）
-▸ 实施路径（如"通过融合X论文的A方法与Y论文的B框架"）
-▸ 预期突破点（量化描述如"有望提升XX指标15-20%"）
+▸ 理论依据
+▸ 实施路径
+▸ 预期突破点
 
 领域适配性
 使用"针对{{领域特性}}，可采取..."的领域定制表述
@@ -135,7 +143,31 @@ Abstract:    Mosquito-borne diseases (MBDs), such as dengue virus, chikungunya v
 禁用项目符号，保持段落连贯性
 总字数控制在对标不足分析部分的120%
 """
+    unreferenced = queryDeepSeek(prompt3)
 
-    # queryKimi(prompt2)
-    queryKimi(prompt3)
-    
+    prompt4 = f"""{unreferenced} \n
+请润色以上文章，为文章补充一些【真实存在的、被引用过的】参考文献并在对应位置标号（例如[1],[2,3]等），
+而将对应的格式化后的参考文献单独提取到引用列表中，并使用数字编号进行标注。（如果参考文献无法格式化，则不添加在正文中添加该条参考文献）
+
+参考文献格式样例：
+1.	会议论文
+格式：[序号] 作者. 文献题名[A] 论文集名[C]. 出版地:出版者, 出版年: 起止页码. 
+示例：
+[1] 毛峡，孙贇. 和谐图案的自动生成研究[A]. 第一届中国情感计算及智能交互学术会议论文集[C]. 北京:中国科学院自动化研究所, 2003:277-281.
+[2] Mao X., Chen B., Zhu G., et al. Analysis of affective characteristics and evaluation of harmonious feeling of image based on 1/f fluctuation theory[A]. International Conference on Industrial, Engineering and Other Applications of Applied Intelligent Systems (IEA/AIE)[C]. Germany: Springer Berlin Heidelberg, 2002:780-789.
+2.	期刊论文
+格式：[序号] 作者.文献题名[J].刊名,出版年份,卷号(期号):起止页码.
+示例：
+[1] 毛峡, 丁玉宽, 牟田一弥. 图像的情感特征分析及其和谐感评价[J]. 电子学报, 2001, 29(12A):1923-1927. 
+[2] Adhianto L., Banerjee S., Fagan M., et al. HPCToolkit: Tools for performance analysis of optimized parallel programs[J]. Concurrency and Computation: Practice and Experience, 2010, 22(6):685-701.
+3.	学位论文
+格式：[序号] 主要责任.文献题名[D].保存地:保存单位,年份. 
+[1] 张和生. 地质力学系统理论[D]. 太原:太原理工大学, 1998. 
+[2] Zhou X. Tiling optimizations for stencil computations[D]. Champaign:University of Illinois at Urbana-Champaign, 2013.
+其他参考文献格式要求类似。
+
+要求以json格式返回：{{"content":"润色后的正文部分，不含参考文献，只含对应标号", references":["r1", "r2"]}}，注意请不要用json块（```json```）包裹。
+"""
+    queryDeepSeek(prompt4)
+
+
