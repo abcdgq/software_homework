@@ -712,6 +712,12 @@ def do_paper_study(request):
 
         # 返回成功响应
         print("返回成功响应")
+        data = {
+            "ai_reply": ai_reply,
+            "docs": origin_docs,
+            "prob_question": question_reply,
+            "highlights": []
+        }
         return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
 
     except Exception as e:

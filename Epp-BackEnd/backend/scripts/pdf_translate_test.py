@@ -40,13 +40,8 @@ def do_request(url, data):
     return requests.post(url, data=data, headers=headers)
 
 
-def upload(pdf_name):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    untranslated_dir = os.path.join(script_dir, "untranslated_pdf")
-    os.makedirs(untranslated_dir, exist_ok=True)  # 创建目录（若不存在）
-    
-    # 拼接路径（使用 f-string 简化字符串拼接）
-    route = os.path.join(untranslated_dir,pdf_name)
+def upload(pdf_path,pdf_name):
+    route = pdf_path
     # route = os.path.join("D:\\software_homework\\Epp-BackEnd\\backend\scripts\\untranslated_pdf", pdf_name)
     #route = os.path.join(".\\untranslated_pdf", pdf_name)
     f = open(route, 'rb')  # 二进制方式打开文件
@@ -116,24 +111,29 @@ def download(q, pdf_name):
     #print (response.content)
     # 定义PDF保存路径
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    translated_dir = os.path.join(script_dir, "translated_pdf")
-    route = os.path.join(translated_dir, "translated__"+pdf_name)
+    translated_dir = os.path.join(script_dir, "..\\..\\scripts\\translated_pdf")
+    if not isinstance(pdf_name, str):
+        # 假设 UserDocument 对象有一个获取文件名的属性或方法
+        pdf_name = str(pdf_name)
+    route = os.path.join(translated_dir, "translated__"+pdf_name+'.pdf')
     #route = os.path.join(".\\untranslated_pdf", "translated__"+pdf_name)
 
     # 写入文件
     with open(route, 'wb') as f:  # 'wb' 表示以二进制写入模式打开文件
         f.write(response.content)
 
-def pdf_translate(pdf_name):
-    q = upload(pdf_name)
+def pdf_translate(pdf_path,pdf_name):
+    q = upload(pdf_path,pdf_name)
     status = 0
-    while(True): 
+    while(True):
         status = query(q)
         if(status == 4 or status < 0): break
         else: time.sleep(3)
     if status == 4:
         download(q, pdf_name)
+        return True
     else: print("error:" + status)
+    return False
 
 if __name__ == '__main__':
     pdf_translate("test.pdf")

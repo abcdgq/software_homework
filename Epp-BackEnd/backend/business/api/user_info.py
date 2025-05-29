@@ -195,12 +195,16 @@ def delete_summary_reports(request):
 
     params: dict = json.loads(request.body)
     report_ids = params.get("report_ids", None)
+    type = params.get("type")
     if not report_ids or len(report_ids) == 0:
         # 清空综述报告列表
         reports_to_remove = SummaryReport.objects.filter(user_id=user)
     else:
         # 删除指定报告
-        reports_to_remove = SummaryReport.objects.filter(Q(report_id__in=report_ids) & Q(user_id=user))
+        if type == "abstract":
+            reports_to_remove = AbstractReport.objects.filter(Q(report_id__in=report_ids) & Q(user_id=user))
+        else:
+            reports_to_remove = SummaryReport.objects.filter(Q(report_id__in=report_ids) & Q(user_id=user))
 
     for report in reports_to_remove:
         # 删除报告文件
