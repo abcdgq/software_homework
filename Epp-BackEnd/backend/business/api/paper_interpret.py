@@ -606,7 +606,7 @@ def self_check(query, reply):
     except:
         print("质量评估解析失败，使用原始回答")
         return reply
-    
+
 def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
     # 分发
     from business.utils.ai.agent.route_agent import generate_subtasks,get_expert_weights
@@ -739,7 +739,7 @@ import time
 # def fetch_api_reply(api_query):
 #     if not api_query:
 #         return '', []
-    
+
 #     # 调用实际的API函数
 #     api_reply, docs_from_api = get_api_reply(api_query)
 #     print(api_reply)
@@ -750,7 +750,7 @@ import time
 # def fetch_search_reply(search_query):
 #     if not search_query:
 #         return '', []
-    
+
 #     # 调用实际的搜索函数
 #     search_reply, docs_from_search = get_search_reply(search_query)
 #     print(search_reply)
@@ -761,9 +761,9 @@ import time
 # def fetch_llm_reply(conversation_history, llm_query, tmp_kb_id):
 #     if not llm_query:
 #         return '', [], []
-    
+
 #     print(f"会话历史: {conversation_history}")
-    
+
 #     # 调用实际的LLM函数
 #     llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
 #     print(llm_reply)
@@ -774,31 +774,31 @@ import time
 def three_api_answer(conversation_history, tmp_kb_id, subtasks):
     # 使用多线程执行三个任务
     start_time = time.time()  # 记录开始时间
-    
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
         # 提交API任务
         api_future = executor.submit(get_api_reply, subtasks.get("api"))
-        
+
         # 提交搜索任务
         search_future = executor.submit(get_search_reply, subtasks.get("search"))
-        
+
         # 提交LLM任务
-        llm_future = executor.submit(do_file_chat, 
-                                     conversation_history, 
-                                     subtasks.get("llm"), 
+        llm_future = executor.submit(do_file_chat,
+                                     conversation_history,
+                                     subtasks.get("llm"),
                                      tmp_kb_id)
-        
+
         # 获取API结果
         api_reply, docs_from_api = api_future.result()
-        
+
         # 获取搜索结果
         search_reply, docs_from_search = search_future.result()
-        
+
         # 获取LLM结果
         llm_reply, origin_docs, question_reply = llm_future.result()
-    
+
     end_time = time.time()  # 记录结束时间
-    
+
     # 打印最终结果
     print(f"\n==== 最终结果（总耗时: {end_time - start_time:.2f}秒） ====")
     print("API回复:", api_reply)
@@ -888,6 +888,13 @@ def do_paper_study(request):
         # 返回成功响应
         print("返回成功响应")
         return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply, "highlights": words}, msg="成功")
+        data = {
+            "ai_reply": ai_reply,
+            "docs": origin_docs,
+            "prob_question": question_reply,
+            "highlights": []
+        }
+        return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
 
     except Exception as e:
         print(f"发生错误: {e}")
