@@ -27,8 +27,6 @@ def queryGLM(msg: str, history=None) -> str:
     对chatGLM3-6B发出一次单纯的询问(目前改为zhipu-api)
     '''
     print(msg)
-    # chat_chat_url = 'http://172.17.62.88:7861/chat/chat'
-    # chat_chat_url = 'http://114.116.205.43:7861/chat/chat'
     chat_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/chat'
     headers = {
         'Content-Type': 'application/json'
@@ -90,7 +88,7 @@ def get_summary2(paper_ids, report_id):
         report.delete()
 
 
-def get_summary(paper_ids, report_id):
+def get_summary(paper_ids, report_id): #原本综述生成方法，效果不好，现在已经弃用
     print("开始生成多篇综述")
     print('report_id:', report_id)
     report = SummaryReport.objects.get(report_id=report_id)
@@ -598,5 +596,3 @@ class abs_gen_thread(threading.Thread):
         # 设置线程停止
         self.isend = True
     
-if __name__ == '__main__':
-    queryGLM("你好")
