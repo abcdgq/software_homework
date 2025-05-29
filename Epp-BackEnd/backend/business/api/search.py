@@ -11,21 +11,6 @@ from django.views.decorators.http import require_http_methods
 from business.models.problem import problem_record
 from business.utils.ai.llm_queries.queryGLM import queryGLM
 
-# def insert_search_record_2_kb(search_record_id, tmp_kb_id):
-#     search_record_id = str(search_record_id)
-#     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
-#         s_2_kb_map = json.load(f)
-#     s_2_kb_map = {str(k): v for k, v in s_2_kb_map.items()}
-#     if search_record_id in s_2_kb_map.keys():
-#         if delete_tmp_kb(s_2_kb_map[search_record_id]):
-#             print("删除TmpKb成功")
-#         else:
-#             print("删除TmpKb失败")
-
-#     s_2_kb_map[search_record_id] = tmp_kb_id
-#     with open(settings.USER_SEARCH_MAP_PATH, "w") as f:
-#         json.dump(s_2_kb_map, f, indent=4)
-
 
 def insert_search_record_2_kb(search_record_id, tmp_kb_id):
     # 调试：打印输入参数
@@ -108,12 +93,6 @@ def search_papers_by_keywords(keywords):
     for paper in result:
         filtered_paper_list.append(paper)
     return filtered_paper_list
-
-
-# def update_search_record_2_paper(search_record, filtered_papers):
-#     search_record.related_papers.clear()
-#     for paper in filtered_papers:
-#         search_record.related_papers.add(paper)
 
 
 # @require_http_methods(["POST"])
@@ -339,40 +318,6 @@ def get_user_search_history(request):
 
     return reply.success({"keywords": list(set(keywords))[:10]})
 
-# def kb_ask_ai(payload):
-#     ''''
-#     payload = json.dumps({
-#         "query": query,
-#         "knowledge_id": tmp_kb_id,
-#         "history": conversation_history[-10:],
-#         "prompt_name": "text"  # 使用历史记录对话模式
-#     })
-#     payload = json.dumps({
-#         "query": query,
-#         "knowledge_id": tmp_kb_id,
-#         "prompt_name": "default"  # 使用普通对话模式
-#     })
-#     '''
-#     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
-#     headers = {
-#         'Content-Type': 'application/json'
-#     }
-#     response = requests.request("POST", file_chat_url, data=payload, headers=headers, stream=False)
-#     ai_reply = ""
-#     origin_docs = []
-#     print(response)
-#     for line in response.iter_lines():
-#         if line:
-#             decoded_line = line.decode('utf-8')
-#             if decoded_line.startswith('data'):
-#                 data = decoded_line.replace('data: ', '')
-#                 data = json.loads(data)
-#                 ai_reply += data["answer"]
-#                 for doc in data["docs"]:
-#                     doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-#                     origin_docs.append(doc)
-#     return ai_reply, origin_docs
-
 # @require_http_methods(["POST"])
 # def dialog_query(request):
 #     """
@@ -569,7 +514,7 @@ def flush(request):
 API格式如下：
 api/serach/...
 '''
-import json, openai
+import json
 import os
 
 from django.db.models import Q
@@ -599,7 +544,7 @@ from business.utils.paper_vdb_init import get_filtered_paper, local_vdb_init
 #         json.dump(s_2_kb_map, f, indent=4)
 
 
-def get_tmp_kb_id(search_record_id):
+def get_tmp_kb_id(search_record_id): #TODO:可以提取，放到utils/knowledge_base.py里
     with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
         s_2_kb_map = json.load(f)
     # print(f_2_kb_map)
@@ -607,50 +552,6 @@ def get_tmp_kb_id(search_record_id):
         return s_2_kb_map[str(search_record_id)]
     else:
         return None
-
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-
-# def queryGLM(msg: str, history=None) -> str:
-#     '''
-#     对chatGLM3-6B发出一次单纯的询问
-#     '''
-#     print(msg)
-#     chat_chat_url = 'http://115.190.109.233:7861/chat/chat'
-#     headers = {
-#         'Content-Type': 'application/json'
-#     }
-#     payload = json.dumps({
-#         "query": msg,
-#         "prompt_name": "default",
-#         "temperature": 0.3
-#     })
-
-#     session = requests.Session()
-#     retry = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
-#     adapter = HTTPAdapter(max_retries=retry)
-#     session.mount('http://', adapter)
-#     session.mount('https://', adapter)
-
-#     try:
-#         response = session.post(chat_chat_url, data=payload, headers=headers, stream=False)
-#         response.raise_for_status()
-
-#         # 确保正确处理分块响应
-#         decoded_line = next(response.iter_lines()).decode('utf-8')
-#         print("AI回答: ", decoded_line)
-#         if decoded_line.startswith('data'):
-#             data = json.loads(decoded_line.replace('data: ', ''))
-#         else:
-#             data = decoded_line
-#         return data['text']
-#     except requests.exceptions.ChunkedEncodingError as e:
-#         print(f"ChunkedEncodingError: {e}")
-#         return "错误: 响应提前结束"
-#     except requests.exceptions.RequestException as e:
-#         print(f"RequestException: {e}")
-#         return f"错误: {e}"
-
 
 from django.views.decorators.http import require_http_methods
 from business.models.paper import Paper
@@ -824,8 +725,6 @@ def search_papers(keywords, start_year=None, end_year=None, authors=None, max_re
     return list(results[:max_results])
 
 def extract_search_conditions(query: str):
-
-
     """
     使用AI提取结构化搜索条件
     
@@ -902,7 +801,6 @@ def vector_query(request):
         ]
     }
 
-    TODO:
         1. 从Request中获取user_id和search_content
         2. 将search_content存入数据库
         3. 使用向量检索从数据库中获取文献信息
@@ -1108,7 +1006,7 @@ def get_user_search_history(request):
 
     return reply.success({"keywords": list(set(keywords))[:10]})
 
-def kb_ask_ai(conversation_history, query, tmp_kb_id):
+def kb_ask_ai(conversation_history, query, tmp_kb_id): #这个方法不用了，留着参考吧
     ''''
     payload = json.dumps({
         "query": query,
@@ -1150,128 +1048,7 @@ def kb_ask_ai(conversation_history, query, tmp_kb_id):
                     origin_docs.append(doc)
     return ai_reply, origin_docs
 
-def get_final_answer(conversation_history, query, tmp_kb_id):
-    from business.utils.ai.agent.route_agent import generate_subtasks,get_expert_weights
-    q_type, subtasks = generate_subtasks(query)
-    print("多智能体：完成子问题生成")
-    print(q_type, subtasks)
-
-    print("多智能体：开始问题分发")
-    if q_type == "other":
-        print("other type")
-        # llm
-        return kb_ask_ai(conversation_history, query, tmp_kb_id)
-    else:
-        api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs = three_api_answer(conversation_history, tmp_kb_id, subtasks)
-
-    # 整合
-    from business.utils.ai.agent.summary_agent import aggregate_answers
-    weight = get_expert_weights(q_type)
-    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
-    print("多智能体：已完成问题整合")
-
-    # 整合docs  
-    for doc in docs_from_api: #规范docs格式
-        origin_docs.append(" " + doc)
-    for doc in docs_from_search: #规范docs格式
-        origin_docs.append(" " + doc)
-    docs = origin_docs
-    print(origin_docs)
-    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-    # docs.append(doc)
-    print("多智能体：已完成来源整合")
-
-    from business.utils.ai.agent.refine_agent import self_check
-    result = self_check(query, ai_reply)
-    if result == None:
-        result = ai_reply
-
-    return result, docs
-
-
-def get_search_reply2(search_query): #获取tavily搜索引擎专家的结果 #TODO：弃用的方法，待删除
-    from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
-    qa_list = tavily_advanced_search(search_query).get("results")
-    uselist = []
-    times = 0
-    while True: #防止产生的结果过长，导致后边没法喂给大模型进行整合，进行一下筛选
-        if times > 5: #防止问太多遍
-            break
-        for qa in qa_list:
-            if qa['raw_content']:
-                if(len(qa['raw_content']) < 2000):
-                    uselist.append(qa)
-            else:
-                if(len(qa['content']) < 2000):
-                    uselist.append(qa)
-        if len(uselist) >= 2:
-            break
-        else: #数量不够就重新问，重新筛
-            qa_list = tavily_advanced_search(search_query + "len < 2000").get("results")
-            uselist = []
-
-    search_reply = "\n".join([
-        f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_content'])} score ：{qa['score']}"
-        for qa in uselist
-        ])
-    
-    from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
-    summarized_search_reply = text_summarizer(search_reply)
-
-    docs = []
-    for qa in uselist:
-        docs.append(qa['title'] + "   "+ qa['url'])
-    #返回示例  ['VQ-VAE Explained - Papers With Code   https://paperswithcode.com/method/vq-vae', 
-    # 'PDF   https://xnought.github.io/files/vq_vae_explainer.pdf']
-
-    return summarized_search_reply, docs
-
-
-import concurrent.futures
-import time
-def three_api_answer(conversation_history, tmp_kb_id, subtasks):
-    # 使用多线程执行三个任务
-    start_time = time.time()  # 记录开始时间
-
-    from business.utils.ai.agent.api_agent import get_api_reply
-    from business.utils.ai.agent.search_agent import get_search_reply
-    
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        # 提交API任务
-        api_future = executor.submit(get_api_reply, subtasks.get("api"))
-        
-        # 提交搜索任务
-        search_future = executor.submit(get_search_reply, subtasks.get("search"))
-        
-        # 提交LLM任务
-        print()
-        llm_future = executor.submit(kb_ask_ai, 
-                                     conversation_history, 
-                                     subtasks.get("llm"), 
-                                     tmp_kb_id)
-        
-        # 获取API结果
-        api_reply, docs_from_api = api_future.result()
-        
-        # 获取搜索结果
-        search_reply, docs_from_search = search_future.result()
-        
-        # 获取LLM结果
-        llm_reply, origin_docs = llm_future.result()
-    
-    end_time = time.time()  # 记录结束时间
-    
-    # 打印最终结果
-    print(f"\n==== 最终结果（总耗时: {end_time - start_time:.2f}秒） ====")
-    print("API回复:", api_reply)
-    print("搜索回复:", search_reply)
-    print("LLM回复:", llm_reply)
-    print("\n引用文档:")
-    print("API:", docs_from_api)
-    print("搜索:", docs_from_search)
-    print("LLM:", origin_docs)
-
-    return api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs
+from business.utils.ai.multi_agent import get_final_answer
 
 @require_http_methods(["POST"])
 def dialog_query(request):
@@ -1406,7 +1183,7 @@ def dialog_query(request):
         # ai_reply, origin_docs = kb_ask_ai(payload)
         # ai_reply = queryGLM(message, input_history)
         # print("ai_reply: ", ai_reply)
-        ai_reply, origin_docs = get_final_answer(input_history, message, kb_id)
+        ai_reply, origin_docs, question_reply = get_final_answer(input_history, message, kb_id)
         dialog_type = 'dialog'
         papers = []
         content = queryGLM('你叫epp论文助手，以你的视角重新转述这段话（注意不要出现作为EPP论文助手等语句，直接给出转述后的内容）：' + ai_reply, [])

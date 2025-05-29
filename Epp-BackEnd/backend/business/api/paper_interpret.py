@@ -329,176 +329,11 @@ def get_paper_url(request):
     return reply.success({"local_url": "/" + paper_local_url}, msg="success")
 
 
-# def do_file_chat(conversation_history, query, tmp_kb_id):
-#     # 将历史记录与本次对话发送给服务器, 获取对话结果
-#     file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
-#     headers = {
-#         'Content-Type': 'application/json'
-#     }
-#     if len(conversation_history) != 0:
-#         # 有问题
-#         payload = json.dumps({
-#             "query": query,
-#             "knowledge_id": tmp_kb_id,
-#             "history": conversation_history[-10:],  # 传10条历史记录
-#             "prompt_name": "text"  # 使用历史记录对话模式
-#         })
-
-#     else:
-#         payload = json.dumps({
-#             "query": query,
-#             "knowledge_id": tmp_kb_id,
-#             "prompt_name": "default"  # 使用普通对话模式
-#         })
-#         # print(payload)
-
-#     def _get_ai_reply(payload):
-#         response = requests.request("POST", file_chat_url, data=payload, headers=headers, stream=False)
-#         ai_reply = ""
-#         origin_docs = []
-#         # print(response)
-#         for line in response.iter_lines():
-#             if line:
-#                 decoded_line = line.decode('utf-8')
-#                 if decoded_line.startswith('data'):
-#                     data = decoded_line.replace('data: ', '')
-#                     data = json.loads(data)
-#                     ai_reply += data["answer"]
-#                     for doc in data["docs"]:
-#                         doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-#                         origin_docs.append(doc)
-#         return ai_reply, origin_docs
-
-#     # task = asyncio.create_task(_get_ai_reply())  # 创建任务
-#     ai_reply, origin_docs = _get_ai_reply(payload)
-
-#     # 给出用户仍可能存在的问题
-#     def _get_prob_paper_study_question():
-
-#         # empty模板不含任何知识库信息
-#         payload = json.dumps({
-#             "query": query,
-#             "knowledge_id": tmp_kb_id,
-#             "history": conversation_history[-4:],
-#             "prompt_name": "question",  # 使用问题模式
-#             "max_tokens": 50,
-#             "temperature": 0.4
-#         })
-#         question_reply, _ = _get_ai_reply(payload)
-#         question_reply = re.sub(r'\d. ', '', question_reply).split("\n")[:2]
-#         question_reply.append("告诉我更多")
-#         return question_reply
-
-#     question_reply = _get_prob_paper_study_question()
-#     return ai_reply, origin_docs, question_reply
-
 import json
 import requests
 import re
 
-def do_file_chat(conversation_history, query, tmp_kb_id):
-    print("do_file_chat")
-    file_chat_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/chat/file_chat'
-    headers = {
-        'Content-Type': 'application/json'
-    }
-
-    # 构建请求 payload
-    if len(conversation_history) != 0:
-        payload = json.dumps({
-            "query": query,
-            "knowledge_id": tmp_kb_id,
-            "history": conversation_history[-10:],  # 传10条历史记录
-            "prompt_name": "text",  # 使用历史记录对话模式
-            "max_tokens": 500,
-        })
-    else:
-        payload = json.dumps({
-            "query": query,
-            "knowledge_id": tmp_kb_id,
-            "prompt_name": "default",  # 使用普通对话模式
-            "max_tokens": 500,
-        })
-
-    # print(f"Sending payload to server: {payload}")
-
-    def _get_ai_reply(payload):
-        try:
-            # 发送请求
-            response = requests.post(file_chat_url, data=payload, headers=headers, stream=True)
-            # 检查 HTTP 请求是否成功
-            response.raise_for_status()
-
-            ai_reply = ""
-            origin_docs = []
-
-            # 处理流式响应
-            for line in response.iter_lines():
-                if line:
-                    decoded_line = line.decode('utf-8')
-                    # print(f"Received line: {decoded_line}")
-
-                    if decoded_line.startswith('data'):
-                        data = decoded_line.replace('data: ', '')
-                        try:
-                            data = json.loads(data)
-                        except json.JSONDecodeError as e:
-                            print(f"Failed to parse JSON: {e}")
-                            print(f"Invalid JSON data: {data}")
-                            raise
-
-                        ai_reply += data.get("answer", "")
-                        for doc in data.get("docs", []):
-                            doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-                            origin_docs.append(doc)
-
-            return ai_reply, origin_docs
-
-        except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-            print(f"Response status code: {response.status_code if 'response' in locals() else 'N/A'}")
-            print(f"Response content: {response.content if 'response' in locals() else 'N/A'}")
-            raise
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            raise
-
-    try:
-        ai_reply, origin_docs = _get_ai_reply(payload)
-    except Exception as e:
-        print(f"Failed to get AI reply: {e}")
-        raise
-
-    def _get_prob_paper_study_question():
-        payload = json.dumps({
-            "query": query,
-            "knowledge_id": tmp_kb_id,
-            "history": conversation_history[-4:],
-            "prompt_name": "question",  # 使用问题模式
-            "max_tokens": 50,
-            "temperature": 0.4
-        })
-
-        # print(f"Sending question payload to server: {payload}")
-
-        try:
-            question_reply, _ = _get_ai_reply(payload)
-            # question_reply = question_reply.replace("\n\n", "\n")   # 避免两次换行
-            question_reply = re.sub(r'\d. ', '', question_reply).split("\n")[:2]
-            question_reply.append("告诉我更多")
-            return question_reply
-        except Exception as e:
-            print(f"Failed to get study question: {e}")
-            raise
-
-    try:
-        question_reply = _get_prob_paper_study_question()
-    except Exception as e:
-        print(f"Failed to generate study questions: {e}")
-        question_reply = ["发生错误，请稍后再试", "告诉我更多"]
-
-    return ai_reply, origin_docs, question_reply
-
+from business.utils.ai.agent.llm_agent import do_file_chat
 
 def add_conversation_history(conversation_history, query, ai_reply, conversation_path):
     # 添加历史记录并保存
@@ -548,186 +383,7 @@ def add_conversation_history(conversation_history, query, ai_reply, conversation
 #     return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
 
 from django.conf import settings
-    
-def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
-    # 分发
-    from business.utils.ai.agent.route_agent import generate_subtasks,get_expert_weights
-    q_type, subtasks = generate_subtasks(query)
-    print("多智能体：完成子问题生成")
-    print(q_type, subtasks)
-
-    print("多智能体：开始问题分发")
-    if q_type == "other":
-        print("other type")
-        # llm
-        return do_file_chat(conversation_history, query, tmp_kb_id)
-    else:
-        # # api
-        # api_query = subtasks.get("api")
-        # api_reply = ''
-        # api_reply, docs_from_api = get_api_reply(api_query)
-        # print(api_reply)
-        # print("多智能体：已获取api专家回答")
-
-        # # search
-        # search_query = subtasks.get("search")
-        # search_reply = ''
-        # search_reply, docs_from_search = get_search_reply(search_query)
-        # print(search_reply)
-        # print("多智能体：已获取搜索引擎专家回答")
-
-        # # llm
-        # llm_query = subtasks.get("llm")
-        # print(conversation_history)
-        # llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
-        # print(llm_reply)
-        # print("多智能体：已获取原生LLM专家回答")
-
-        api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs, question_reply  = three_api_answer(conversation_history, tmp_kb_id, subtasks)
-
-    # 整合
-    from business.utils.ai.agent.summary_agent import aggregate_answers
-    weight = get_expert_weights(q_type)
-    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
-    print("多智能体：已完成问题整合")
-
-    # 整合docs  
-    for doc in docs_from_api: #规范docs格式
-        origin_docs.append(" " + doc)
-    for doc in docs_from_search: #规范docs格式
-        origin_docs.append(" " + doc)
-    docs = origin_docs
-    print(origin_docs)
-    # doc = str(doc).replace("\n", " ").replace("<span style='color:red'>", "").replace("</span>", "")
-    # docs.append(doc)
-    print("多智能体：已完成来源整合")
-
-    from business.utils.ai.agent.refine_agent import self_check
-    result = self_check(query, ai_reply)
-    if result == None:
-        result = ai_reply
-
-    return result, docs, question_reply
-
-def get_search_reply2(search_query): #获取tavily搜索引擎专家的结果 #TODO：启用的方法，待删除
-    from scripts.tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
-    qa_list = tavily_advanced_search(search_query).get("results")
-    uselist = []
-    times = 0
-    while True: #防止产生的结果过长，导致后边没法喂给大模型进行整合，进行一下筛选
-        if times > 5: #防止问太多遍
-            break
-        for qa in qa_list:
-            if qa['raw_content']:
-                if(len(qa['raw_content']) < 2000):
-                    uselist.append(qa)
-            else:
-                if(len(qa['content']) < 2000):
-                    uselist.append(qa)
-        if len(uselist) >= 2:
-            break
-        else: #数量不够就重新问，重新筛
-            qa_list = tavily_advanced_search(search_query + "len < 2000").get("results")
-            uselist = []
-
-    search_reply = "\n".join([
-        f"- [{qa['title']}] {(qa['content'] if qa['raw_content'] == None else qa['raw_content'])} score ：{qa['score']}"
-        for qa in uselist
-        ])
-    
-    from business.utils.text_summarizer import text_summarizer #对搜索引擎专家产生的结果进行总结
-    summarized_search_reply = text_summarizer(search_reply)
-
-    docs = []
-    for qa in uselist:
-        docs.append(qa['title'] + "   "+ qa['url'])
-    #返回示例  ['VQ-VAE Explained - Papers With Code   https://paperswithcode.com/method/vq-vae', 
-    # 'PDF   https://xnought.github.io/files/vq_vae_explainer.pdf']
-
-    return summarized_search_reply, docs
-
-import concurrent.futures
-import time
-# # 定义获取API回复的函数
-# def fetch_api_reply(api_query):
-#     if not api_query:
-#         return '', []
-    
-#     # 调用实际的API函数
-#     api_reply, docs_from_api = get_api_reply(api_query)
-#     print(api_reply)
-#     print("多智能体：已获取API专家回答")
-#     return api_reply, docs_from_api
-
-# # 定义获取搜索引擎回复的函数
-# def fetch_search_reply(search_query):
-#     if not search_query:
-#         return '', []
-    
-#     # 调用实际的搜索函数
-#     search_reply, docs_from_search = get_search_reply(search_query)
-#     print(search_reply)
-#     print("多智能体：已获取搜索引擎专家回答")
-#     return search_reply, docs_from_search
-
-# # 定义获取LLM回复的函数
-# def fetch_llm_reply(conversation_history, llm_query, tmp_kb_id):
-#     if not llm_query:
-#         return '', [], []
-    
-#     print(f"会话历史: {conversation_history}")
-    
-#     # 调用实际的LLM函数
-#     llm_reply, origin_docs, question_reply = do_file_chat(conversation_history, llm_query, tmp_kb_id)
-#     print(llm_reply)
-#     print("多智能体：已获取原生LLM专家回答")
-#     return llm_reply, origin_docs, question_reply
-
-# 添加main函数作为入口点
-def three_api_answer(conversation_history, tmp_kb_id, subtasks):
-    # 使用多线程执行三个任务
-    start_time = time.time()  # 记录开始时间
-    
-    from business.utils.ai.agent.api_agent import get_api_reply
-    from business.utils.ai.agent.search_agent import get_search_reply
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        # 提交API任务
-        api_future = executor.submit(get_api_reply, subtasks.get("api"))
-        
-        # 提交搜索任务
-        search_future = executor.submit(get_search_reply, subtasks.get("search"))
-        
-        # 提交LLM任务
-        llm_future = executor.submit(do_file_chat, 
-                                     conversation_history, 
-                                     subtasks.get("llm"), 
-                                     tmp_kb_id)
-        
-        # 获取API结果
-        api_reply, docs_from_api = api_future.result()
-        
-        # 获取搜索结果
-        search_reply, docs_from_search = search_future.result()
-        
-        # 获取LLM结果
-        llm_reply, origin_docs, question_reply = llm_future.result()
-    
-    end_time = time.time()  # 记录结束时间
-    
-    # 打印最终结果
-    print(f"\n==== 最终结果（总耗时: {end_time - start_time:.2f}秒） ====")
-    print("API回复:", api_reply)
-    print("搜索回复:", search_reply)
-    print("LLM回复:", llm_reply)
-    print("\n引用文档:")
-    print("API:", docs_from_api)
-    print("搜索:", docs_from_search)
-    print("LLM:", origin_docs)
-    print("\n建议后续问题:")
-    for idx, question in enumerate(question_reply, 1):
-        print(f"{idx}. {question}")
-    return api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs, question_reply
+from business.utils.ai.multi_agent import get_final_answer
 
 @require_http_methods(["POST"])
 def do_paper_study(request):
@@ -785,9 +441,9 @@ def do_paper_study(request):
         # ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
         
         # 获取title
-        title = fr.document_id if fr.document_id else fr.paper_id
-        print("paper title: ", title)
-        ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id, title)
+        # title = fr.document_id if fr.document_id else fr.paper_id
+        # print("paper title: ", title)
+        ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id)
 
         print(f"AI 回复: {ai_reply}")
         print(f"原始文档: {origin_docs}")
@@ -848,8 +504,8 @@ def re_do_paper_study(request):
     # 同 do_paper_study
 
     # 获取title
-    title = fr.document_id if fr.document_id else fr.paper_id
-    ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id, title)
+    # title = fr.document_id if fr.document_id else fr.paper_id
+    ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id)
     add_conversation_history(conversation_history, query, ai_reply, conversation_path)
 
     # keywords?
@@ -857,54 +513,6 @@ def re_do_paper_study(request):
     return reply.success({"ai_reply": ai_reply, "docs": origin_docs, "prob_question": question_reply}, msg="成功")
 
 
-# @require_http_methods(["POST"])
-# def paper_interpret(request):
-#     # mark:已被放弃
-#     '''
-#     本文件唯一的接口，类型为POST
-#     根据用户的问题，返回一个回答
-#     思路如下：
-#         1. 根据session获得用户的username, request中包含local_path和question
-#         2. 根据paper_id得到向量库中各段落的向量，根据question得到问题的向量，选择最相似的段落
-#         3. 将段落输入到ChatGLM2-6B中，得到回答，进行总结，给出一个本文中的回答
-#         4. 查找与其相似度最高的几篇文章的段落，相似度最高的5个段落，对每段给出一个简单的总结。
-#         5. 将几个总结和回答拼接返回
-#         6. 把聊天记录保存到数据库中，见backend/business/models/file_reading.py
-#     return : {
-#         content: str
-#     }
-#     '''
-#     if request.method == 'POST':
-#         data = json.loads(request.body)
-#         local_path = data['local_path']
-#         question = data['question']
-#         username = request.session.get('username')
-#         user = User.objects.get(username=username)
-#         file = FileReading.objects.get(user_id=user, file_local_path=local_path)
-#         conversation = []
-#         conversation_path = ''
-#         if file is None:
-#             # 新建一个研读记录
-#             t = get_pdf_title(local_path)
-#             file = FileReading(user_id=user.user_id, file_local_path=local_path, title=t, conversation_path=None)
-#             file.conversation_path = f'{USER_READ_CONSERVATION_PATH}/{file.user_id.id}_{file.title}.txt'
-#             conversation_path = file.conversation_path
-#             file.save()
-#         else:
-#             conversation_path = file.conversation_path
-#             with open(conversation_path, 'r') as f:
-#                 conversation = json.load(f)
-#         conversation.append({'role': 'user', 'content': question})
-#         # 从数据库中找到最相似的段落
-#
-#             # print(f"Received data (Client ID {client_id}): {data}")
-#         elif decoded_line.startswith('event'):
-#             event_type = decoded_line.replace('event: ', '')
-#             # print(f"Event type: {event_type}")
-#     finally:
-#         response.close()
-#     # print(response)  # 目前不清楚是何种返回 TODO:
-#     return reply.success({"ai_reply": ai_reply, "docs": origin_docs}, msg="成功")
 @require_http_methods(["POST"])
 def clear_conversation(request):
     # 鉴权
