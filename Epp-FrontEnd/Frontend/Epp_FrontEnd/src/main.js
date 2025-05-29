@@ -10,6 +10,7 @@ import '@fortawesome/fontawesome-free/css/all.css'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import { BASE_URL, BASE_API_URL} from './config'
 
 Vue.use(BootstrapVue)
 
@@ -21,8 +22,9 @@ Vue.config.productionTip = false
 
 // Vue.prototype.$BASE_URL = 'https://epp.buaase.cn'
 // Vue.prototype.$BASE_API_URL = 'https://epp.buaase.cn/api'
-Vue.prototype.$BASE_URL = 'http://127.0.0.1:8000'
-Vue.prototype.$BASE_API_URL = 'http://127.0.0.1:8000/api'
+
+Vue.prototype.$BASE_URL = BASE_URL
+Vue.prototype.$BASE_API_URL = BASE_API_URL
 
 /* eslint-disable no-new */
 new Vue({

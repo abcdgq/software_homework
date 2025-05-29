@@ -3,13 +3,15 @@ import Vue from 'vue'
 import axios from 'axios'
 import router from '../router'
 import message from 'element-ui'
+import { BASE_URL, BASE_API_URL } from '../config'
+
 // import { cat } from 'shelljs'
 axios.defaults.withCredentials = true
 Vue.prototype.$axios = axios
 // const baseURL = 'https://epp.buaase.cn/api/'
 
 const api = axios.create({
-  baseURL: this.$BASE_API_URL,
+  baseURL: BASE_API_URL,
   timeout: 5000 // 设置超时时间
 })
 
@@ -153,7 +155,7 @@ export const fetchUserInfo = async () => {
     console.log(response)
     localStorage.setItem('username', response.data.username)
     // localStorage.setItem('avatar', 'https://epp.buaase.cn' + response.data.avatar)
-    localStorage.setItem('avatar', 'http://127.0.0.1:8000' + response.data.avatar)
+    localStorage.setItem('avatar', BASE_URL + response.data.avatar)
     localStorage.setItem('loginTime', response.data.registration_date)
     localStorage.setItem('favorites', response.data.collected_papers_cnt)
     localStorage.setItem('likes', response.data.liked_papers_cnt)
