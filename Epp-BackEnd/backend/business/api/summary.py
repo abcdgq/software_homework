@@ -4,7 +4,7 @@ path : /api/summary/...
 '''
 
 from django.http import JsonResponse, HttpRequest
-import openai, json
+import json
 from business.models import User, paper
 import threading, requests
 from business.utils.reply import fail, success
@@ -74,7 +74,7 @@ def get_summary2(paper_ids, report_id):
         p = Paper.objects.filter(paper_id=id).first()
         papers += "Title: " + p.title + "\nAbstract: " + p.abstract + "\n\n"
     try:
-        from scripts.summary_test import generate_summary
+        from business.utils.ai.summary import generate_summary
         summary = generate_summary(papers)
         md_path = settings.USER_REPORTS_PATH + '/' + str(report.report_id) + '.md'
         with open(md_path, 'w', encoding='utf-8') as f:

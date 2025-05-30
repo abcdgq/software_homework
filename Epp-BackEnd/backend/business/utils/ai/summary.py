@@ -1,5 +1,4 @@
 #这个文件存放多篇综述生成的相关方法，在/scripts/summary_test.py中进行测试
-#TODO:还有依赖没有修改完成
 import json
 import time
 from business.utils.ai.llm_queries.queryDeepseek import queryDeepSeek
@@ -388,33 +387,3 @@ def generate_summary2(papers):
     print(f"\n==== 优化结果（总耗时: {end_time - start_time:.2f}秒） ====")
 
     return result
-
-def get_api_reply(api_auery):#获取本地RAG以及google scholar api检索文献结果（google scholar api有使用限制，还是以本地RAG为主）
-    from test_classifyAndGenerate1 import test_localvdb_and_scholarapi #先从scripts里import，之后要把这个文件中的方法移到utils里
-    return test_localvdb_and_scholarapi(api_auery)
-
-def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
-    from tavily_test import tavily_advanced_search #先从scripts里import，之后要把tavily这个文件移到utils里
-    search_list = tavily_advanced_search(search_query).get("results")
-    # print(search_list)
-
-    from text_summary import text_summarizer
-
-    search_reply = ""
-    docs = []
-    for r in search_list:
-        title = r['title']
-        search_reply += f"- [{title}] "
-
-        content = r['raw_content'] if r['raw_content'] else r['content']
-        cnt = 10
-        while len(content) > 2000 and cnt > 0:
-            content = text_summarizer(content, cnt)
-            cnt -= 1
-        search_reply += f"{content}\n"
-
-        search_reply += f"score: {r['score']}\n\n"
-
-        docs.append(r['title'] + "   "+ r['url'])
-
-    return search_reply, docs

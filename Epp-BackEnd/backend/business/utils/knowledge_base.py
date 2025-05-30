@@ -1,8 +1,18 @@
+import json
 import requests
 from django.conf import settings
 from business.models import Paper
 import os
 from .download_paper import downloadPaper
+
+def get_tmp_kb_id(search_record_id): 
+    with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+        s_2_kb_map = json.load(f)
+    # print(f_2_kb_map)
+    if str(search_record_id) in s_2_kb_map:
+        return s_2_kb_map[str(search_record_id)]
+    else:
+        return None
 
 def delete_tmp_kb(tmp_kb_id):
     delete_tmp_kb_url =f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/delete_temp_docs'

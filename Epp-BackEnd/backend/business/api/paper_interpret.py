@@ -41,19 +41,7 @@ def create_content_disposition(filename):
 
 
 # 删除Tmp_kb的缓存，用于某tmp_kb_id再也不被使用时，避免内存爆炸
-def delete_tmp_kb(tmp_kb_id):
-    delete_tmp_kb_url = f'http://{settings.REMOTE_MODEL_BASE_PATH}/knowledge_base/delete_temp_docs'
-    # headers = {
-    #     'Content-Type': 'application/x-www-form-urlencoded'
-    # }
-    payload = {
-        "knowledge_id": tmp_kb_id
-    }
-    response = requests.post(delete_tmp_kb_url, data=payload)  # data默认是form形式
-    if response.status_code == 200:
-        return True
-    else:
-        return False
+from business.utils.knowledge_base import delete_tmp_kb
 
 
 # 建立file_reading和tmp_kb的映射
@@ -80,14 +68,7 @@ def insert_file_2_kb(file_reading_id, tmp_kb_id):
         json.dump(f_2_kb_map, f, indent=4)
 
 
-def get_tmp_kb_id(file_reading_id):
-    with open(settings.USER_READ_MAP_PATH, "r") as f:
-        f_2_kb_map = json.load(f)
-    # print(f_2_kb_map)
-    if str(file_reading_id) in f_2_kb_map:
-        return f_2_kb_map[str(file_reading_id)]
-    else:
-        return None
+from business.utils.knowledge_base import get_tmp_kb_id
 
 
 @require_http_methods(["POST"])
@@ -333,7 +314,6 @@ import json
 import requests
 import re
 
-from business.utils.ai.agent.llm_agent import do_file_chat
 
 def add_conversation_history(conversation_history, query, ai_reply, conversation_path):
     # 添加历史记录并保存
