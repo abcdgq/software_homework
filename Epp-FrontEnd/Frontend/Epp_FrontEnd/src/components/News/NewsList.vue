@@ -11,9 +11,9 @@
           <el-select v-model="sourceFilter" placeholder="选择来源" size="small" class="source-select" style="width: 100%;">
             <el-option
               v-for="source in sources"
-              :key="source"
-              :label="source"
-              :value="source === '全部' ? 'all' : source"
+              :key="source.value"
+              :label="source.label"
+              :value="source.value"
             />
           </el-select>
         </div>
@@ -23,9 +23,8 @@
           <h3 class="filter-title">时间范围</h3>
           <el-radio-group v-model="timeRange" class="vertical-radio-group">
             <el-radio label="all">全部</el-radio>
-            <el-radio label="latest">三天内</el-radio>
-            <el-radio label="week">五天内</el-radio>
-            <el-radio label="month">一周内</el-radio>
+            <el-radio label="latest">一天内</el-radio>
+            <el-radio label="threeDays">三天内</el-radio>
           </el-radio-group>
         </div>
       </div>
@@ -114,6 +113,11 @@
             </el-card>
           </div>
         </div>
+        <div class="summary-panel">
+          <!-- <h3 class="summary-title">资讯总结</h3> -->
+          <el-button type="primary" size="small" @click="fetchSummary">获取资讯总结</el-button>
+          <div class="summary-content" v-html="summaryText"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -121,30 +125,45 @@
 
 <script>
 import axios from 'axios'
+import MarkdownIt from 'markdown-it' // 引入markdown-it
 
 export default {
   data () {
     return {
+      md: null, // 存储markdown-it实例
       searchQuery: '',
       timeRange: 'all',
       sourceFilter: 'all',
       sources: [
-        '全部',
-        '人工智能',
-        '机器学习',
-        '计算机视觉与模式识别',
-        '自然语言处理',
-        '密码学与安全',
-        '软件工程',
-        '分布式与并行计算',
-        '人机交互'
+        { label: '全部', value: 'all' },
+        { label: '人工智能', value: 'AI' },
+        { label: '机器学习', value: 'ML' },
+        { label: '计算机视觉与模式识别', value: 'CV' },
+        { label: '自然语言处理', value: 'NLP' },
+        { label: '密码学与安全', value: 'CR' },
+        { label: '软件工程', value: 'SE' },
+        { label: '分布式与并行计算', value: 'DC' },
+        { label: '人机交互', value: 'HC' }
       ],
-      newsList: [],
-      selectedNews: null
+      // newsList: [],
+      newsList: [
+        // {
+        //   title: '示例新闻标题',
+        //   summary: '这是一个示例新闻摘要，用于展示新闻列表的样式。',
+        //   source: '人工智能',
+        //   published: '2023-10-01',
+        //   link: 'https://example.com/news1',
+        //   authors: '张三, 李四',
+        //   time: '三天内'
+        // }
+      ],
+      selectedNews: null,
+      summaryText: ''
     }
   },
   created () {
     this.fetchNews()
+    this.md = new MarkdownIt() // 初始化markdown-it实例
   },
   computed: {
     filteredNews () {
@@ -156,10 +175,8 @@ export default {
 
         const matchesTime =
           this.timeRange === 'all' ||
-          (this.timeRange === 'latest' && news.time === '三天内') ||
-          (this.timeRange === 'week' && (news.time === '三天内' || news.time === '五天内')) ||
-          (this.timeRange === 'month' && (news.time === '三天内' || news.time === '五天内' || news.time === '一周内'))
-
+          (this.timeRange === 'latest' && news.time === '一天内') ||
+          (this.timeRange === 'threeDays' && (news.time === '一天内' || news.time === '三天内'))
         const matchesSource =
           this.sourceFilter === 'all' || news.source === this.sourceFilter
 
@@ -190,6 +207,37 @@ export default {
       }).catch(error => {
         console.error('Error fetching news:', error)
       })
+    },
+    fetchSummary () {
+      this.$message({
+        message: '正在获取总结，请稍候...',
+        type: 'info'
+      })
+      axios.get(this.$BASE_API_URL + '/news/getSummary')
+        .then(response => {
+          this.summaryText = this.md.render(response.data.summary)
+          this.$message({
+            message: '总结加载成功',
+            type: 'success'
+          })
+        })
+        .catch(error => {
+          // this.summaryText = '<p>获取失败，请稍后再试。</p>'
+          this.summaryText = `
+  <div class="markdown-body">
+    <div class="error-message">
+      <h3 style="color: #f56c6c;">获取总结失败</h3>
+      <p>抱歉，暂时无法加载内容。请稍后再试或联系管理员。</p>
+      <div class="error-details" style="margin-top: 16px; padding: 12px; background-color: #f8f8f8; border-radius: 4px;">
+        <p style="font-size: 14px; color: #606266;">错误信息：</p>
+        <pre style="margin: 8px 0; padding: 8px; background-color: #f0f2f5; border-radius: 4px; font-family: monospace; font-size: 13px;">${'网络不佳'}</pre>
+      </div>
+    </div>
+  </div>
+`
+          console.error('获取总结失败:', error)
+          this.$message.error('获取总结失败')
+        })
     }
   }
 }
@@ -245,25 +293,27 @@ export default {
 .news-layout {
   display: flex;
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   gap: 20px;
+  height: calc(100vh - 120px); /* 保证撑满视口高度，考虑 header 和 margin */
 }
 
 .news-main-wrapper {
   margin-left: 250px;
   padding-top: 60px;  /* 给固定搜索栏留空间 */
-  flex: 1;
+  /* flex: 1; */
   display: flex;
-  flex-direction: column;
-  height: calc(100vh - 60px); /* 减去导航栏高度 */
+  /* flex-direction: column; */
+  /* height: calc(100vh - 60px); 减去导航栏高度 */
   /* overflow: hidden; */
 }
 
 .news-main {
-  flex: 1;
+  width: 900px;
+  height: 100%;
   overflow-y: auto;
   padding-right: 10px;
-  background-color: #f5f7fa; /* 和整体背景色保持一致 */
+  background-color: #f5f7fa;
 }
 
 .news-sidebar {
@@ -349,7 +399,7 @@ export default {
 
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -404,6 +454,167 @@ export default {
 
 .news-detail-card h2 {
   margin-bottom: 10px;
+}
+
+.summary-panel {
+  width: 100%; /* 占满父容器宽度 */
+  max-width: 360px; /* 保留最大宽度限制 */
+  flex-shrink: 0;
+  background-color: #fff;
+  padding: 0; /* 移除内边距，让内容直接填充 */
+  border-radius: 8px;
+  height: 100%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding-top: 24px;
+  /* 移除 overflow-y: auto，让内容自己处理滚动 */
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.summary-content {
+  margin-top: 15px;
+  max-height: calc(100% - 70px);
+  overflow-y: auto;
+  line-height: 1.6;
+  color: #333;
+  padding: 16px 24px; /* 增加左右内边距至 24px */
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.summary-content .error-message:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #f56c6c;
+}
+
+.summary-content .error-message h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #f56c6c;
+  font-size: 1.2em;
+  display: flex;
+}
+
+.summary-content .error-message h3::before {
+  content: '⚠️';
+  margin-right: 8px;
+  font-size: 1.1em;
+}
+
+.summary-content .error-message p {
+  margin: 0.8em 0;
+  color: #606266;
+}
+
+/* 错误详情区域优化 */
+.summary-content .error-details {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.summary-content .error-details p {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #909399;
+  font-weight: 500;
+}
+
+.summary-content .error-details pre {
+  margin: 0;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Markdown内容样式 */
+.summary-content h1,
+.summary-content h2,
+.summary-content h3 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+}
+
+.summary-content h1 { font-size: 1.5em; }
+.summary-content h2 { font-size: 1.3em; }
+.summary-content h3 { font-size: 1.1em; }
+
+.summary-content ul,
+.summary-content ol {
+  margin: 0.8em 0;
+  padding-left: 2em;
+  text-align: left; /* 确保列表居左 */
+}
+
+.summary-content code {
+  font-family: monospace;
+  background-color: #f5f5f5;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+.summary-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+</style>
+
+<style>
+.summary-content p {
+  margin: 0.8em 0;
+  text-align: left !important; /* 确保段落居左 */
+}
+
+/* 错误消息样式优化 */
+.summary-content .error-message {
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #fde2e2;
+  background-color: #fef6f6;
+  position: relative;
+  overflow: hidden;
+  text-align: left !important; /* 确保内容居左 */
+}
+.summary-content pre {
+  background-color: #f5f5f5;
+  padding: 1em;
+  border-radius: 4px;
+  overflow: auto;
+  text-align: left !important; /* 确保代码块居左 */
+
+}
+.summary-content blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  background-color: #f8f8f8;
+  border-left: 4px solid #ddd;
+  color: #666;
+  text-align: left !important; /* 确保引用居左 */
+}
+
+#app .summary-content li {
+  text-align: left !important;
 }
 
 </style>

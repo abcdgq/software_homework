@@ -6,6 +6,7 @@ import os
 import random
 import time
 import zipfile
+import PyPDF2
 
 from backend.settings import BATCH_DOWNLOAD_PATH, BATCH_DOWNLOAD_URL
 from django.http import JsonResponse
@@ -22,8 +23,9 @@ from business.models.paper_annotation import FileAnnotation
 from business.models.paper_note import FileNote
 from business.utils import reply
 from business.utils.download_paper import downloadPaper
-from business.utils.aliyun_detect import auto_comment_detection
-from business.utils.text_translate import connect as text_translate_tool
+from scripts.aliyun_test import auto_comment_detection
+from scripts.pdf_translate_test import pdf_translate
+from scripts.text_translate_test import connect as text_translate_tool
 
 if not os.path.exists(BATCH_DOWNLOAD_PATH):
     os.makedirs(BATCH_DOWNLOAD_PATH)
@@ -764,3 +766,67 @@ def translate_abstract(require):
 
     return reply.success(data=data, msg="成功获取摘要翻译结果")
 
+
+@require_http_methods('GET')
+def download_document_translated_url(request):
+    '''
+    下载用户上传文档的翻译结果(pdf文件)
+    '''
+    document_id = request.GET.get('document_id')
+    document_path = UserDocument.objects.filter(document_id=document_id).values('local_path').first().values()
+    document_name = UserDocument.objects.filter(document_id=document_id).first()
+    value_list = list(document_path)
+    path = value_list[0]  # pdf的path
+    # print(document_name)
+    username = request.session.get('username')
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    pdf_path = os.path.abspath(os.path.join(script_dir, '..\\..\\' + path))
+    try:
+        with open(pdf_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            num_pages = len(reader.pages)
+            for page_num in range(num_pages):
+                page = reader.pages[page_num]
+                text = page.extract_text()
+                print(text)
+    except FileNotFoundError:
+        print(f"文件 {pdf_path} 不存在。")
+    except Exception as e:
+        print(f"读取 PDF 文件时发生错误: {str(e)}")
+    if pdf_path:
+        # 对该论文进行翻译
+        if (pdf_translate(pdf_path=pdf_path, pdf_name=document_name)):
+            if not isinstance(document_name, str):
+                document_name = str(document_name)
+            translated_filename = os.path.abspath(os.path.join(script_dir, '..\\..\\' + 'scripts\\translated_pdf',
+                                                               'translated__' + document_name + '.pdf'))
+        else:
+            data = {
+                'zip_url': '/',
+                'is_success': False
+            }
+            return reply.fail(data=data, msg="没翻译成功")
+
+        # 将所有paper打包成zip文件，存入BATCH_DOWNLOAD_PATH，返回zip文件路径
+        zip_name = (username + '_batchDownload_' + time.strftime('%Y%m%d%H%M%S') +
+                    '_%d' % random.randint(0, 100) + '.zip')
+        zip_file_path = os.path.join(BATCH_DOWNLOAD_PATH, zip_name)
+        print(zip_file_path)
+        with zipfile.ZipFile(zip_file_path, 'w') as z:
+            z.write(translated_filename, arcname=os.path.basename(translated_filename))
+
+        zip_url = BATCH_DOWNLOAD_URL + zip_name
+
+        data = {
+            'zip_url': zip_url,
+            'is_success': True
+        }
+        return reply.success(data=data, msg="成功翻译并下载翻译结果")
+
+    else:
+        data = {
+            'zip_url': '/',
+            'is_success': False
+        }
+        return reply.fail(data=data, msg="找不到需要翻译的论文")

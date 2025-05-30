@@ -3,7 +3,7 @@ import request from '../request/request'
 export const translateAbstract = (paperId) => {
   return request({
     method: 'get',
-    url: 'api/paper/translate_abstract',
+    url: '/api/paper/translate_abstract',
     params: {
       paper_id: paperId
     }
@@ -13,7 +13,7 @@ export const translateAbstract = (paperId) => {
 export const collectPaper = (paperId) => {
   return request({
     method: 'post',
-    url: 'api/collectPaper',
+    url: '/api/collectPaper',
     data: {
       paper_id: paperId
     }
@@ -23,7 +23,7 @@ export const collectPaper = (paperId) => {
 export const fetchFurtherReadingPapers = (paperId) => {
   return request({
     method: 'get',
-    url: 'api/relatedPaper',
+    url: '/api/relatedPaper',
     params: {
       paper_id: paperId
     }

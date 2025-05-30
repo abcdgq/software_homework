@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'corsheaders',
     'business',
-    'django_crontab'
+    'django_crontab',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -222,3 +223,7 @@ LINUX_WKHTMLTOPDF_PATH = '/usr/bin/wkhtmltopdf'  # 安装位置
 # CRONJOBS = [
 #     ('0 0 * * *', 'business.api.paper_recommand.refreshRecommendation'),
 # ]
+
+CRON_CLASSES = [
+    "business.api.cron.UpdateNewsJob",  # 指向你的定时任务类
+]

@@ -23,6 +23,7 @@
 
 <script>
 import { login, register } from '@/request/userRequest.js'
+import { BASE_URL } from '../../config'
 
 export default {
   data () {
@@ -49,7 +50,7 @@ export default {
           this.isLogged = true
           localStorage.setItem('username', this.username)
           // localStorage.setItem('avatar', 'https://epp.buaase.cn' + res.data.avatar)
-          localStorage.setItem('avatar', 'http://127.0.0.1:8000' + res.data.avatar)
+          localStorage.setItem('avatar', BASE_URL + res.data.avatar)
         } else {
           params = {
             'username': this.username,
