@@ -216,6 +216,7 @@ export default {
       axios.get(this.$BASE_API_URL + '/news/getSummary')
         .then(response => {
           this.summaryText = this.md.render(response.data.summary)
+          console.log('总结加载成功:', response.data.summary)
           this.$message({
             message: '总结加载成功',
             type: 'success'

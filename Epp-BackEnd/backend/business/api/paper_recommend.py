@@ -140,7 +140,7 @@ def query_arxiv_by_date_and_field(start_date, end_date, field="computer vision",
     return papers
 
 
-def refreshCache(self):
+def refreshCache():
     # 在这里写你想要执行的任务
     # 获取当前日期，以及前一周的日期
     today = datetime.now()

@@ -237,7 +237,7 @@ export default {
         url: this.pdfUrl,
         cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/cmaps/', // 关键：中文CMAP
         cMapPacked: true,
-        useSystemFonts: false, // 禁用系统字体回退
+        useSystemFonts: true, // 禁用系统字体回退
         disableFontFace: false // 启用@font-face
       }).promise
         .then(pdf => {
