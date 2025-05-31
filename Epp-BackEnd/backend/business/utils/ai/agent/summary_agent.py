@@ -1,7 +1,7 @@
 #该文件存储多智能体中的summary_agent，用于内容整合，在scripts/test_classifyAndGenerate.py进行测试
 from business.utils.ai.llm_queries.queryGLM import queryGLM
 
-def aggregate_answers(main_question, weight, api_reply=None, search_reply=None, llm_reply=None):
+def aggregate_answers(main_question, weight, api_reply=None, search_reply=None, llm_reply=None, title=None):
     print("开始生成关于这个问题的回答：" + main_question)
     api_confidence = weight.get("api")
     search_confidence = weight.get("search")
@@ -38,7 +38,11 @@ def aggregate_answers(main_question, weight, api_reply=None, search_reply=None, 
     """
     
     try:
-        result = queryGLM(prompt)
+        history = None
+        if title != None:
+            syshint = f"现在我们正在进行对{title}这篇论文的论文研读"
+            history = [{"role": "system", "content": syshint}]
+        result = queryGLM(prompt, history)
         return result
     except Exception as e:
         print(f"归纳总结出错: {e}")

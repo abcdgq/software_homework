@@ -68,7 +68,14 @@ def insert_file_2_kb(file_reading_id, tmp_kb_id):
         json.dump(f_2_kb_map, f, indent=4)
 
 
-from business.utils.knowledge_base import get_tmp_kb_id
+def get_tmp_kb_id(file_reading_id):
+    with open(settings.USER_READ_MAP_PATH, "r") as f:
+        f_2_kb_map = json.load(f)
+    # print(f_2_kb_map)
+    if str(file_reading_id) in f_2_kb_map:
+        return f_2_kb_map[str(file_reading_id)]
+    else:
+        return None
 
 
 @require_http_methods(["POST"])
@@ -421,9 +428,9 @@ def do_paper_study(request):
         # ai_reply, origin_docs, question_reply = do_file_chat(conversation_history, query, tmp_kb_id)
         
         # 获取title
-        # title = fr.document_id if fr.document_id else fr.paper_id
-        # print("paper title: ", title)
-        ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id)
+        title = fr.document_id if fr.document_id else fr.paper_id
+        print("paper title: ", title)
+        ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id, title)
 
         print(f"AI 回复: {ai_reply}")
         print(f"原始文档: {origin_docs}")
@@ -484,8 +491,8 @@ def re_do_paper_study(request):
     # 同 do_paper_study
 
     # 获取title
-    # title = fr.document_id if fr.document_id else fr.paper_id
-    ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id)
+    title = fr.document_id if fr.document_id else fr.paper_id
+    ai_reply, origin_docs, question_reply = get_final_answer(conversation_history, query, tmp_kb_id, title)
     add_conversation_history(conversation_history, query, ai_reply, conversation_path)
 
     # keywords?

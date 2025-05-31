@@ -200,7 +200,14 @@ from business.utils import reply
 from business.utils.knowledge_base import delete_tmp_kb, build_abs_kb_by_paper_ids
 from business.utils.paper_vdb_init import get_filtered_paper, local_vdb_init
 
-from business.utils.knowledge_base import get_tmp_kb_id
+def get_tmp_kb_id(search_record_id): 
+    with open(settings.USER_SEARCH_MAP_PATH, "r") as f:
+        s_2_kb_map = json.load(f)
+    # print(f_2_kb_map)
+    if str(search_record_id) in s_2_kb_map:
+        return s_2_kb_map[str(search_record_id)]
+    else:
+        return None
 
 from django.views.decorators.http import require_http_methods
 from business.models.paper import Paper

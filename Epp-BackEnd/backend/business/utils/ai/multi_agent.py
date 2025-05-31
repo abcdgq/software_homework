@@ -8,7 +8,7 @@ from business.utils.ai.agent.llm_agent import do_file_chat
 from business.utils.ai.agent.summary_agent import aggregate_answers
 from business.utils.ai.agent.refine_agent import self_check
 
-def get_final_answer(conversation_history, query, tmp_kb_id):
+def get_final_answer(conversation_history, query, tmp_kb_id, title=None):
     q_type, subtasks = generate_subtasks(query)
     weight = get_expert_weights(q_type)
     print("多智能体：完成子问题生成")
@@ -17,13 +17,15 @@ def get_final_answer(conversation_history, query, tmp_kb_id):
     print("多智能体：开始问题分发")
     if q_type == "other":
         print("other type")
-        # llm
-        return do_file_chat(conversation_history, query, tmp_kb_id)
+        syshint = ""
+        if title != None:
+            syshint = f"现在我们正在进行对题目为：{title} 论文的论文研读。"
+        return do_file_chat(conversation_history, syshint + query, tmp_kb_id)
     else:
         api_reply, docs_from_api,search_reply, docs_from_search,llm_reply, origin_docs, question_reply = three_api_answer(conversation_history, tmp_kb_id, subtasks)
 
     # 整合
-    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply)    # 整合多专家回答
+    ai_reply = aggregate_answers(query, weight, api_reply, search_reply, llm_reply, title)    # 整合多专家回答
     print("多智能体：已完成问题整合")
 
     # 整合docs  

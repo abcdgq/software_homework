@@ -11,7 +11,8 @@ def queryKimi(message):
     response = openai.ChatCompletion.create(
             model="moonshot-v1-128k",
             messages=history,
-            stream=False
+            stream=False,
+            max_tokens = 6000
     )
     res = response.choices[0].message.content
     return res
