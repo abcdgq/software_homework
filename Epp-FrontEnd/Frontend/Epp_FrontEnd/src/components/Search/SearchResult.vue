@@ -209,7 +209,7 @@ export default {
           this.searchRecordID = response.data.search_record_id
           this.defaultSearchContent = this.$route.query.search_content
           loadingInstance.close()
-          await this.buidKB()
+          this.buidKB()
         })
         .catch((error) => {
           console.error('语义检索失败:', error)

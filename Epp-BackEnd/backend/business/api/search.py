@@ -949,8 +949,8 @@ def vector_query(request):
     if search_type == 'dialogue':
         filtered_papers = do_dialogue_search(search_content, chat_chat_url, headers)
     else:
-        # filtered_papers = do_string_search(search_content)
-        filtered_papers = get_filtered_paper(search_content, 20)
+        filtered_papers = do_string_search(search_content)
+        # filtered_papers = get_filtered_paper(search_content, 20)
         if len(filtered_papers) == 0:
             return JsonResponse({"paper_infos": [], 'ai_reply': "EPP助手哭哭惹，很遗憾未能检索出相关论文。",
                                  'search_record_id': search_record.search_record_id}, status=200)
@@ -1023,6 +1023,8 @@ def vector_query(request):
     filtered_papers_list = []
     for p in filtered_papers:
         filtered_papers_list.append(p.to_dict())
+        
+    print(filtered_papers_list)
     
     ### TODO 构建知识库 ###
     
