@@ -472,7 +472,7 @@ class abs_gen_thread(threading.Thread):
         ## 现状，解决问题，解决方法，实验结果，结论
         summary += '# 摘要报告\n'
 
-        from business.api.paper_interpret import do_file_chat
+        from business.utils.ai.agent.llm_agent import do_file_chat
         from business.utils.text_summarizer import text_summarizer
 
         #### 研究现状

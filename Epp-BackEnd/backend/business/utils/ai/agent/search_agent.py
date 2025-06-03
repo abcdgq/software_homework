@@ -51,7 +51,7 @@ def get_search_reply(search_query): #获取tavily搜索引擎专家的结果
 
         content = r['raw_content'] if r['raw_content'] else r['content']
         cnt = 10
-        while len(content) > 2000 and cnt > 0:
+        while len(content) > 1000 and cnt > 0:
             content = text_summarizer(content, cnt)
             cnt -= 1
         search_reply += f"{content}\n"
