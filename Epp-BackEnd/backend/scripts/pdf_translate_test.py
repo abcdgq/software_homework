@@ -111,7 +111,7 @@ def download(q, pdf_name):
     #print (response.content)
     # 定义PDF保存路径
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    translated_dir = os.path.join(script_dir, "..\\..\\scripts\\translated_pdf")
+    translated_dir = os.path.join(script_dir, "../scripts/translated_pdf")
     if not isinstance(pdf_name, str):
         # 假设 UserDocument 对象有一个获取文件名的属性或方法
         pdf_name = str(pdf_name)

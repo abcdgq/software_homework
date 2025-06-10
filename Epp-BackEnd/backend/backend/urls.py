@@ -61,6 +61,7 @@ urlpatterns = [
                   path("api/study/getAnnotations", paper_details.get_paper_annotation),
                   path("api/study/deleteNote", paper_details.delete_paper_note),
                   path("api/study/reportAnnotation", paper_details.report_paper_annotation),
+                  path("api/study/downloadTranslated", paper_details.download_paper_translated_url),
 
                   path("api/paper/translate_abstract", paper_details.translate_abstract),
 

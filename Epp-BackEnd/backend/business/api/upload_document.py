@@ -158,7 +158,8 @@ def download_document_translated_url(request):
     username = request.session.get('username')
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    pdf_path = os.path.abspath(os.path.join(script_dir, '..\\..\\' + path))
+    pdf_path = os.path.abspath(os.path.join(script_dir, '../../' + path))
+    print("pdf_path:" + pdf_path)
     try:
         with open(pdf_path, 'rb') as file:
             reader = PyPDF2.PdfReader(file)
@@ -176,7 +177,7 @@ def download_document_translated_url(request):
         if(pdf_translate(pdf_path=pdf_path,pdf_name=document_name)) :
             if not isinstance(document_name,str):
                 document_name = str(document_name)
-            translated_filename = os.path.abspath(os.path.join(script_dir, '..\\..\\' + 'scripts\\translated_pdf','translated__'+document_name+'.pdf'))
+            translated_filename = os.path.abspath(os.path.join(script_dir, '../../' + 'scripts/translated_pdf','translated__'+document_name+'.pdf'))
         else :
             data = {
                 'zip_url': '/',
@@ -212,7 +213,7 @@ def get_translate_pdf(directory):
     # 获取当前脚本的绝对路径
     script_dir = os.path.dirname(os.path.abspath(__file__))
     # 将用户提供的目录与脚本目录拼接，并解析为规范化的绝对路径
-    target_dir = os.path.abspath(os.path.join(script_dir, '..\\..' + directory))
+    target_dir = os.path.abspath(os.path.join(script_dir, '../..' + directory))
     # print(target_dir)
 
     # 获取目录下所有条目
@@ -228,7 +229,7 @@ def get_translate_pdf(directory):
     if not pdf_files:
         raise FileNotFoundError(f"未找到PDF文件，目录：{target_dir}")
 
-    return target_dir + '\\' + random.choice(pdf_files)
+    return target_dir + '/' + random.choice(pdf_files)
     # return random.choice(pdf_files)
 
 # translated_filename = get_random_pdf('/resource/database/papers')
@@ -328,7 +329,7 @@ def download(q, pdf_name):
     #print (response.content)
     # 定义PDF保存路径
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    translated_dir = os.path.join(script_dir, "..\\..\\scripts\\translated_pdf")
+    translated_dir = os.path.join(script_dir, "../../scripts/translated_pdf")
     if not isinstance(pdf_name, str):
         # 假设 UserDocument 对象有一个获取文件名的属性或方法
         pdf_name = str(pdf_name)

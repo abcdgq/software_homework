@@ -44,7 +44,7 @@
       width="20%">
       <el-upload
         class="avatar-uploader"
-        action="https://epp.buaase.cn/api/userInfo/avatar"
+        action="http://114.116.205.43/api/userInfo/avatar"
         name="avatar"
         with-credentials="true"
         :show-file-list="false"
@@ -59,6 +59,7 @@
 <script>
 import { fetchUserInfo } from '@/request/userRequest.js'
 import { EventBus } from '../../utils/eventBus'
+import { BASE_URL, BASE_API_URL } from '../../config'
 export default {
   data () {
     return {
@@ -82,7 +83,7 @@ export default {
           target: '.other-info'
         })
         var res = (await fetchUserInfo()).data
-        this.path = 'https://epp.buaase.cn' + res.avatar
+        this.path = BASE_URL + res.avatar
         this.username = res.username
         this.loginTime = res.registration_date
         this.favorites = res.collected_papers_cnt
@@ -97,7 +98,7 @@ export default {
       this.avatarUploadVisible = true
     },
     handleAvatarSuccess (res, file) {
-      this.path = 'https://epp.buaase.cn' + res.avatar
+      this.path = BASE_URL + res.avatar
       this.imageUrl = this.path
       this.$message({
         message: '头像上传成功！',

@@ -239,7 +239,9 @@ export default {
     loadPaperInfo() {
       this.fetchPaperInfo()
       this.fetchComments1()
-      this.fetchComments2()
+      forEach (this.comments, (value, key) => {
+        this.fetchComments2(value.comment_id)
+      })
     },
     fetchUserPaperInfo () {
       axios.get(this.$BASE_API_URL + '/getUserPaperInfo?paper_id=' + this.paper_id)

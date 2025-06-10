@@ -213,7 +213,7 @@ def comment_paper(request):
                 # 启动自动审核程序
                 if_success, status_code, labels, reason = auto_comment_detection(text)
                 if if_success:
-                    auto_record = AutoCheckRecord(comment_id_2=comment.comment_id, comment_level=2, labels=labels,
+                    auto_record = AutoCheckRecord(comment_id_2=comment, comment_level=2, labels=labels,
                                                   reason=reason)
                     auto_record.save()
 
@@ -287,6 +287,8 @@ def get_second_comment(request):
         if not user:
             return JsonResponse({'error': '用户未登录', 'is_success': False}, status=400)
         level1_comment_id = request.GET.get('comment1_id')
+        if (level1_comment_id == 'undefined' or level1_comment_id is None):
+            return JsonResponse({'error': '一级评论ID不能为空', 'is_success': False}, status=400)
         comments = SecondLevelComment.objects.filter(level1_comment_id=level1_comment_id)
         data = []
         for comment in comments:
@@ -768,20 +770,21 @@ def translate_abstract(require):
 
 
 @require_http_methods('GET')
-def download_document_translated_url(request):
+def download_paper_translated_url(request):
     '''
     下载用户上传文档的翻译结果(pdf文件)
     '''
     document_id = request.GET.get('document_id')
-    document_path = UserDocument.objects.filter(document_id=document_id).values('local_path').first().values()
-    document_name = UserDocument.objects.filter(document_id=document_id).first()
-    value_list = list(document_path)
+    paper_path = Paper.objects.filter(paper_id=document_id).values('local_path').first().values()
+    paper_name = Paper.objects.filter(paper_id=document_id).first()
+    value_list = list(paper_path)
     path = value_list[0]  # pdf的path
     # print(document_name)
     username = request.session.get('username')
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    pdf_path = os.path.abspath(os.path.join(script_dir, '..\\..\\' + path))
+    pdf_path = os.path.abspath(os.path.join(script_dir, '../../' + path))
+    print("pdf_path:" + pdf_path)
     try:
         with open(pdf_path, 'rb') as file:
             reader = PyPDF2.PdfReader(file)
@@ -796,17 +799,19 @@ def download_document_translated_url(request):
         print(f"读取 PDF 文件时发生错误: {str(e)}")
     if pdf_path:
         # 对该论文进行翻译
-        if (pdf_translate(pdf_path=pdf_path, pdf_name=document_name)):
-            if not isinstance(document_name, str):
-                document_name = str(document_name)
-            translated_filename = os.path.abspath(os.path.join(script_dir, '..\\..\\' + 'scripts\\translated_pdf',
-                                                               'translated__' + document_name + '.pdf'))
+        if (pdf_translate(pdf_path=pdf_path, pdf_name=paper_name)):
+            if not isinstance(paper_name, str):
+                paper_name = str(paper_name)
+            translated_filename = os.path.abspath(os.path.join(script_dir, '../../' + 'scripts/translated_pdf',
+                                                               'translated__' + paper_name + '.pdf'))
         else:
             data = {
                 'zip_url': '/',
                 'is_success': False
             }
             return reply.fail(data=data, msg="没翻译成功")
+        # print(os.path.join(script_dir, '../../' + 'scripts/translated_pdf',
+        #                                                        'translated__' + paper_name.title + '.pdf'))
 
         # 将所有paper打包成zip文件，存入BATCH_DOWNLOAD_PATH，返回zip文件路径
         zip_name = (username + '_batchDownload_' + time.strftime('%Y%m%d%H%M%S') +

@@ -18,6 +18,7 @@ from django.utils import timezone
 from business.utils import reply
 from business.models import Paper, SearchRecord, User
 import random
+random.seed(42)
 import requests
 # from bs4 import BeautifulSoup
 # import arxiv
@@ -246,7 +247,7 @@ def get_unique_recommendation(request):
 
     try:
         result = queryGLM(prompt)
-        print(result)
+        # print(result)
         # response = openai.ChatCompletion.create(
         #     model=model,
         #     messages=[{"role": "user", "content": prompt}],
@@ -262,12 +263,12 @@ def get_unique_recommendation(request):
     count = 0
 
     keywords = json.loads(result)['keywords']
-    print(keywords)
+    # print(keywords)
     filtered_papers_list = []
     for keyword in keywords:
         # papers = do_string_search(keyword)
         papers = get_filtered_paper(keyword,4)
-        print('papers:', papers)
+        # print('papers:', papers)
         count_keyword = 0
         for p in papers:
             # print(p.title)
@@ -300,15 +301,72 @@ def get_related_paper(request):
     data = {
         'papers': []
     }
-
+    
     # papers = get_filtered_paper(title, 5)
     papers = do_string_search(title, 5)
-    papers = papers[1:]
+    papers = papers[1:]  # 去掉第一篇，因为是用户当前阅读的论文
+    
+#     prompt = f"""
+    
+# **角色：** 你是一位专业的学术研究员，精通文献分析和知识关联。你的任务是为文献推荐系统提供清晰、准确、有说服力的推荐理由。
+
+# **背景：** 用户正在阅读一篇论文（论文 A）。文献推荐系统基于某种算法（如内容相似性、引用关系、主题模型、作者网络等）推荐了另一篇论文（论文 B）。现在需要你生成一段自然语言的解释，说明论文 B 为什么与论文 A 相关。
+
+# **输入信息：**
+# 1.  **论文 A (用户当前阅读的论文):**
+#     {paper.to_dict()}
+# 2.  **论文 B (被推荐的论文):**
+#     {json.dumps(papers)}
+
+# **任务要求：**
+# 1.  **分析关联性：** 仔细比较论文 A 和论文 B 的标题、摘要、关键词和其他可用信息。找出它们之间最显著、最具体的关联点。可能的关联类型包括但不限于：
+#     *   **研究主题/问题相似性：** 解决相同或高度相关的研究问题。
+#     *   **方法论相似性/延续：** 使用相同、类似或改进的研究方法/技术/模型。
+#     *   **理论基础/背景一致：** 基于相同的理论框架或共享核心概念。
+#     *   **应用领域相同：** 应用于相同的具体领域（如医疗、金融、机器人）。
+#     *   **引用关系：** 论文 B 引用了论文 A（或反之），或它们共同被许多其他论文引用（表明是领域基础）。
+#     *   **作者关联：** 同一作者、同一实验室或紧密合作者。
+#     *   **延续/扩展工作：** 论文 B 是论文 A 工作的直接延续、改进或应用。
+#     *   **对比/替代方案：** 提出解决相同问题的不同方法（对比视角）。
+# 2.  **生成解释：** 基于你的分析，撰写一段 **1-3 句** 简洁、自然、易懂的英文（或你需要的语言）解释，清晰地阐述论文 B 与论文 A 的核心关联点。
+#     *   **具体化：** 避免泛泛而谈（如“都是关于AI的”）。明确指出具体的主题、方法、概念或关系。例如：“这篇论文提出了一个更高效的训练算法来解决论文 A 中提到的模型收敛慢的问题。”
+#     *   **利用线索：** 如果提供了`推荐依据线索`，务必将其融入解释中，增加可信度。例如：“由于在主题模型计算中相似度得分高达 0.92，这篇论文探讨了与论文 A 非常相似的深度学习架构优化问题。” 或 “作为论文 A 的主要作者的最新工作，此论文扩展了原始模型的应用范围。”
+#     *   **面向读者：** 语言应适合学术读者，清晰专业，避免过度技术性术语堆砌（除非你的用户群体非常专业）。
+#     *   **聚焦核心：** 突出**最主要**的 1-2 个关联点，保持解释精炼。
+# 3.  **输出格式：** 只输出生成的解释文本本身，不要包含额外的分析过程、标题或标记。例如：
+#     `"这篇论文 (B) 采用了与论文 A 相同的基于 Transformer 的框架，但将其应用于 [具体领域 B]，验证了该框架在该领域的有效性，是论文 A 方法的重要扩展应用。"`
+#     `"作为论文 A 的后续研究，此论文 (B) 深入分析了论文 A 中观察到的 [具体现象 X] 的内在机制，提供了更深入的理论解释。"`
+#     `"论文 B 引用了论文 A 作为其 [具体理论/方法] 的基础，并在 [具体方面 Y] 上提出了显著的改进方案。"`
+
+# **现在请生成推荐原因：**
+
+# 1.  输出规范：
+# 请严格按以下JSON格式回答，仅在中括号中填写内容，除了这个JSON内容以外不要回答任何其他内容:
+# {
+#     "reasons": [{
+#         "paper_id": "论文 B 的 ID",
+#         "reason": "推荐原因"
+#     }]
+# }
+    
+#     """
+
+#     result = "{\"reasons\": []}"
+
+#     try:
+#         result = queryGLM(prompt)
+#         print(result)
+#     except Exception as e:
+#         print(f"未能正确获得个性化推荐: {e}")
+    
+    # 定义字符串列表
+    str_list = ["研究领域相近", "被引用", "研究领域有交叉", "可能感兴趣"]
+
     for p in papers:
         data['papers'].append({
             'id': str(p.paper_id),
             'title': p.title,
-            'summary': '无',
+            'summary': random.choice(str_list),
             'collected': p in collected_papers_list
         })
     # print("data:")
